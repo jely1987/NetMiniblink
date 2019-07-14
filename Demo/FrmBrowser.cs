@@ -177,7 +177,7 @@ namespace Demo
 		[NetFunc]
 		public void opensdk()
 		{
-			Process.Start("https://gitee.com/aochulai/QQ2564874169/tree/master/QQ2564874169.Miniblink");
-		}
+		    Process.Start("https://gitee.com/aochulai/NetMiniblink");
+        }
 	}
 }
