@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B20B797D-67FA-4A46-945E-59390D6C0A36}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>QQ2564874169.Miniblink</RootNamespace>
+    <AssemblyName>QQ2564874169.Miniblink</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Exts.cs" />
+    <Compile Include="FrameContext.cs" />
+    <Compile Include="FrmPromptBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPromptBox.Designer.cs">
+      <DependentUpon>FrmPromptBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IMiniblink.cs" />
+    <Compile Include="JsFunc.cs" />
+    <Compile Include="LocalHttp\ApiNameAttribute.cs" />
+    <Compile Include="LocalHttp\NetApi.cs" />
+    <Compile Include="LocalHttp\NetApiAfter.cs" />
+    <Compile Include="LocalHttp\NetApiBefore.cs" />
+    <Compile Include="LocalHttp\NetApiEngine.cs" />
+    <Compile Include="LocalHttp\NetApiError.cs" />
+    <Compile Include="LocalHttp\NetApiRequest.cs" />
+    <Compile Include="LocalHttp\RouteAttribute.cs" />
+    <Compile Include="LocalHttp\RouteSetting.cs" />
+    <Compile Include="MBDeviceParameter.cs" />
+    <Compile Include="MiniblinkForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MiniblinkForm.Designer.cs">
+      <DependentUpon>MiniblinkForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MiniblinkBrowser.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MiniblinkBrowser.Designer.cs">
+      <DependentUpon>MiniblinkBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NetFunc.cs" />
+    <Compile Include="MBApi.cs" />
+    <Compile Include="MBDelegates.cs" />
+    <Compile Include="MBEnums.cs" />
+    <Compile Include="MBEvents.cs" />
+    <Compile Include="MBModels.cs" />
+    <Compile Include="NetJob.cs" />
+    <Compile Include="PostBody.cs" />
+    <Compile Include="MBPrintToBitmap.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="FormShadowWidth.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="WinApi.cs" />
+    <Compile Include="WinConst.cs" />
+    <Compile Include="WinDelegates.cs" />
+    <Compile Include="WinModels.cs" />
+    <Compile Include="WKEException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="FrmPromptBox.resx">
+      <DependentUpon>FrmPromptBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MiniblinkForm.resx">
+      <DependentUpon>MiniblinkForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MiniblinkBrowser.resx">
+      <DependentUpon>MiniblinkBrowser.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

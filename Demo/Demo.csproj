@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D750D58A-E182-4DCD-A722-9D50B0D4AD11}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Demo</RootNamespace>
+    <AssemblyName>Demo</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Apis\TestApi.cs" />
+    <Compile Include="Exts.cs" />
+    <Compile Include="FrmMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmMain.Designer.cs">
+      <DependentUpon>FrmMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmWindow.Designer.cs">
+      <DependentUpon>FrmWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmBrowser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmBrowser.Designer.cs">
+      <DependentUpon>FrmBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmTransparent.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmTransparent.Designer.cs">
+      <DependentUpon>FrmTransparent.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="FrmMain.resx">
+      <DependentUpon>FrmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmWindow.resx">
+      <DependentUpon>FrmWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmBrowser.resx">
+      <DependentUpon>FrmBrowser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmTransparent.resx">
+      <DependentUpon>FrmTransparent.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Webres\index.html" />
+    <Content Include="Webres\style.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\QQ2564874169.Miniblink\QQ2564874169.Miniblink.csproj">
+      <Project>{b20b797d-67fa-4a46-945e-59390d6c0a36}</Project>
+      <Name>QQ2564874169.Miniblink</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(ProjectDir)Webres" "$(TargetDir)Webres\" /s /y
+xcopy "$(ProjectDir)Libs\front_end" "$(TargetDir)front_end\" /s /y
+copy "$(ProjectDir)Libs\node_x86.dll" "$(TargetDir)node_x86.dll" /y
+copy "$(ProjectDir)Libs\node_x64.dll" "$(TargetDir)node_x64.dll" /y</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
