@@ -59,7 +59,7 @@ namespace QQ2564874169.Miniblink
         public IntPtr Job { get; internal set; }
         public bool Cancel { get; set; }
         public byte[] Data { get; set; }
-        public string ContentType { get; set; }
+        public string ContentType { get; internal set; }
 
         internal NetResponseEventArgs()
         {
@@ -75,7 +75,6 @@ namespace QQ2564874169.Miniblink
         public string Url { get; internal set; }
         public NetJob Job { get; internal set; }
         public byte[] Data { get; set; }
-        public string ContentType { get; set; }
         public bool Cancel { get; set; }
         public bool IsLocalFile { get; internal set; }
         internal bool HookRequest { get; set; }

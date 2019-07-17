@@ -19,7 +19,7 @@ namespace QQ2564874169.Miniblink
     /// <summary>
     /// 代理
     /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     public struct WKEProxy
     {
         /// <summary>

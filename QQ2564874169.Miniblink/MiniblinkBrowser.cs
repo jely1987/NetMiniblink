@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -15,30 +16,57 @@ namespace QQ2564874169.Miniblink
     {
         #region 属性
 
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IntPtr MiniblinkHandle { get; private set; }
-        public string LocalDomain { get; private set; }
-        public string LocalResourceDir { get; private set; }
-
-        [Browsable(false)] public MBDeviceParameter DeviceParameter { get; }
-
-        [Browsable(false)] public string Url => MBApi.wkeGetURL(MiniblinkHandle).ToUTF8String() ?? string.Empty;
-
-        [Browsable(false)] public bool IsDocumentReady { get; private set; }
 
         [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string LocalDomain { get; private set; }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string LocalResourceDir { get; private set; }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public MBDeviceParameter DeviceParameter { get; }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string Url => MBApi.wkeGetURL(MiniblinkHandle).ToUTF8String() ?? string.Empty;
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool IsDocumentReady { get; private set; }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string DocumentTitle => MBApi.wkeGetTitle(MiniblinkHandle).ToUTF8String() ?? string.Empty;
 
-        [Browsable(false)] public int DocumentWidth => MBApi.wkeGetWidth(MiniblinkHandle);
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int DocumentWidth => MBApi.wkeGetWidth(MiniblinkHandle);
 
-        [Browsable(false)] public int DocumentHeight => MBApi.wkeGetHeight(MiniblinkHandle);
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int DocumentHeight => MBApi.wkeGetHeight(MiniblinkHandle);
 
-        [Browsable(false)] public int ContentWidth => MBApi.wkeGetContentWidth(MiniblinkHandle);
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int ContentWidth => MBApi.wkeGetContentWidth(MiniblinkHandle);
 
-        [Browsable(false)] public int ContentHeight => MBApi.wkeGetContentHeight(MiniblinkHandle);
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int ContentHeight => MBApi.wkeGetContentHeight(MiniblinkHandle);
 
-        [Browsable(false)] public bool CanGoBack => MBApi.wkeCanGoBack(MiniblinkHandle);
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool CanGoBack => MBApi.wkeCanGoBack(MiniblinkHandle);
 
-        [Browsable(false)] public bool CanGoForward => MBApi.wkeCanGoForward(MiniblinkHandle);
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool CanGoForward => MBApi.wkeCanGoForward(MiniblinkHandle);
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -167,10 +195,7 @@ namespace QQ2564874169.Miniblink
 
                 _urlChanged += value;
             }
-            remove
-            {
-                _urlChanged -= value;
-            }
+            remove { _urlChanged -= value; }
         }
 
         protected virtual void OnUrlChanged(IntPtr mb, IntPtr param, IntPtr frame, IntPtr url)
@@ -321,13 +346,14 @@ namespace QQ2564874169.Miniblink
             var e = new NetResponseEventArgs
             {
                 Job = job,
-                Url = url
+                Url = url,
+                ContentType = MBApi.wkeNetGetMIMEType(job).ToUTF8String()
             };
             _netResponse(this, e);
 
             if (e.Data != null)
             {
-                NetSetData(job, e.Data, e.ContentType);
+                NetSetData(e.Job, e.Data);
                 return true;
             }
 
@@ -353,15 +379,7 @@ namespace QQ2564874169.Miniblink
 
                 _loadUrlBegin += value;
             }
-            remove
-            {
-                _loadUrlBegin -= value;
-
-                if (_loadUrlBegin == null)
-                {
-                    MBApi.wkeOnLoadUrlBegin(MiniblinkHandle, null, IntPtr.Zero);
-                }
-            }
+            remove { _loadUrlBegin -= value; }
         }
 
         private IntPtr _bakWndProc;
@@ -470,7 +488,12 @@ namespace QQ2564874169.Miniblink
             {
                 this.UIInvoke(() =>
                 {
-                    NetSetData(job.Handle, job.Data, job.ContentType);
+                    if (job.ResponseContentType != null)
+                    {
+                        MBApi.wkeNetSetMIMEType(job.Handle, job.ResponseContentType);
+                    }
+
+                    NetSetData(job.Handle, job.Data);
                     MBApi.wkeNetContinueJob(job.Handle);
                 });
             }
@@ -497,8 +520,7 @@ namespace QQ2564874169.Miniblink
 
         protected virtual bool OnLoadUrlBegin(IntPtr mb, IntPtr param, IntPtr url, IntPtr job)
         {
-            if (_loadUrlBegin == null)
-                return false;
+            if (_loadUrlBegin == null) return false;
 
             var rawurl = url.ToUTF8String();
             var e = new LoadUrlBeginEventArgs
@@ -530,7 +552,7 @@ namespace QQ2564874169.Miniblink
 
             if (e.Data != null)
             {
-                NetSetData(job, e.Data, e.ContentType);
+                NetSetData(job, e.Data);
                 return true;
             }
 
@@ -558,11 +580,11 @@ namespace QQ2564874169.Miniblink
             var end = begin.OnLoadUrlEnd(data);
             if (end.Modify)
             {
-                NetSetData(job, end.Data, begin.ContentType);
+                NetSetData(job, end.Data);
             }
         }
 
-        private static void NetSetData(IntPtr job, byte[] data = null, string mime = null)
+        private static void NetSetData(IntPtr job, byte[] data = null)
         {
             if (data != null && data.Length > 0)
             {
@@ -571,11 +593,6 @@ namespace QQ2564874169.Miniblink
             else
             {
                 MBApi.wkeNetSetData(job, new byte[] {0}, 1);
-            }
-
-            if (mime != null)
-            {
-                MBApi.wkeNetSetMIMEType(job, mime);
             }
         }
 
@@ -790,17 +807,15 @@ namespace QQ2564874169.Miniblink
                 {
                     throw new WKECreateException();
                 }
-
+                MBApi.wkeSetHandle(MiniblinkHandle, Handle);
                 _wndProcCallback = new WndProcCallback(OnWndMsg);
+                _bakWndProc = WinApi.SetWindowLong(Handle, (int) WinConst.GWL_WNDPROC, _wndProcCallback);
+                MBApi.wkeResize(MiniblinkHandle, Width, Height);
                 _wkePaintUpdated = new wkePaintUpdatedCallback(OnPaintUpdated);
+                MBApi.wkeOnPaintUpdated(MiniblinkHandle, _wkePaintUpdated, Handle);
                 _browserWndMsg += BrowserWndMsg;
                 _browserPaintUpdated += BrowserPaintUpdated;
                 _toBitmap = new MBPrintToBitmap(this);
-                _bakWndProc = WinApi.SetWindowLong(Handle, (int) WinConst.GWL_WNDPROC, _wndProcCallback);
-
-                MBApi.wkeSetHandle(MiniblinkHandle, Handle);
-                MBApi.wkeResize(MiniblinkHandle, Width, Height);
-                MBApi.wkeOnPaintUpdated(MiniblinkHandle, _wkePaintUpdated, Handle);
 
                 LoadUrlBegin += HookLocalFileRequest;
                 DocumentReady += (s, e) => { IsDocumentReady = true; };
@@ -817,7 +832,7 @@ namespace QQ2564874169.Miniblink
                 var hdc = MBApi.wkeGetViewDC(MiniblinkHandle);
                 WinApi.BitBlt(e.Graphics.GetHdc(), e.ClipRectangle.X, e.ClipRectangle.Y,
                     e.ClipRectangle.Width, e.ClipRectangle.Height, hdc, e.ClipRectangle.X, e.ClipRectangle.Y,
-                    (int)WinConst.SRCCOPY);
+                    (int) WinConst.SRCCOPY);
             }
         }
 
@@ -858,7 +873,6 @@ namespace QQ2564874169.Miniblink
                     {
                         e.Result = IntPtr.Zero;
                     }
-
                     break;
                 }
 
@@ -916,32 +930,14 @@ namespace QQ2564874169.Miniblink
                         }
                     }
 
-                    switch (wMsg)
-                    {
-                        case WinConst.WM_LBUTTONDOWN:
-                        case WinConst.WM_MBUTTONDOWN:
-                        case WinConst.WM_RBUTTONDOWN:
-                            if (WinApi.GetFocus() != hWnd)
-                                WinApi.SetFocus(hWnd);
-                            WinApi.SetCapture(hWnd);
-                            break;
-                        case WinConst.WM_LBUTTONUP:
-                        case WinConst.WM_MBUTTONUP:
-                        case WinConst.WM_RBUTTONUP:
-                            WinApi.ReleaseCapture();
-                            break;
-                    }
-
                     var x = Utils.LOWORD(lParam);
                     var y = Utils.HIWORD(lParam);
-
                     var flags = 0;
 
                     if ((wParam.ToInt32() & (int) WinConst.MK_CONTROL) != 0)
                         flags |= (int) wkeMouseFlags.WKE_CONTROL;
                     if ((wParam.ToInt32() & (int) WinConst.MK_SHIFT) != 0)
                         flags |= (int) wkeMouseFlags.WKE_SHIFT;
-
                     if ((wParam.ToInt32() & (int) WinConst.MK_LBUTTON) != 0)
                         flags |= (int) wkeMouseFlags.WKE_LBUTTON;
                     if ((wParam.ToInt32() & (int) WinConst.MK_MBUTTON) != 0)
@@ -1040,23 +1036,23 @@ namespace QQ2564874169.Miniblink
                 }
 
                 case WinConst.WM_IME_STARTCOMPOSITION:
+                {
+                    var caret = MBApi.wkeGetCaretRect(MiniblinkHandle);
+                    var comp = new CompositionForm
                     {
-                        var caret = MBApi.wkeGetCaretRect(MiniblinkHandle);
-                        var comp = new CompositionForm
-                        {
-                            dwStyle = (int)WinConst.CFS_POINT | (int)WinConst.CFS_FORCE_POSITION,
-                            ptCurrentPos =
+                        dwStyle = (int) WinConst.CFS_POINT | (int) WinConst.CFS_FORCE_POSITION,
+                        ptCurrentPos =
                         {
                             x = caret.x,
                             y = caret.y
                         }
-                        };
-                        var imc = WinApi.ImmGetContext(hWnd);
-                        WinApi.ImmSetCompositionWindow(imc, ref comp);
-                        WinApi.ImmReleaseContext(hWnd, imc);
-                        e.Result = IntPtr.Zero;
-                        break;
-                    }
+                    };
+                    var imc = WinApi.ImmGetContext(hWnd);
+                    WinApi.ImmSetCompositionWindow(imc, ref comp);
+                    WinApi.ImmReleaseContext(hWnd, imc);
+                    e.Result = IntPtr.Zero;
+                    break;
+                }
 
                 case WinConst.WM_INPUTLANGCHANGE:
                 {
@@ -1308,8 +1304,67 @@ namespace QQ2564874169.Miniblink
 
                 default:
                     throw new ArgumentException("未知的参数值：" + type);
-
             }
         }
+
+//        public bool UsePrivateCookie
+//        {
+//            get { return _cookieContainer != null; }
+//            set
+//            {
+//                if (value)
+//                {
+//                    LoadCookieFromWebView();
+//                }
+//                else
+//                {
+//                    _cookieContainer = null;
+//                    LoadUrlBegin -= LoadUrlBegin_SetCookie;
+//                }
+//            }
+//        }
+
+//        private CookieContainer _cookieContainer;
+
+//        private void LoadCookieFromWebView()
+//        {
+//            _cookieContainer = new CookieContainer(int.MaxValue);
+
+//            //var cookies = MBApi.wkeGetCookie(MiniblinkHandle).ToUTF8String();
+//            //var coolist = Utils.ParseCookies(cookies);
+//            //foreach (var item in coolist)
+//            //{
+//            //    _cookieContainer.Add(item);
+//            //}
+
+//            LoadUrlBegin += LoadUrlBegin_SetCookie;
+//            NetResponse += NetResponse_ReadCookie;
+//        }
+
+//        private void NetResponse_ReadCookie(object sender, NetResponseEventArgs e)
+//        {
+//            var cookies = MBApi.wkeNetGetHTTPHeaderFieldFromResponse(e.Job, "set-cookie").ToUTF8String();
+////            Console.WriteLine("rev " + cookies);
+//            var coolist = Utils.ParseCookies(cookies, new Uri(e.Url).Host);
+//            foreach (var item in coolist)
+//            {
+//                _cookieContainer.Add(item);
+//            }
+//        }
+
+//        private void LoadUrlBegin_SetCookie(object sender, LoadUrlBeginEventArgs e)
+//        {
+//            var uri = new Uri(e.Url);
+//            var cookies = _cookieContainer.GetCookies(uri);
+//            var list = new List<string>();
+//            foreach (Cookie item in cookies)
+//            {
+//                list.Add(item.Name + "=" + item.Value);
+//            }
+
+//            var value = string.Join(";", list);
+//            MBApi.wkeNetSetHTTPHeaderField(e.Job.Handle, "Cookie", value);
+//            Console.WriteLine("post " + value);
+//        }
     }
 }

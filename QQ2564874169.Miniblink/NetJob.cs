@@ -9,7 +9,7 @@ namespace QQ2564874169.Miniblink
         public IntPtr WebView { get; }
         public object State { get; private set; }
         public byte[] Data { get; set; }
-        public string ContentType { get; set; }
+        public string ResponseContentType { get; set; }
 		public string Url { get; internal set; }
 
         internal bool IsAsync;

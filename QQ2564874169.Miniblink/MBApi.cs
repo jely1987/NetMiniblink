@@ -244,19 +244,19 @@ namespace QQ2564874169.Miniblink
         //}
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetViewProxy", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void wkeSetViewProxy_x86(IntPtr webView, WKEProxy proxy);
+        private static extern void wkeSetViewProxy_x86(IntPtr webView, ref WKEProxy proxy);
         [DllImport(DLL_x64, EntryPoint = "wkeSetViewProxy", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void wkeSetViewProxy_x64(IntPtr webView, WKEProxy proxy);
+        private static extern void wkeSetViewProxy_x64(IntPtr webView, ref WKEProxy proxy);
 
         public static void wkeSetViewProxy(IntPtr webView, WKEProxy proxy)
         {
             if (is64())
             {
-                wkeSetViewProxy_x64(webView, proxy);
+                wkeSetViewProxy_x64(webView, ref proxy);
             }
             else
             {
-                wkeSetViewProxy_x86(webView, proxy);
+                wkeSetViewProxy_x86(webView, ref proxy);
             }
         }
 
@@ -330,12 +330,7 @@ namespace QQ2564874169.Miniblink
 
         public static IntPtr wkeGetUserAgent(IntPtr webView)
         {
-            if (is64())
-            {
-                return wkeGetUserAgent_x64(webView);
-            }
-
-            return wkeGetUserAgent_x86(webView);
+            return is64() ? wkeGetUserAgent_x64(webView) : wkeGetUserAgent_x86(webView);
         }
 
         [DllImport(DLL_x86, EntryPoint = "wkeLoadURL", CallingConvention = CallingConvention.Cdecl,
@@ -822,20 +817,16 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeGetCookie", CallingConvention = CallingConvention.Cdecl)]
-        //private static extern IntPtr wkeGetCookie_x86(IntPtr webView);
-        //[DllImport(DLL_x64, EntryPoint = "wkeGetCookie", CallingConvention = CallingConvention.Cdecl)]
-        //private static extern IntPtr wkeGetCookie_x64(IntPtr webView);
+        [DllImport(DLL_x86, EntryPoint = "wkeGetCookie", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr wkeGetCookie_x86(IntPtr webView);
+        [DllImport(DLL_x64, EntryPoint = "wkeGetCookie", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr wkeGetCookie_x64(IntPtr webView);
 
-        //public static IntPtr wkeGetCookie(IntPtr webView)
-        //{
-        //    if (is64())
-        //    {
-        //        return wkeGetCookie_x64(webView);
-        //    }
-        //    return wkeGetCookie_x86(webView);
-        //}
-        
+        public static IntPtr wkeGetCookie(IntPtr webView)
+        {
+            return is64() ? wkeGetCookie_x64(webView) : wkeGetCookie_x86(webView);
+        }
+
 
         //[DllImport(DLL_x86, EntryPoint = "wkePerformCookieCommand", CallingConvention = CallingConvention.Cdecl)]
         //public static extern void wkePerformCookieCommand(wkeCookieCommand command);
@@ -2072,6 +2063,69 @@ namespace QQ2564874169.Miniblink
             else
             {
                 wkeShowDevtools_x86(webView, path, callback, param);
+            }
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeNetGetHTTPHeaderFieldFromResponse",
+            CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Ansi)]
+        private static extern IntPtr wkeNetGetHTTPHeaderFieldFromResponse_x86(IntPtr job, string key);
+
+        [DllImport(DLL_x64, EntryPoint = "wkeNetGetHTTPHeaderFieldFromResponse",
+            CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Ansi)]
+        private static extern IntPtr wkeNetGetHTTPHeaderFieldFromResponse_x64(IntPtr job, string key);
+
+        public static IntPtr wkeNetGetHTTPHeaderFieldFromResponse(IntPtr job, string key)
+        {
+            return is64()
+                ? wkeNetGetHTTPHeaderFieldFromResponse_x64(job, key)
+                : wkeNetGetHTTPHeaderFieldFromResponse_x86(job, key);
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeNetGetUrlByJob", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Unicode)]
+        private static extern IntPtr wkeNetGetUrlByJob_x86(IntPtr job);
+
+        [DllImport(DLL_x64, EntryPoint = "wkeNetGetUrlByJob", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Unicode)]
+        private static extern IntPtr wkeNetGetUrlByJob_x64(IntPtr job);
+
+        public static IntPtr wkeNetGetUrlByJob(IntPtr job)
+        {
+            return is64() ? wkeNetGetUrlByJob_x64(job) : wkeNetGetUrlByJob_x86(job);
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeNetGetMIMEType", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Ansi)]
+        private static extern IntPtr wkeNetGetMIMEType_x86(IntPtr job, IntPtr mime);
+
+        [DllImport(DLL_x64, EntryPoint = "wkeNetGetMIMEType", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Ansi)]
+        private static extern IntPtr wkeNetGetMIMEType_x64(IntPtr job, IntPtr mime);
+
+        public static IntPtr wkeNetGetMIMEType(IntPtr job)
+        {
+            return is64() ? wkeNetGetMIMEType_x64(job, IntPtr.Zero) : wkeNetGetMIMEType_x86(job, IntPtr.Zero);
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeNetSetHTTPHeaderField", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Unicode)]
+        private static extern void wkeNetSetHTTPHeaderField_x86(IntPtr job, string key, string value, [MarshalAs(UnmanagedType.I1)]bool response);
+
+        [DllImport(DLL_x64, EntryPoint = "wkeNetSetHTTPHeaderField", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Unicode)]
+        private static extern void wkeNetSetHTTPHeaderField_x64(IntPtr job, string key, string value, [MarshalAs(UnmanagedType.I1)]bool response);
+
+        public static void wkeNetSetHTTPHeaderField(IntPtr job, string key, string value)
+        {
+            if (is64())
+            {
+                wkeNetSetHTTPHeaderField_x64(job, key, value, false);
+            }
+            else
+            {
+                wkeNetSetHTTPHeaderField_x86(job, key, value, false);
             }
         }
     }

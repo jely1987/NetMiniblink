@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Net;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace QQ2564874169.Miniblink
 {
@@ -32,6 +35,7 @@ namespace QQ2564874169.Miniblink
                 data[i] = Marshal.PtrToStringAnsi(str);
                 ptr = new IntPtr(ptr.ToInt64() + IntPtr.Size);
             }
+
             return data;
         }
 
@@ -45,25 +49,123 @@ namespace QQ2564874169.Miniblink
                 data[i] = (wkePostBodyElement) Marshal.PtrToStructure(tmp, typeof(wkePostBodyElement));
                 ptr = new IntPtr(ptr.ToInt64() + IntPtr.Size);
             }
+
             return data;
         }
 
-	    public static bool IsDesignMode()
-	    {
-		    var returnFlag = false;
+        public static bool IsDesignMode()
+        {
+            var returnFlag = false;
 
 #if DEBUG
-		    if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
-		    {
-			    returnFlag = true;
-		    }
-		    else if (Process.GetCurrentProcess().ProcessName == "devenv")
-		    {
-			    returnFlag = true;
-		    }
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+            {
+                returnFlag = true;
+            }
+            else if (Process.GetCurrentProcess().ProcessName == "devenv")
+            {
+                returnFlag = true;
+            }
 #endif
 
-		    return returnFlag;
-	    }
-	}
+            return returnFlag;
+        }
+
+        public static List<Cookie> ParseCookies(string cookies, string defaultDomain = null)
+        {
+            var regx = new Regex("expires=(.+?GMT)", RegexOptions.IgnoreCase);
+            var ms = regx.Match(cookies);
+            while (ms.Success)
+            {
+                var left = cookies.Substring(0, ms.Index);
+                var right = cookies.Substring(ms.Index + ms.Length);
+                var time = ms.Groups[1].Value;
+                DateTime out_time;
+                if (DateTime.TryParse(time, out out_time))
+                {
+                    cookies = left + "expires=" + out_time.ToString("yyyy-MM-dd HH:mm:ss") + right;
+                }
+                else
+                {
+                    cookies = left + right;
+                }
+
+                ms = regx.Match(cookies);
+            }
+
+            var list = new List<Cookie>();
+            var items = cookies.Split(';', ',');
+            var curr = new Cookie
+            {
+                Domain = defaultDomain
+            };
+            for (var i = 0; i < items.Length; i++)
+            {
+                if (items[i] == null || string.IsNullOrEmpty(items[i].Trim())) continue;
+
+                var item = items[i];
+                string value = null;
+
+                switch (item.ToLower().Trim())
+                {
+                    case "httponly":
+                        curr.HttpOnly = true;
+                        break;
+                    case "secure":
+                        curr.Secure = true;
+                        break;
+                    default:
+                        value = item;
+                        break;
+                }
+
+                if (value == null) continue;
+
+                var kv = value.Split('=');
+                var k = kv[0].Trim();
+                var v = kv[1].Trim();
+
+                switch (k.ToLower())
+                {
+                    case "comment":
+                        curr.Comment = v;
+                        break;
+                    case "domain":
+                        curr.Domain = v;
+                        break;
+                    case "max-age":
+                        var sec = 0;
+                        if (int.TryParse(v, out sec))
+                        {
+                            curr.Expires = DateTime.Now.AddSeconds(sec);
+                        }
+
+                        break;
+                    case "expires":
+                        curr.Expires = DateTime.Parse(v);
+                        break;
+                    case "path":
+                        curr.Path = v;
+                        break;
+                    case "version":
+                        var ver = 0;
+                        if (int.TryParse(v, out ver))
+                        {
+                            curr.Version = ver;
+                        }
+
+                        break;
+                    default:
+                        curr = new Cookie(k, v)
+                        {
+                            Domain = defaultDomain
+                        };
+                        list.Add(curr);
+                        break;
+                }
+            }
+
+            return list;
+        }
+    }
 }

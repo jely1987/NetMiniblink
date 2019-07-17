@@ -41,6 +41,7 @@ namespace QQ2564874169.Miniblink
             this._browser.Name = "_browser";
             this._browser.Size = new System.Drawing.Size(389, 334);
             this._browser.TabIndex = 0;
+            this._browser.UsePrivateCookie = false;
             // 
             // MiniblinkForm
             // 
@@ -48,9 +49,9 @@ namespace QQ2564874169.Miniblink
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(389, 334);
             this.Controls.Add(this._browser);
+            this.KeyPreview = true;
             this.Name = "MiniblinkForm";
             this.Text = "MiniblinkForm";
-            this.Activated += new System.EventHandler(this.MiniblinkForm_Activated);
             this.Load += new System.EventHandler(this.MiniblinkForm_Load);
             this.ResumeLayout(false);
 

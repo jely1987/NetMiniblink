@@ -119,7 +119,7 @@ namespace QQ2564874169.Miniblink
                     TransparentPaint(MBApi.wkeGetViewDC(MiniblinkHandle));
                 }
 	        }
-	    }
+        }
 
 	    private void Miniblink_Paint(object sender, PaintUpdatedEventArgs e)
 	    {
@@ -833,14 +833,12 @@ namespace QQ2564874169.Miniblink
 			RightBottom
 		}
 
-        private void MiniblinkForm_Activated(object sender, EventArgs e)
-        {
-            _browser.Refresh();
-        }
-
         private void MiniblinkForm_Load(object sender, EventArgs e)
         {
-            TransparentPaint(MBApi.wkeGetViewDC(MiniblinkHandle));
+            if (!Utils.IsDesignMode() && IsTransparent)
+            {
+                TransparentPaint(MBApi.wkeGetViewDC(MiniblinkHandle));
+            }
         }
     }
 }

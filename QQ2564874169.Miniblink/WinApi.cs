@@ -5,7 +5,7 @@ namespace QQ2564874169.Miniblink
 {
     internal class WinApi
     {
-        [DllImport("user32.dll", EntryPoint = "GetWindowLong", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", EntryPoint = "GetWindowLongW", CharSet = CharSet.Auto)]
         private static extern int GetWindowLong86(IntPtr hwnd, int nIndex);
 
         [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr", CharSet = CharSet.Auto)]
@@ -20,7 +20,7 @@ namespace QQ2564874169.Miniblink
             return GetWindowLong86(hwnd, nIndex);
         }
 
-        [DllImport("user32.dll", EntryPoint = "SetWindowLong", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongW", CharSet = CharSet.Auto)]
         private static extern IntPtr SetWindowLong86(IntPtr hwnd, int nIndex, int dwNewLong);
 
         [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", CharSet = CharSet.Auto)]
@@ -38,7 +38,7 @@ namespace QQ2564874169.Miniblink
         [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", CharSet = CharSet.Auto)]
         private static extern IntPtr SetWindowLong64(IntPtr hwnd, int nIndex, Delegate dwNewLong);
 
-        [DllImport("user32.dll", EntryPoint = "SetWindowLong", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongW", CharSet = CharSet.Auto)]
         private static extern IntPtr SetWindowLong86(IntPtr hwnd, int nIndex, Delegate dwNewLong);
 
         public static IntPtr SetWindowLong(IntPtr hwnd, int nIndex, Delegate dwNewLong)
@@ -50,7 +50,7 @@ namespace QQ2564874169.Miniblink
             return SetWindowLong86(hwnd, nIndex, dwNewLong);
         }
 
-        [DllImport("user32.dll", EntryPoint = "CallWindowProc")]
+        [DllImport("user32.dll", EntryPoint = "CallWindowProcW")]
         public static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hwnd, int msg, IntPtr wParam,
             IntPtr lParam);
 
