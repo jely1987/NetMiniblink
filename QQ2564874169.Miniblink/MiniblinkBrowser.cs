@@ -180,6 +180,35 @@ namespace QQ2564874169.Miniblink
 
         #region 事件
 
+        private wkeDidCreateScriptContextCallback _wkeDidCreateScriptContextCallback;
+        private EventHandler<DidCreateScriptContextEventArgs> _didCreateScriptContextCallback;
+
+        public event EventHandler<DidCreateScriptContextEventArgs> DidCreateScriptContext
+        {
+            add
+            {
+                if (_wkeDidCreateScriptContextCallback == null)
+                {
+                    _wkeDidCreateScriptContextCallback = new wkeDidCreateScriptContextCallback(onWkeDidCreateScriptContextCallback);
+                    MBApi.wkeOnDidCreateScriptContext(MiniblinkHandle, _wkeDidCreateScriptContextCallback, IntPtr.Zero);
+                }
+
+                _didCreateScriptContextCallback += value;
+            }
+            remove { _didCreateScriptContextCallback -= value; }
+        }
+
+        protected virtual void onWkeDidCreateScriptContextCallback(IntPtr webView, IntPtr param, IntPtr frame,
+            IntPtr context,
+            int extensionGroup, int worldId)
+        {
+            var e = new DidCreateScriptContextEventArgs
+            {
+                Frame = new FrameContext(this, frame)
+            };
+            _didCreateScriptContextCallback?.Invoke(this, e);
+        }
+
         private wkeURLChangedCallback2 _wkeUrlChanged;
         private EventHandler<UrlChangedEventArgs> _urlChanged;
 

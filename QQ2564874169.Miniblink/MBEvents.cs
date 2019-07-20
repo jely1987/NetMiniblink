@@ -222,4 +222,14 @@ namespace QQ2564874169.Miniblink
 
         }
     }
+
+    public class DidCreateScriptContextEventArgs : MiniblinkEventArgs
+    {
+        public FrameContext Frame { get; internal set; }
+
+        internal DidCreateScriptContextEventArgs()
+        {
+
+        }
+    }
 }

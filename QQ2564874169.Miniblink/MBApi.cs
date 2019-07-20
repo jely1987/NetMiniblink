@@ -1336,13 +1336,45 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeOnDidCreateScriptContext", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkeOnDidCreateScriptContext(IntPtr webView,
-        //    wkeDidCreateScriptContextCallback callback, IntPtr param);
+        [DllImport(DLL_x86, EntryPoint = "wkeOnDidCreateScriptContext", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeOnDidCreateScriptContext_x86(IntPtr webView,
+            wkeDidCreateScriptContextCallback callback, IntPtr param);
+        [DllImport(DLL_x64, EntryPoint = "wkeOnDidCreateScriptContext", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeOnDidCreateScriptContext_x64(IntPtr webView,
+            wkeDidCreateScriptContextCallback callback, IntPtr param);
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeOnWillReleaseScriptContext", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkeOnWillReleaseScriptContext(IntPtr webView,
-        //    wkeWillReleaseScriptContextCallback callback, IntPtr param);
+        public static void wkeOnDidCreateScriptContext(IntPtr webView, wkeDidCreateScriptContextCallback callback,
+            IntPtr param)
+        {
+            if (is64())
+            {
+                wkeOnDidCreateScriptContext_x64(webView, callback, param);
+            }
+            else
+            {
+                wkeOnDidCreateScriptContext_x86(webView, callback, param);
+            }
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeOnWillReleaseScriptContext", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeOnWillReleaseScriptContext_x86(IntPtr webView,
+            wkeWillReleaseScriptContextCallback callback, IntPtr param);
+        [DllImport(DLL_x64, EntryPoint = "wkeOnWillReleaseScriptContext", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeOnWillReleaseScriptContext_x64(IntPtr webView,
+            wkeWillReleaseScriptContextCallback callback, IntPtr param);
+
+        public static void wkeOnWillReleaseScriptContext(IntPtr webView, wkeWillReleaseScriptContextCallback callback,
+            IntPtr param)
+        {
+            if (is64())
+            {
+                wkeOnWillReleaseScriptContext_x64(webView, callback, param);
+            }
+            else
+            {
+                wkeOnWillReleaseScriptContext_x86(webView, callback, param);
+            }
+        }
 
         [DllImport(DLL_x86, EntryPoint = "wkeNetSetMIMEType", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Ansi)]

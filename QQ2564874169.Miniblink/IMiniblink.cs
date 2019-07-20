@@ -38,6 +38,7 @@ namespace QQ2564874169.Miniblink
         event EventHandler<AlertEventArgs> AlertBefore;
         event EventHandler<ConfirmEventArgs> ConfirmBefore;
         event EventHandler<PromptEventArgs> PromptBefore;
+	    event EventHandler<DidCreateScriptContextEventArgs> DidCreateScriptContext;
 
         void ScrollTo(int x, int y);
 		void RegisterNetFunc(object target);
