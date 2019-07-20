@@ -854,6 +854,11 @@ namespace QQ2564874169.Miniblink
             }
         }
 
+        private void MiniblinkBrowser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            e.IsInputKey = true;
+        }
+
         private void MiniblinkBrowser_Paint(object sender, PaintEventArgs e)
         {
             if (!Utils.IsDesignMode() && !IsDisposed)
