@@ -817,9 +817,9 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        [DllImport(DLL_x86, EntryPoint = "wkeGetCookie", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DLL_x86, EntryPoint = "wkeGetCookieW", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetCookie_x86(IntPtr webView);
-        [DllImport(DLL_x64, EntryPoint = "wkeGetCookie", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DLL_x64, EntryPoint = "wkeGetCookieW", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetCookie_x64(IntPtr webView);
 
         public static IntPtr wkeGetCookie(IntPtr webView)
