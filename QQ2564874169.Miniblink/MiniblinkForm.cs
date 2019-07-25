@@ -672,8 +672,23 @@ namespace QQ2564874169.Miniblink
             remove { _browser.PromptBefore -= value; }
         }
 
-        public event EventHandler<WndMsgEventArgs> WndMsg;
-        public event EventHandler<PaintUpdatedEventArgs> PaintUpdated;
+        public event EventHandler<WndMsgEventArgs> WndMsg
+	    {
+	        add { _browser.WndMsg += value; }
+	        remove { _browser.WndMsg -= value; }
+	    }
+
+	    public event EventHandler<PaintUpdatedEventArgs> PaintUpdated
+	    {
+	        add { _browser.PaintUpdated += value; }
+	        remove { _browser.PaintUpdated -= value; }
+	    }
+
+	    public event EventHandler<DidCreateScriptContextEventArgs> DidCreateScriptContext
+	    {
+	        add { _browser.DidCreateScriptContext += value; }
+	        remove { _browser.DidCreateScriptContext -= value; }
+	    }
 
         public void ScrollTo(int x, int y)
         {

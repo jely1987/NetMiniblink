@@ -179,18 +179,21 @@ namespace Demo
         private void FrmTest_Load(object sender, EventArgs e)
         {
             DeviceParameter.ScreenAvailWidth = 1234;
-            //指定了本地站点后，所有文件加载方式都和web中一致
-            LoadUri("/index.html");
-            //LoadUri("https://jbaysolutions.github.io/vue-grid-layout/examples/01-basic.html");
-            //LoadUri("https://www.baidu.com");
-            //LoadUri("https://www.cnblogs.com/wangkongming/p/6195903.html");
-            //LoadUri("https://www.baidu.com");
 
-            ConsoleMessage += FrmTest_ConsoleMessage;
+            //ConsoleMessage += FrmTest_ConsoleMessage;
             LoadUrlBegin += FrmTest_LoadUrlBegin;
             AlertBefore += FrmWindow_AlertBefore;
             ConfirmBefore += FrmWindow_ConfirmBefore;
             PromptBefore += FrmWindow_PromptBefore;
+
+            //指定了本地站点后，所有文件加载方式都和web中一致
+            //LoadUri("/index.html");
+            //LoadUri("/input.html");
+            //LoadUri("/device.html");
+            //LoadUri("https://jbaysolutions.github.io/vue-grid-layout/examples/01-basic.html");
+            //LoadUri("https://www.baidu.com");
+            //LoadUri("https://www.cnblogs.com/wangkongming/p/6195903.html");
+            LoadUri("https://myliang.github.io/x-spreadsheet/");
         }
 
         private void FrmWindow_PromptBefore(object sender, PromptEventArgs e)
