@@ -52,6 +52,12 @@
     <Compile Include="FrmMain.Designer.cs">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmPrint.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPrint.Designer.cs">
+      <DependentUpon>FrmPrint.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmPrivateCookie.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,6 +89,9 @@
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FrmPrint.resx">
+      <DependentUpon>FrmPrint.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmPrivateCookie.resx">
       <DependentUpon>FrmPrivateCookie.cs</DependentUpon>
     </EmbeddedResource>
@@ -98,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Webres\device.html" />
+    <Content Include="Webres\qq.html" />
     <Content Include="Webres\input.html" />
     <Content Include="Webres\index.html" />
     <Content Include="Webres\style.css" />

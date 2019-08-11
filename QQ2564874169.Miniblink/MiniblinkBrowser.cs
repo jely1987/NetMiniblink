@@ -813,7 +813,7 @@ namespace QQ2564874169.Miniblink
         private EventHandler<WndMsgEventArgs> _browserWndMsg;
         private EventHandler<PaintUpdatedEventArgs> _browserPaintUpdated;
         private Hashtable _ref = new Hashtable();
-        private MBPrintToBitmap _toBitmap;
+        private GetView _toBitmap;
         private static string _hoolTipName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private static string _promptName = "func" + Guid.NewGuid().ToString().Replace("-", "");
 
@@ -844,7 +844,7 @@ namespace QQ2564874169.Miniblink
                 MBApi.wkeOnPaintUpdated(MiniblinkHandle, _wkePaintUpdated, Handle);
                 _browserWndMsg += BrowserWndMsg;
                 _browserPaintUpdated += BrowserPaintUpdated;
-                _toBitmap = new MBPrintToBitmap(this);
+                _toBitmap = new GetView(this);
 
                 LoadUrlBegin += HookLocalFileRequest;
                 DocumentReady += (s, e) => { IsDocumentReady = true; };
@@ -1210,7 +1210,7 @@ namespace QQ2564874169.Miniblink
 
         public void PrintToBitmap(Action<Image> callback)
         {
-            _toBitmap.Start(callback);
+            _toBitmap.ToImage(callback);
         }
 
         private void RegisterJsFunc()
