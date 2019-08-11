@@ -52,12 +52,6 @@
     <Compile Include="FrmMain.Designer.cs">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="FrmPrivateCookie.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmPrivateCookie.Designer.cs">
-      <DependentUpon>FrmPrivateCookie.cs</DependentUpon>
-    </Compile>
     <Compile Include="FrmWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -82,9 +76,6 @@
   <ItemGroup>
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FrmPrivateCookie.resx">
-      <DependentUpon>FrmPrivateCookie.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmWindow.resx">
       <DependentUpon>FrmWindow.cs</DependentUpon>
