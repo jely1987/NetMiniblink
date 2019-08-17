@@ -64,6 +64,11 @@ namespace QQ2564874169.Miniblink
         internal NetResponseEventArgs()
         {
         }
+
+        public string GetHeader(string name)
+        {
+            return MBApi.wkeNetGetHTTPHeaderFieldFromResponse(Job, name).ToUTF8String();
+        }
     }
 
     public class LoadUrlBeginEventArgs : MiniblinkEventArgs
@@ -81,9 +86,25 @@ namespace QQ2564874169.Miniblink
         private Action<LoadUrlEndArgs> _loadUrlEnd;
         private object _endState;
         internal bool Ended;
+        private PostBody _postBody;
 
         internal LoadUrlBeginEventArgs()
         {
+        }
+
+        public PostBody GetPostBody()
+        {
+            if (_postBody == null)
+            {
+                _postBody = new PostBody(Job.Handle);
+            }
+
+            return _postBody;
+        }
+
+        public void SetHeader(string name, string value)
+        {
+            MBApi.wkeNetSetHTTPHeaderField(Job.Handle, name, value);
         }
 
         public void WatchLoadUrlEnd(Action<LoadUrlEndArgs> callback, object state = null)
@@ -150,6 +171,11 @@ namespace QQ2564874169.Miniblink
         {
             Modify = true;
             Data = data;
+        }
+
+        public string GetHeader(string name)
+        {
+            return MBApi.wkeNetGetHTTPHeaderFieldFromResponse(Job, name).ToUTF8String();
         }
     }
 
