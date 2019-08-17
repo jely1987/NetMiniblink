@@ -21,21 +21,25 @@ namespace Demo
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var ppd = new PrintPreviewDialog();
-            ppd.Document = printDocument1;
-            ppd.ShowDialog();
-            return;
+            //var ppd = new PrintPreviewDialog();
+            //ppd.Document = printDocument1;
+            //ppd.ShowDialog();
+            //return;
 
-            miniblinkBrowser1.PrintToBitmap(img =>
+            //miniblinkBrowser1.PrintToBitmap(img =>
+            //{
+            //    var name = Guid.NewGuid() + ".png";
+            //    img.Save(name);
+            //    jietu = Image.FromFile(name);
+
+            //    if (printDialog1.ShowDialog() == DialogResult.OK)
+            //    {
+            //        printDocument1.Print();
+            //    }
+            //});
+            miniblinkBrowser1.PrintToSm(sm =>
             {
-                var name = Guid.NewGuid() + ".png";
-                img.Save(name);
-                jietu = Image.FromFile(name);
-
-                if (printDialog1.ShowDialog() == DialogResult.OK)
-                {
-                    printDocument1.Print();
-                }
+                Image.FromStream(sm).Save(Guid.NewGuid().ToString() + ".png");
             });
         }
 

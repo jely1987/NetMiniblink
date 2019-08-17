@@ -1213,6 +1213,11 @@ namespace QQ2564874169.Miniblink
             _toBitmap.ToImage(callback);
         }
 
+        public void PrintToSm(Action<Stream> callback)
+        {
+            _toBitmap.ToStream(callback);
+        }
+
         private void RegisterJsFunc()
         {
             BindNetFunc(new NetFunc(_hoolTipName, OnHookTip));

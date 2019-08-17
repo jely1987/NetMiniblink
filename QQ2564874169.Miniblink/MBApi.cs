@@ -598,8 +598,8 @@ namespace QQ2564874169.Miniblink
         //public static extern void wkePaint2(IntPtr webView, IntPtr bits, int bufWid, int bufHei, int xDst, int yDst,
         //    int w, int h, int xSrc, int ySrc, [MarshalAs(UnmanagedType.I1)] bool bCopyAlpha);
 
-        //[DllImport(DLL_x86, EntryPoint = "wkePaint", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkePaint(IntPtr webView, IntPtr bits, int pitch);
+        [DllImport(DLL_x86, EntryPoint = "wkePaint", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void wkePaint(IntPtr webView, byte[] bits, int pitch);
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetViewDC", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetViewDC_x86(IntPtr webView);
