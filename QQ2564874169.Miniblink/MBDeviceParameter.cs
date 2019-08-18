@@ -103,5 +103,17 @@ namespace QQ2564874169.Miniblink
                 MBApi.wkeSetDeviceParameter(_mb.MiniblinkHandle, "screen.pixelDepth", null, value, 0);
             }
         }
+
+        /// <summary>
+        /// window.devicePixelRatio
+        /// </summary>
+        public int DevicePixelRatio
+        {
+            get { return Convert.ToInt32(_mb.RunJs("return window.devicePixelRatio;")); }
+            set
+            {
+                _mb.RunJs("Object.defineProperty(window,'devicePixelRatio',{get:function(){return " + value + ";}})");
+            }
+        }
     }
 }

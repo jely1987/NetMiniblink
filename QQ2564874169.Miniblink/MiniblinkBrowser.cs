@@ -854,7 +854,7 @@ namespace QQ2564874169.Miniblink
 
                 LoadUrlBegin += HookLocalFileRequest;
                 DocumentReady += (s, e) => { IsDocumentReady = true; };
-                DocumentReady += HookTip;
+                DidCreateScriptContext += HookTip;
                 DeviceParameter = new MBDeviceParameter(this);
                 RegisterJsFunc();
             }
@@ -1245,9 +1245,9 @@ namespace QQ2564874169.Miniblink
             return frm.GetValue();
         }
 
-        private void HookTip(object sender, DocumentReadyEventArgs e)
+        private void HookTip(object sender, DidCreateScriptContextEventArgs e)
         {
-            RunJs(@"
+            e.Frame.RunJs(@"
                 var abak=alert;
                 alert=function(msg){
                     var data =" + _hoolTipName + @"('alert',msg);

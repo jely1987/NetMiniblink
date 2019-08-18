@@ -98,8 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Webres\device.html" />
-    <Content Include="Webres\qq.html" />
-    <Content Include="Webres\input.html" />
+    <Content Include="Webres\control.html" />
     <Content Include="Webres\index.html" />
     <Content Include="Webres\style.css" />
   </ItemGroup>

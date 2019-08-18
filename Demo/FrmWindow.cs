@@ -178,22 +178,21 @@ namespace Demo
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            DeviceParameter.ScreenAvailWidth = 1234;
-
-            //ConsoleMessage += FrmTest_ConsoleMessage;
+            FormBorderStyle = FormBorderStyle.None;
+            ConsoleMessage += FrmTest_ConsoleMessage;
             LoadUrlBegin += FrmTest_LoadUrlBegin;
             AlertBefore += FrmWindow_AlertBefore;
             ConfirmBefore += FrmWindow_ConfirmBefore;
             PromptBefore += FrmWindow_PromptBefore;
 
             //指定了本地站点后，所有文件加载方式都和web中一致
-            //LoadUri("/index.html");
+            LoadUri("/index.html");
             //LoadUri("/input.html");
             //LoadUri("/device.html");
             //LoadUri("https://jbaysolutions.github.io/vue-grid-layout/examples/01-basic.html");
             //LoadUri("https://www.baidu.com");
             //LoadUri("https://www.cnblogs.com/wangkongming/p/6195903.html");
-            LoadUri("https://myliang.github.io/x-spreadsheet/");
+            //LoadUri("https://myliang.github.io/x-spreadsheet/");
         }
 
         private void FrmWindow_PromptBefore(object sender, PromptEventArgs e)
@@ -213,6 +212,8 @@ namespace Demo
 
         private void FrmTest_LoadUrlBegin(object sender, LoadUrlBeginEventArgs e)
         {
+            //以下全部是替换指定资源的返回结果
+
 			if (e.Url.Contains("hook.js"))
 			{
 				e.Data = Encoding.UTF8.GetBytes("function hook(){alert('hook')}");
@@ -226,6 +227,7 @@ namespace Demo
 			}
 			if (e.Url.Contains("hook3.js"))
             {
+                //wait方法是异步的，从文档来看是不卡UI线程的，但我实际测试只对异步ajax有效。
                 e.Job.Wait(job =>
                 {
                     job.Data = Encoding.UTF8.GetBytes("function hook3(){alert('hook3')}");
