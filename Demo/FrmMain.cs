@@ -40,5 +40,10 @@ namespace Demo
 		{
 			new FrmTransparent().Show();
 		}
-	}
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            new FrmPrint().Show();
+        }
+    }
 }

@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -59,6 +59,14 @@ namespace QQ2564874169.Miniblink
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int ContentHeight => MBApi.wkeGetContentHeight(MiniblinkHandle);
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int ViewWidth => MBApi.wkeGetWidth(MiniblinkHandle);
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int ViewHeight => MBApi.wkeGetHeight(MiniblinkHandle);
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -813,7 +821,6 @@ namespace QQ2564874169.Miniblink
         private EventHandler<WndMsgEventArgs> _browserWndMsg;
         private EventHandler<PaintUpdatedEventArgs> _browserPaintUpdated;
         private Hashtable _ref = new Hashtable();
-        private GetView _toBitmap;
         private static string _hoolTipName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private static string _promptName = "func" + Guid.NewGuid().ToString().Replace("-", "");
 
@@ -844,7 +851,6 @@ namespace QQ2564874169.Miniblink
                 MBApi.wkeOnPaintUpdated(MiniblinkHandle, _wkePaintUpdated, Handle);
                 _browserWndMsg += BrowserWndMsg;
                 _browserPaintUpdated += BrowserPaintUpdated;
-                _toBitmap = new GetView(this);
 
                 LoadUrlBegin += HookLocalFileRequest;
                 DocumentReady += (s, e) => { IsDocumentReady = true; };
@@ -1208,14 +1214,9 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        public void PrintToBitmap(Action<Image> callback)
+        public void DrawToBitmap(Action<Image> callback)
         {
-            _toBitmap.ToImage(callback);
-        }
-
-        public void PrintToSm(Action<Stream> callback)
-        {
-            _toBitmap.ToStream(callback);
+            new DrawToBitmapUtil(this).ToImage(callback);
         }
 
         private void RegisterJsFunc()
@@ -1346,64 +1347,9 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-//        public bool UsePrivateCookie
-//        {
-//            get { return _cookieContainer != null; }
-//            set
-//            {
-//                if (value)
-//                {
-//                    LoadCookieFromWebView();
-//                }
-//                else
-//                {
-//                    _cookieContainer = null;
-//                    LoadUrlBegin -= LoadUrlBegin_SetCookie;
-//                }
-//            }
-//        }
-
-//        private CookieContainer _cookieContainer;
-
-//        private void LoadCookieFromWebView()
-//        {
-//            _cookieContainer = new CookieContainer(int.MaxValue);
-
-//            //var cookies = MBApi.wkeGetCookie(MiniblinkHandle).ToUTF8String();
-//            //var coolist = Utils.ParseCookies(cookies);
-//            //foreach (var item in coolist)
-//            //{
-//            //    _cookieContainer.Add(item);
-//            //}
-
-//            LoadUrlBegin += LoadUrlBegin_SetCookie;
-//            NetResponse += NetResponse_ReadCookie;
-//        }
-
-//        private void NetResponse_ReadCookie(object sender, NetResponseEventArgs e)
-//        {
-//            var cookies = MBApi.wkeNetGetHTTPHeaderFieldFromResponse(e.Job, "set-cookie").ToUTF8String();
-////            Console.WriteLine("rev " + cookies);
-//            var coolist = Utils.ParseCookies(cookies, new Uri(e.Url).Host);
-//            foreach (var item in coolist)
-//            {
-//                _cookieContainer.Add(item);
-//            }
-//        }
-
-//        private void LoadUrlBegin_SetCookie(object sender, LoadUrlBeginEventArgs e)
-//        {
-//            var uri = new Uri(e.Url);
-//            var cookies = _cookieContainer.GetCookies(uri);
-//            var list = new List<string>();
-//            foreach (Cookie item in cookies)
-//            {
-//                list.Add(item.Name + "=" + item.Value);
-//            }
-
-//            var value = string.Join(";", list);
-//            MBApi.wkeNetSetHTTPHeaderField(e.Job.Handle, "Cookie", value);
-//            Console.WriteLine("post " + value);
-//        }
+        public void Print(Action<PrintPreviewDialog> callback)
+        {
+            new PrintUtil(this).Start(callback);
+        }
     }
 }

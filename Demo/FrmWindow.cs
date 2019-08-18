@@ -59,7 +59,7 @@ namespace Demo
 
         private void Btn3_Click(object sender, EventArgs e)
         {
-            PrintToBitmap(image =>
+            DrawToBitmap(image =>
             {
                 var filename = Guid.NewGuid() + ".png";
                 image.Save(filename, ImageFormat.Png);

@@ -3,17 +3,19 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using QQ2564874169.Miniblink;
 
 namespace Demo
 {
     public partial class FrmPrint : Form
     {
-        private Image jietu;
-
         public FrmPrint()
         {
             InitializeComponent();
@@ -21,36 +23,30 @@ namespace Demo
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //var ppd = new PrintPreviewDialog();
-            //ppd.Document = printDocument1;
-            //ppd.ShowDialog();
-            //return;
-
-            //miniblinkBrowser1.PrintToBitmap(img =>
-            //{
-            //    var name = Guid.NewGuid() + ".png";
-            //    img.Save(name);
-            //    jietu = Image.FromFile(name);
-
-            //    if (printDialog1.ShowDialog() == DialogResult.OK)
-            //    {
-            //        printDocument1.Print();
-            //    }
-            //});
-            miniblinkBrowser1.PrintToSm(sm =>
+            miniblinkBrowser1.Print(dialog =>
             {
-                Image.FromStream(sm).Save(Guid.NewGuid().ToString() + ".png");
+                //如有需要，可以先设置一下
+                dialog.StartPosition = FormStartPosition.CenterScreen;
+                dialog.ShowDialog();
             });
-        }
-
-        private void printDocument1_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
-        {
-            //e.Graphics.DrawImage(jietu, 0, 0, jietu.Width, jietu.Height);
         }
 
         private void FrmPrint_Load(object sender, EventArgs e)
         {
+            miniblinkBrowser1.DocumentReady += MiniblinkBrowser1_DocumentReady;
+            miniblinkBrowser1.NavigateBefore += MiniblinkBrowser1_NavigateBefore;
             miniblinkBrowser1.LoadUri("https://www.qq.com");
+        }
+
+        private void MiniblinkBrowser1_NavigateBefore(object sender, QQ2564874169.Miniblink.NavigateEventArgs e)
+        {
+            button1.Enabled = false;
+        }
+
+        private void MiniblinkBrowser1_DocumentReady(object sender, DocumentReadyEventArgs e)
+        {
+            button1.Enabled = true;
+            Text = miniblinkBrowser1.DocumentTitle;
         }
     }
 }

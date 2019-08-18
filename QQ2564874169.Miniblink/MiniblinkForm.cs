@@ -69,7 +69,6 @@ namespace QQ2564874169.Miniblink
 		public MiniblinkForm(bool isTransparent)
 		{
 			InitializeComponent();
-            NoneBorderResize = true;
 
 			IsTransparent = isTransparent;
 			ShadowWidth = new FormShadowWidth();
@@ -78,6 +77,7 @@ namespace QQ2564874169.Miniblink
             {
                 if (IsTransparent)
                 {
+                    NoneBorderResize = true;
                     FormBorderStyle = FormBorderStyle.None;
                     var style = WinApi.GetWindowLong(Handle, (int)WinConst.GWL_EXSTYLE);
                     if ((style & (int)WinConst.WS_EX_LAYERED) != (int) WinConst.WS_EX_LAYERED)
@@ -542,20 +542,6 @@ namespace QQ2564874169.Miniblink
             set { _browser.ScrollLeft = value; }
         }
 
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public int ScrollHeight
-        {
-            get { return _browser.ScrollHeight; }
-        }
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public int ScrollWidth
-        {
-            get { return _browser.ScrollWidth; }
-        }
-
         private FormWindowState _windowState = FormWindowState.Normal;
 		private Rectangle? _stateRect;
 		public new FormWindowState WindowState
@@ -598,10 +584,9 @@ namespace QQ2564874169.Miniblink
 			}
 		}
 
-        public IntPtr MiniblinkHandle
-        {
-            get { return _browser.MiniblinkHandle; }
-        }
+        public IntPtr MiniblinkHandle => _browser.MiniblinkHandle;
+        public int ScrollHeight => _browser.ScrollHeight;
+        public int ScrollWidth => _browser.ScrollWidth;
         public string LocalDomain => _browser.LocalDomain;
 		public string LocalResourceDir => _browser.LocalResourceDir;
 		public string Url => _browser.Url;
@@ -611,13 +596,11 @@ namespace QQ2564874169.Miniblink
 		public int DocumentHeight => _browser.DocumentHeight;
 		public int ContentWidth => _browser.ContentWidth;
 		public int ContentHeight => _browser.ContentHeight;
-		public bool CanGoBack => _browser.CanGoBack;
+        public int ViewWidth => _browser.ViewWidth;
+        public int ViewHeight => _browser.ViewHeight;
+        public bool CanGoBack => _browser.CanGoBack;
 		public bool CanGoForward => _browser.CanGoForward;
-
-        public MBDeviceParameter DeviceParameter
-        {
-            get { return _browser.DeviceParameter; }
-        }
+        public MBDeviceParameter DeviceParameter => _browser.DeviceParameter;
 
         public event EventHandler<UrlChangedEventArgs> UrlChanged
 		{
@@ -830,9 +813,9 @@ namespace QQ2564874169.Miniblink
 			_browser.Reload();
 		}
 
-        public void PrintToBitmap(Action<Image> callback)
+        public void DrawToBitmap(Action<Image> callback)
         {
-            _browser.PrintToBitmap(callback);
+            _browser.DrawToBitmap(callback);
         }
 
         private enum ResizeDirect

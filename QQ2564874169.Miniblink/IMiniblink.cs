@@ -15,6 +15,8 @@ namespace QQ2564874169.Miniblink
 		int DocumentHeight { get; }
 		int ContentWidth { get; }
 		int ContentHeight { get; }
+        int ViewWidth { get; }
+        int ViewHeight { get; }
         int ScrollTop { get; set; }
         int ScrollLeft { get; set; }
         int ScrollHeight { get; }
@@ -68,6 +70,6 @@ namespace QQ2564874169.Miniblink
 		void LoadHtml(string html, string baseUrl = null);
 		void StopLoading();
 		void Reload();
-        void PrintToBitmap(Action<Image> callback);
+        void DrawToBitmap(Action<Image> callback);
     }
 }

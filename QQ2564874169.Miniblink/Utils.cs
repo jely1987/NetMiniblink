@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -166,6 +169,24 @@ namespace QQ2564874169.Miniblink
             }
 
             return list;
+        }
+
+        public static Image GetReducedImage(int width, int height, Image image)
+        {
+            var imageFromWidth = image.Width;
+            var imageFromHeight = image.Height;
+            var bmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            bmp.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.Clear(Color.White);
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = SmoothingMode.HighQuality;
+                g.DrawImage(image, new Rectangle(0, 0, bmp.Width, bmp.Height),
+                    new Rectangle(0, 0, imageFromWidth, imageFromHeight), GraphicsUnit.Pixel);
+            }
+
+            return bmp;
         }
     }
 }
