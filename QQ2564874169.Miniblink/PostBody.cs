@@ -63,9 +63,14 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        public string Get(string name)
+        public string GetValue(string name)
         {
             return _param.ContainsKey(name) ? _param[name] : null;
+        }
+
+        public ICollection<string> GetNames()
+        {
+            return _param.Keys;
         }
     }
 
