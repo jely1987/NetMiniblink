@@ -833,8 +833,23 @@ namespace QQ2564874169.Miniblink
         }
 
 
-        //[DllImport(DLL_x86, EntryPoint = "wkePerformCookieCommand", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkePerformCookieCommand(wkeCookieCommand command);
+        [DllImport(DLL_x86, EntryPoint = "wkePerformCookieCommand", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkePerformCookieCommand_x86(IntPtr webView, wkeCookieCommand command);
+        [DllImport(DLL_x64, EntryPoint = "wkePerformCookieCommand", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkePerformCookieCommand_x64(IntPtr webView, wkeCookieCommand command);
+
+        public static void wkePerformCookieCommand(IntPtr webView, wkeCookieCommand command)
+        {
+            if (is64())
+            {
+                wkePerformCookieCommand_x64(webView, command);
+            }
+            else
+            {
+                wkePerformCookieCommand_x86(webView, command);
+            }
+        }
+
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetCookieEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetCookieEnabled_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
