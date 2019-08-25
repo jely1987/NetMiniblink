@@ -30,7 +30,7 @@ namespace QQ2564874169.Miniblink
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool IsDocumentReady { get; private set; }
+        public bool IsDocumentReady => MBApi.wkeIsDocumentReady(MiniblinkHandle);
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -837,7 +837,6 @@ namespace QQ2564874169.Miniblink
                 _browserPaintUpdated += BrowserPaintUpdated;
 
                 LoadUrlBegin += LoadResource;
-                DocumentReady += (s, e) => { IsDocumentReady = true; };
                 DidCreateScriptContext += HookTip;
                 DeviceParameter = new MBDeviceParameter(this);
                 RegisterJsFunc();

@@ -455,18 +455,23 @@ namespace QQ2564874169.Miniblink
 
         public static long wkeRunJsByFrame(IntPtr webView, IntPtr frameId, string str, bool isInClosure)
         {
-            if (is64())
-            {
-                return wkeRunJsByFrame_x64(webView, frameId, str, isInClosure);
-            }
-            return wkeRunJsByFrame_x86(webView, frameId, str, isInClosure);
+            return is64() ? 
+                wkeRunJsByFrame_x64(webView, frameId, str, isInClosure) : 
+                wkeRunJsByFrame_x86(webView, frameId, str, isInClosure);
         }
 
         //[DllImport(DLL_x86, EntryPoint = "wkeIsLoading", CallingConvention = CallingConvention.Cdecl)]
         //public static extern byte wkeIsLoading(IntPtr webView);
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeIsDocumentReady", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern byte wkeIsDocumentReady(IntPtr webView);
+        [DllImport(DLL_x86, EntryPoint = "wkeIsDocumentReady", CallingConvention = CallingConvention.Cdecl)]
+        private static extern byte wkeIsDocumentReady_x86(IntPtr webView);
+        [DllImport(DLL_x64, EntryPoint = "wkeIsDocumentReady", CallingConvention = CallingConvention.Cdecl)]
+        private static extern byte wkeIsDocumentReady_x64(IntPtr webView);
+
+        public static bool wkeIsDocumentReady(IntPtr webView)
+        {
+            return (is64() ? wkeIsDocumentReady_x64(webView) : wkeIsDocumentReady_x86(webView)) == 1;
+        }
 
         [DllImport(DLL_x86, EntryPoint = "wkeStopLoading", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeStopLoading_x86(IntPtr webView);
