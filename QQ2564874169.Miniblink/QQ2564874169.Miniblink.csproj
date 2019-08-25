@@ -37,6 +37,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exts.cs" />
@@ -47,8 +48,11 @@
     <Compile Include="FrmPromptBox.Designer.cs">
       <DependentUpon>FrmPromptBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="ILoadResource.cs" />
     <Compile Include="IMiniblink.cs" />
     <Compile Include="JsFunc.cs" />
+    <Compile Include="LoadResourceImpl\LoadResourceByEmbed.cs" />
+    <Compile Include="LoadResourceImpl\LoadResourceByFile.cs" />
     <Compile Include="LocalHttp\ApiNameAttribute.cs" />
     <Compile Include="LocalHttp\NetApi.cs" />
     <Compile Include="LocalHttp\NetApiAfter.cs" />

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using QQ2564874169.Miniblink;
+using QQ2564874169.Miniblink.LoadResourceImpl;
 
 namespace Demo
 {
@@ -17,12 +18,14 @@ namespace Demo
 		public FrmTransparent() : base(true)
 		{
 			InitializeComponent();
-		}
+            LoadResourceHandlerList.Add(new LoadResourceByFile(
+                Path.Combine(Application.StartupPath, "webres"),
+                "loc.webres"));
+        }
 
 		private void FrmTransparent_Load(object sender, EventArgs e)
 		{
-			SetLocalResource(Path.Combine(Application.StartupPath, "webres"), "loc.webres");
-			LoadUri("/index.html");
+			LoadUri("http://loc.webres/index.html");
 		}
 	}
 }

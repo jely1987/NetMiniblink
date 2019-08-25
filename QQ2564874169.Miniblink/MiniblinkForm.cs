@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Threading;
@@ -587,8 +588,6 @@ namespace QQ2564874169.Miniblink
         public IntPtr MiniblinkHandle => _browser.MiniblinkHandle;
         public int ScrollHeight => _browser.ScrollHeight;
         public int ScrollWidth => _browser.ScrollWidth;
-        public string LocalDomain => _browser.LocalDomain;
-		public string LocalResourceDir => _browser.LocalResourceDir;
 		public string Url => _browser.Url;
 		public bool IsDocumentReady => _browser.IsDocumentReady;
 		public string DocumentTitle => _browser.DocumentTitle;
@@ -601,6 +600,7 @@ namespace QQ2564874169.Miniblink
         public bool CanGoBack => _browser.CanGoBack;
 		public bool CanGoForward => _browser.CanGoForward;
         public MBDeviceParameter DeviceParameter => _browser.DeviceParameter;
+        public IList<ILoadResource> LoadResourceHandlerList => _browser.LoadResourceHandlerList;
 
         public event EventHandler<UrlChangedEventArgs> UrlChanged
 		{
@@ -701,11 +701,6 @@ namespace QQ2564874169.Miniblink
 		public void BindNetFunc(NetFunc func)
 		{
 			_browser.BindNetFunc(func);
-		}
-
-		public void SetLocalResource(string dir, string domain)
-		{
-			_browser.SetLocalResource(dir, domain);
 		}
 
 		public void SetHeadlessEnabled(bool enable)

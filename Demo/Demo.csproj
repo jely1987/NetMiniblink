@@ -52,6 +52,12 @@
     <Compile Include="FrmMain.Designer.cs">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmPkg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPkg.Designer.cs">
+      <DependentUpon>FrmPkg.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmPrint.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -78,10 +84,18 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPkg.resx">
+      <DependentUpon>FrmPkg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmPrint.resx">
       <DependentUpon>FrmPrint.cs</DependentUpon>
@@ -95,8 +109,16 @@
     <EmbeddedResource Include="FrmTransparent.resx">
       <DependentUpon>FrmTransparent.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Res\images\img.png" />
+    <EmbeddedResource Include="Res\js\jquery.js" />
+    <EmbeddedResource Include="Res\pkg.html" />
     <Content Include="Webres\device.html" />
     <Content Include="Webres\control.html" />
     <Content Include="Webres\index.html" />

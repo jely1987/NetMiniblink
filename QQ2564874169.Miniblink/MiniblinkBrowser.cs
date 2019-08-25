@@ -22,14 +22,6 @@ namespace QQ2564874169.Miniblink
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string LocalDomain { get; private set; }
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string LocalResourceDir { get; private set; }
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public MBDeviceParameter DeviceParameter { get; }
 
         [Browsable(false)]
@@ -681,12 +673,6 @@ namespace QQ2564874169.Miniblink
             MBApi.wkeJsBindFunction(func.Name, funcvalue, ptr, 0);
         }
 
-        public void SetLocalResource(string dir, string domain)
-        {
-            LocalDomain = domain.TrimEnd('/');
-            LocalResourceDir = dir.TrimEnd(Path.DirectorySeparatorChar);
-        }
-
         public void SetHeadlessEnabled(bool enable)
         {
             MBApi.wkeSetHeadlessEnabled(MiniblinkHandle, enable);
@@ -781,10 +767,6 @@ namespace QQ2564874169.Miniblink
             {
                 MBApi.wkeLoadURL(MiniblinkHandle, uri);
             }
-            else if (uri.StartsWith("/") && LocalDomain != null)
-            {
-                MBApi.wkeLoadURL(MiniblinkHandle, LocalDomain + uri);
-            }
             else
             {
                 MBApi.wkeLoadFileW(MiniblinkHandle, uri);
@@ -823,12 +805,14 @@ namespace QQ2564874169.Miniblink
         private Hashtable _ref = new Hashtable();
         private static string _hoolTipName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private static string _promptName = "func" + Guid.NewGuid().ToString().Replace("-", "");
+        public IList<ILoadResource> LoadResourceHandlerList { get; }
 
         public MiniblinkBrowser()
         {
             InitializeComponent();
 
             InvokeBro = InvokeBro ?? this;
+            LoadResourceHandlerList = new List<ILoadResource>();
 
             if (!Utils.IsDesignMode())
             {
@@ -852,7 +836,7 @@ namespace QQ2564874169.Miniblink
                 _browserWndMsg += BrowserWndMsg;
                 _browserPaintUpdated += BrowserPaintUpdated;
 
-                LoadUrlBegin += HookLocalFileRequest;
+                LoadUrlBegin += LoadResource;
                 DocumentReady += (s, e) => { IsDocumentReady = true; };
                 DidCreateScriptContext += HookTip;
                 DeviceParameter = new MBDeviceParameter(this);
@@ -1192,25 +1176,32 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private void HookLocalFileRequest(object sender, LoadUrlBeginEventArgs e)
+        private void LoadResource(object sender, LoadUrlBeginEventArgs e)
         {
-            if (string.IsNullOrEmpty(LocalDomain))
+            if (LoadResourceHandlerList.Count < 1)
                 return;
             if (e.RequestMethod != wkeRequestType.Get)
                 return;
             var url = e.Url;
             if (url.SW("http:") == false && url.SW("https:") == false)
                 return;
+
             var uri = new Uri(url);
-            if (string.Equals(uri.Host, LocalDomain, StringComparison.OrdinalIgnoreCase) == false)
-                return;
-            var path = uri.AbsolutePath;
-            path = path.Replace("/", Path.DirectorySeparatorChar.ToString());
-            path = LocalResourceDir + path;
-            e.IsLocalFile = true;
-            if (File.Exists(path))
+            byte[] data = null;
+
+            foreach (var handler in LoadResourceHandlerList.ToArray())
             {
-                e.Data = File.ReadAllBytes(path);
+                data = handler.ByUri(uri);
+                if (data != null)
+                {
+                    break;
+                }
+            }
+
+            if (data != null)
+            {
+                e.IsLocalFile = true;
+                e.Data = data;
             }
         }
 

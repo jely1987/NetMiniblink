@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using QQ2564874169.Miniblink;
+using QQ2564874169.Miniblink.LoadResourceImpl;
 
 namespace Demo
 {
@@ -16,10 +17,11 @@ namespace Demo
         {
             InitializeComponent();
 
-			//指定本地一个文件夹作为站点根目录，同时指定站点域名
-	        SetLocalResource(Path.Combine(Application.StartupPath, "webres"), "loc.webres");
+            LoadResourceHandlerList.Add(new LoadResourceByFile(
+                Path.Combine(Application.StartupPath, "webres"),
+                "loc.webres"));
 
-	        BindNetFunc(new NetFunc("test1", Test1));
+            BindNetFunc(new NetFunc("test1", Test1));
 	        BindNetFunc(new NetFunc("test2", Test2));
 	        BindNetFunc(new NetFunc("test3", Test3));
 	        BindNetFunc(new NetFunc("test4", Test4));
@@ -186,7 +188,7 @@ namespace Demo
             PromptBefore += FrmWindow_PromptBefore;
 
             //指定了本地站点后，所有文件加载方式都和web中一致
-            LoadUri("/index.html");
+            LoadUri("http://loc.webres/index.html");
             //LoadUri("/input.html");
             //LoadUri("/device.html");
             //LoadUri("https://jbaysolutions.github.io/vue-grid-layout/examples/01-basic.html");

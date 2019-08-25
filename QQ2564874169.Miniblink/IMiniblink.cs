@@ -6,8 +6,6 @@ namespace QQ2564874169.Miniblink
 	public interface IMiniblink
 	{
         IntPtr MiniblinkHandle { get; }
-		string LocalDomain { get; }
-		string LocalResourceDir { get; }
 		string Url { get; }
 		bool IsDocumentReady { get; }
 		string DocumentTitle { get; }
@@ -48,7 +46,6 @@ namespace QQ2564874169.Miniblink
 		object RunJs(string script);
 		object CallJsFunc(string funcName, params object[] param);
 		void BindNetFunc(NetFunc func);
-		void SetLocalResource(string dir, string domain);
 		void SetHeadlessEnabled(bool enable);
 		void SetNpapiPluginsEnable(bool enable);
 		void SetNavigationToNewWindow(bool enable);

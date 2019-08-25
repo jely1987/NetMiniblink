@@ -1,0 +1,20 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <script src="/js/jquery.js"></script>
+    <script>
+        $(function() {
+            $("#btn").click(function() {
+                $("#img").remove();
+                $("<img/>").attr("id", "img").attr("src", "/images/img.png").css("display", "block").appendTo("body");
+            });
+        });
+    </script>
+</head>
+<body>
+<h2>此页面使用的html以及图片和外部js都是打包在程序集内的</h2>
+<input type="button" value="点击此按钮加载图片" id="btn"/>
+</body>
+</html>
