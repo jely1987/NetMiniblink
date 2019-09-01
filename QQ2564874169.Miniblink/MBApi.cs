@@ -300,6 +300,40 @@ namespace QQ2564874169.Miniblink
             }
         }
 
+        [DllImport(DLL_x86, EntryPoint = "wkeSetDragEnable", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetDragEnable_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+        [DllImport(DLL_x64, EntryPoint = "wkeSetDragEnable", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetDragEnable_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
+        public static void wkeSetDragEnable(IntPtr webView, bool enable)
+        {
+            if (is64())
+            {
+                wkeSetDragEnable_x64(webView, enable);
+            }
+            else
+            {
+                wkeSetDragEnable_x86(webView, enable);
+            }
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeSetDragDropEnable", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetDragDropEnable_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+        [DllImport(DLL_x64, EntryPoint = "wkeSetDragDropEnable", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetDragDropEnable_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
+        public static void wkeSetDragDropEnable(IntPtr webView, bool enable)
+        {
+            if (is64())
+            {
+                wkeSetDragDropEnable_x64(webView, enable);
+            }
+            else
+            {
+                wkeSetDragDropEnable_x86(webView, enable);
+            }
+        }
+
         [DllImport(DLL_x86, EntryPoint = "wkeSetUserAgent", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Unicode)]
         private static extern void wkeSetUserAgent_x86(IntPtr webView, string userAgent);
@@ -1144,8 +1178,15 @@ namespace QQ2564874169.Miniblink
         //    CharSet = CharSet.Ansi)]
         //public static extern IntPtr wkeGetUserKeyValue(IntPtr webView, string key);
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeGetCursorInfoType", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern wkeCursorInfo wkeGetCursorInfoType(IntPtr webView);
+        [DllImport(DLL_x86, EntryPoint = "wkeGetCursorInfoType", CallingConvention = CallingConvention.Cdecl)]
+        private static extern wkeCursorInfo wkeGetCursorInfoType_x86(IntPtr webView);
+        [DllImport(DLL_x64, EntryPoint = "wkeGetCursorInfoType", CallingConvention = CallingConvention.Cdecl)]
+        private static extern wkeCursorInfo wkeGetCursorInfoType_x64(IntPtr webView);
+
+        public static wkeCursorInfo wkeGetCursorInfoType(IntPtr webView)
+        {
+            return is64() ? wkeGetCursorInfoType_x64(webView) : wkeGetCursorInfoType_x86(webView);
+        }
 
         //[DllImport(DLL_x86, EntryPoint = "wkeSetDragFiles", CallingConvention = CallingConvention.Cdecl)]
         //public static extern void wkeSetDragFiles(IntPtr webView, IntPtr clintPos, IntPtr screenPos,

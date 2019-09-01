@@ -30,11 +30,34 @@ namespace Demo
 		{
 			//指定了本地站点后，所有文件加载方式都和web中一致
 			mbbw.LoadUri("http://loc.webres/control.html");
-		}
+            mbbw.AllowDrop = true;
+        }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            mbbw.ImeMode = ImeMode.On;
             mbbw.LoadUri(textBox1.Text);
+        }
+
+        private void mbbw_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.All;
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+            Console.WriteLine(e);
+        }
+
+        private void mbbw_DragDrop(object sender, DragEventArgs e)
+        {
+            var path = ((Array)e.Data.GetData(DataFormats.FileDrop)).GetValue(0).ToString();
+            Console.WriteLine(path);
+            var p = PointToClient(new Point(e.X, e.Y));
+            mbbw.OnDropFiles(p.X, p.Y, path);
         }
     }
 }

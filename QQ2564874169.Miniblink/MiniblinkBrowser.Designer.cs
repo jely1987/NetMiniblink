@@ -37,8 +37,6 @@
             this.BackColor = System.Drawing.Color.White;
             this.Name = "MiniblinkBrowser";
             this.Size = new System.Drawing.Size(405, 288);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.MiniblinkBrowser_Paint);
-            this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.MiniblinkBrowser_PreviewKeyDown);
             this.ResumeLayout(false);
 
 		}

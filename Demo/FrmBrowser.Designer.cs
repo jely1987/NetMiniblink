@@ -29,25 +29,13 @@
 		private void InitializeComponent()
 		{
             this.components = new System.ComponentModel.Container();
-            this.mbbw = new QQ2564874169.Miniblink.MiniblinkBrowser();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.右键菜单ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
+            this.mbbw = new QQ2564874169.Miniblink.MiniblinkBrowser();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // mbbw
-            // 
-            this.mbbw.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.mbbw.BackColor = System.Drawing.Color.White;
-            this.mbbw.ContextMenuStrip = this.contextMenuStrip1;
-            this.mbbw.Location = new System.Drawing.Point(12, 46);
-            this.mbbw.Name = "mbbw";
-            this.mbbw.Size = new System.Drawing.Size(550, 438);
-            this.mbbw.TabIndex = 0;
             // 
             // contextMenuStrip1
             // 
@@ -82,6 +70,20 @@
             this.button1.Text = "前往";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // mbbw
+            // 
+            this.mbbw.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.mbbw.BackColor = System.Drawing.Color.White;
+            this.mbbw.ContextMenuStrip = this.contextMenuStrip1;
+            this.mbbw.Location = new System.Drawing.Point(12, 46);
+            this.mbbw.Name = "mbbw";
+            this.mbbw.Size = new System.Drawing.Size(550, 438);
+            this.mbbw.TabIndex = 0;
+            this.mbbw.DragDrop += new System.Windows.Forms.DragEventHandler(this.mbbw_DragDrop);
+            this.mbbw.DragEnter += new System.Windows.Forms.DragEventHandler(this.mbbw_DragEnter);
             // 
             // FrmBrowser
             // 

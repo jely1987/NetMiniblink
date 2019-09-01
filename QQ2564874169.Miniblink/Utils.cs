@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
 {
@@ -187,6 +188,26 @@ namespace QQ2564874169.Miniblink
             }
 
             return bmp;
+        }
+
+        public static bool IsExtendedKey(Keys key)
+        {
+            switch (key)
+            {
+                case Keys.Insert:
+                case Keys.Delete:
+                case Keys.Home:
+                case Keys.End:
+                case Keys.Prior:
+                case Keys.Next:
+                case Keys.Left:
+                case Keys.Right:
+                case Keys.Up:
+                case Keys.Down:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }
