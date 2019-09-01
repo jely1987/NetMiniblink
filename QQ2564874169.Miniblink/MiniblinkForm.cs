@@ -27,14 +27,14 @@ namespace QQ2564874169.Miniblink
 			{
 				_noneBorderResize = value;
 
-				if (_noneBorderResize)
-				{
-					_browser.WndMsg += ResizeMsg;
-				}
-				else
-				{
-					_browser.WndMsg -= ResizeMsg;
-				}
+				//if (_noneBorderResize)
+				//{
+				//	_browser.WndMsg += ResizeMsg;
+				//}
+				//else
+				//{
+				//	_browser.WndMsg -= ResizeMsg;
+				//}
 			}
 		}
 
@@ -96,14 +96,14 @@ namespace QQ2564874169.Miniblink
                 BindNetFunc(new NetFunc(_minfunc = "min" + tmp, MinFunc));
                 BindNetFunc(new NetFunc(_closefunc = "close" + tmp, CloseFunc));
 
-                _browser.WndMsg += DropWndMsg;
-                _browser.WndMsg += ResizeMsg;
+                //_browser.WndMsg += DropWndMsg;
+                //_browser.WndMsg += ResizeMsg;
                 DocumentReady += RegisterJsEvent;
                 RegisterNetFunc(this);
 
                 if (CheckAero())
                 {
-                    _browser.WndMsg += ShadowWndMsg;
+                    //_browser.WndMsg += ShadowWndMsg;
                 }
             }
 		}
@@ -655,11 +655,11 @@ namespace QQ2564874169.Miniblink
             remove { _browser.PromptBefore -= value; }
         }
 
-        public event EventHandler<WndMsgEventArgs> WndMsg
-	    {
-	        add { _browser.WndMsg += value; }
-	        remove { _browser.WndMsg -= value; }
-	    }
+     //   public event EventHandler<WndMsgEventArgs> WndMsg
+	    //{
+     //       add { _browser.WndMsg += value; }
+     //       remove { _browser.WndMsg -= value; }
+     //   }
 
 	    public event EventHandler<PaintUpdatedEventArgs> PaintUpdated
 	    {

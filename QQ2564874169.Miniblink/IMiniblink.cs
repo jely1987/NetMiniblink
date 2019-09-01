@@ -32,7 +32,6 @@ namespace QQ2564874169.Miniblink
 		event EventHandler<ConsoleMessageEventArgs> ConsoleMessage;
 		event EventHandler<NetResponseEventArgs> NetResponse;
 		event EventHandler<LoadUrlBeginEventArgs> LoadUrlBegin;
-        event EventHandler<WndMsgEventArgs> WndMsg;
         event EventHandler<PaintUpdatedEventArgs> PaintUpdated;
         event EventHandler<DownloadEventArgs> Download;
         event EventHandler<AlertEventArgs> AlertBefore;
