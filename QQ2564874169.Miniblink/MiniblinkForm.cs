@@ -72,7 +72,6 @@ namespace QQ2564874169.Miniblink
 			InitializeComponent();
 
 			IsTransparent = isTransparent;
-			ShadowWidth = new FormShadowWidth();
 
             if (!Utils.IsDesignMode())
             {
@@ -89,26 +88,83 @@ namespace QQ2564874169.Miniblink
                     _browser.PaintUpdated += Miniblink_Paint;
                 }
 
+                if (CheckAero())
+                {
+                    ShadowWidth = new FormShadowWidth();
+                }
+
                 DropByClass = true;
                 var tmp = Guid.NewGuid().ToString().Replace("-", "");
-                BindNetFunc(new NetFunc(_dragfunc = "drag" + tmp, DropFunc));
+                BindNetFunc(new NetFunc(_dragfunc = "drag" + tmp, DropStart));
                 BindNetFunc(new NetFunc(_maxfunc = "max" + tmp, MaxFunc));
                 BindNetFunc(new NetFunc(_minfunc = "min" + tmp, MinFunc));
                 BindNetFunc(new NetFunc(_closefunc = "close" + tmp, CloseFunc));
-
-                //_browser.WndMsg += DropWndMsg;
+                
                 //_browser.WndMsg += ResizeMsg;
                 DocumentReady += RegisterJsEvent;
                 RegisterNetFunc(this);
-
-                if (CheckAero())
-                {
-                    //_browser.WndMsg += ShadowWndMsg;
-                }
             }
+        }
+
+        private void DropEvent(bool isRemove)
+        {
+            if (isRemove)
+            {
+                _browser.MouseMove -= DropMove;
+                _browser.MouseUp -= DropUp;
+                _browser.MouseLeave -= DropLeave;
+            }
+            else
+            {
+                _browser.MouseMove += DropMove;
+                _browser.MouseUp += DropUp;
+                _browser.MouseLeave += DropLeave;
+            }
+        }
+
+        private void DropLeave(object sender, EventArgs e)
+        {
+            DropUp(sender, null);
+        }
+
+        private void DropUp(object sender, MouseEventArgs e)
+        {
+            _isdrop = false;
+            DropEvent(true);
+            Cursor = Cursors.Default;
+        }
+
+        private void DropMove(object sender, MouseEventArgs e)
+        {
+            var nx = MousePosition.X - _dropstart.X;
+            var ny = MousePosition.Y - _dropstart.Y;
+            nx = _dropWinstart.X + nx;
+            ny = _dropWinstart.Y + ny;
+            Location = new Point(nx, ny);
+        }
+
+		private object DropStart(NetFuncContext context)
+		{
+			if (_isdrop == false && WindowState != FormWindowState.Maximized && MouseButtons == MouseButtons.Left)
+			{
+				_isdrop = true;
+				_dropstart = MousePosition;
+				_dropWinstart = Location;
+                Cursor = Cursors.SizeAll;
+                DropEvent(false);
+			}
+			return null;
 		}
 
-	    protected override void WndProc(ref Message m)
+        private void MiniblinkForm_Load(object sender, EventArgs e)
+        {
+            if (!Utils.IsDesignMode() && IsTransparent)
+            {
+                TransparentPaint(MBApi.wkeGetViewDC(MiniblinkHandle));
+            }
+        }
+
+        protected override void WndProc(ref Message m)
 	    {
 	        base.WndProc(ref m);
 
@@ -120,9 +176,38 @@ namespace QQ2564874169.Miniblink
                     TransparentPaint(MBApi.wkeGetViewDC(MiniblinkHandle));
                 }
 	        }
+
+            if (m.Msg == (int)WinConst.WM_NCPAINT)
+            {
+                DrawShadow();
+            }
         }
 
-	    private void Miniblink_Paint(object sender, PaintUpdatedEventArgs e)
+        private void DrawShadow()
+        {
+            if (ShadowWidth == null)
+            {
+                return;
+            }
+
+            if (ShadowWidth.Bottom + ShadowWidth.Left + ShadowWidth.Right + ShadowWidth.Top < 1)
+            {
+                return;
+            }
+
+            var v = 2;
+            WinApi.DwmSetWindowAttribute(Handle, 2, ref v, 4);
+            var margins = new MARGINS
+            {
+                top = ShadowWidth.Top,
+                left = ShadowWidth.Left,
+                right = ShadowWidth.Right,
+                bottom = ShadowWidth.Bottom
+            };
+            WinApi.DwmExtendFrameIntoClientArea(Handle, ref margins);
+        }
+
+        private void Miniblink_Paint(object sender, PaintUpdatedEventArgs e)
 	    {
 	        if (!IsDisposed && IsTransparent)
 	        {
@@ -168,55 +253,6 @@ namespace QQ2564874169.Miniblink
 			}
 			return false;
 		}
-
-        private void ShadowWndMsg(object sender, WndMsgEventArgs e)
-        {
-            if (e.Message != (int) WinConst.WM_NCPAINT)
-                return;
-            if (ShadowWidth.Bottom + ShadowWidth.Left + ShadowWidth.Right + ShadowWidth.Top < 1)
-                return;
-            var v = 2;
-            WinApi.DwmSetWindowAttribute(Handle, 2, ref v, 4);
-            var margins = new MARGINS
-            {
-                top = ShadowWidth.Top,
-                left = ShadowWidth.Left,
-                right = ShadowWidth.Right,
-                bottom = ShadowWidth.Bottom
-            };
-            WinApi.DwmExtendFrameIntoClientArea(Handle, ref margins);
-        }
-
-        private void DropWndMsg(object sender, WndMsgEventArgs e)
-        {
-            if (_isdrop == false)
-            {
-                return;
-            }
-
-            var lParam = Utils.Dword(e.LParam);
-            var wMsg = (WinConst) e.Message;
-
-            switch (wMsg)
-            {
-                case WinConst.WM_LBUTTONUP:
-                    _isdrop = false;
-                    Cursor = Cursors.Default;
-                    break;
-                case WinConst.WM_MOUSEMOVE:
-                    var x = Utils.LOWORD(lParam);
-                    var y = Utils.HIWORD(lParam);
-                    var sp = PointToScreen(new Point(x, y));
-                    var nx = sp.X - _dropstart.X;
-                    var ny = sp.Y - _dropstart.Y;
-                    nx = _dropWinstart.X + nx;
-                    ny = _dropWinstart.Y + ny;
-                    Location = new Point(nx, ny);
-                    Cursor = Cursors.SizeAll;
-                    e.Result = IntPtr.Zero;
-                    break;
-            }
-        }
 
         private void ResizeTask()
 		{
@@ -421,18 +457,6 @@ namespace QQ2564874169.Miniblink
 			}
 		}
 
-		private object DropFunc(NetFuncContext context)
-		{
-			if (_isdrop == false && WindowState != FormWindowState.Maximized && MouseButtons == MouseButtons.Left)
-			{
-				_isdrop = true;
-				_dropstart = MousePosition;
-				_dropWinstart = Location;
-				Cursor = Cursors.SizeAll;
-			}
-			return null;
-		}
-
 		private object MaxFunc(NetFuncContext context)
 		{
 			WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
@@ -459,7 +483,7 @@ namespace QQ2564874169.Miniblink
                 document.getElementsByTagName('body')[0].addEventListener('mousedown',
                     function(e) {
                         var obj = e.target || e.srcElement;
-                        if ({ 'INPUT': 1, 'SELECT': 1,'IMG': 1 }[obj.tagName.toUpperCase()])
+                        if ({ 'INPUT': 1, 'SELECT': 1 }[obj.tagName.toUpperCase()])
                         return;
 
                         while (obj) {
@@ -467,7 +491,7 @@ namespace QQ2564874169.Miniblink
                                 if (obj.classList[i] === 'mbform-nodrag')
                                     return;
                                 if (obj.classList[i] === 'mbform-drag') {
-                                    " + _dragfunc + @"(e.screenX, e.screenY);
+                                    " + _dragfunc + @"();
                                     return;
                                 }
                             }
@@ -499,9 +523,11 @@ namespace QQ2564874169.Miniblink
             ");
 		}
 
-		[Browsable(false)]
+        [Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public bool IsTransparent { get; set; }
+
+        #region IMiniblink成员
 
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -655,13 +681,7 @@ namespace QQ2564874169.Miniblink
             remove { _browser.PromptBefore -= value; }
         }
 
-     //   public event EventHandler<WndMsgEventArgs> WndMsg
-	    //{
-     //       add { _browser.WndMsg += value; }
-     //       remove { _browser.WndMsg -= value; }
-     //   }
-
-	    public event EventHandler<PaintUpdatedEventArgs> PaintUpdated
+        public event EventHandler<PaintUpdatedEventArgs> PaintUpdated
 	    {
 	        add { _browser.PaintUpdated += value; }
 	        remove { _browser.PaintUpdated -= value; }
@@ -813,6 +833,13 @@ namespace QQ2564874169.Miniblink
             _browser.DrawToBitmap(callback);
         }
 
+        public void Print(Action<PrintPreviewDialog> callback)
+        {
+            _browser.Print(callback);
+        }
+
+        #endregion
+
         private enum ResizeDirect
 		{
 			None,
@@ -825,14 +852,6 @@ namespace QQ2564874169.Miniblink
 			RightTop,
 			RightBottom
 		}
-
-        private void MiniblinkForm_Load(object sender, EventArgs e)
-        {
-            if (!Utils.IsDesignMode() && IsTransparent)
-            {
-                TransparentPaint(MBApi.wkeGetViewDC(MiniblinkHandle));
-            }
-        }
     }
 }
 

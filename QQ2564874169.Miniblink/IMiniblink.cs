@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
 {
@@ -67,5 +68,6 @@ namespace QQ2564874169.Miniblink
 		void StopLoading();
 		void Reload();
         void DrawToBitmap(Action<Image> callback);
+        void Print(Action<PrintPreviewDialog> callback);
     }
 }

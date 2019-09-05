@@ -1129,12 +1129,14 @@ namespace QQ2564874169.Miniblink
             ");
         }
 
+        #region 消息处理
         protected override void OnResize(EventArgs e)
         {
             if (!Utils.IsDesignMode() && MiniblinkHandle != IntPtr.Zero)
             {
                 MBApi.wkeResize(MiniblinkHandle, Width, Height);
             }
+            base.OnResize(e);
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
@@ -1151,6 +1153,7 @@ namespace QQ2564874169.Miniblink
             {
                 e.Handled = true;
             }
+            base.OnKeyUp(e);
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -1167,6 +1170,7 @@ namespace QQ2564874169.Miniblink
             {
                 e.Handled = true;
             }
+            base.OnKeyDown(e);
         }
 
         protected override void OnKeyPress(KeyPressEventArgs e)
@@ -1178,6 +1182,7 @@ namespace QQ2564874169.Miniblink
             {
                 e.Handled = true;
             }
+            base.OnKeyPress(e);
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
@@ -1200,6 +1205,7 @@ namespace QQ2564874169.Miniblink
             {
                 OnWkeMouseEvent(msg, e);
             }
+            base.OnMouseDown(e);
         }
 
         protected override void OnMouseUp(MouseEventArgs e)
@@ -1222,6 +1228,7 @@ namespace QQ2564874169.Miniblink
             {
                 OnWkeMouseEvent(msg, e);
             }
+            base.OnMouseUp(e);
         }
 
         protected override void OnMouseDoubleClick(MouseEventArgs e)
@@ -1244,16 +1251,17 @@ namespace QQ2564874169.Miniblink
             {
                 OnWkeMouseEvent(msg, e);
             }
+            base.OnMouseDoubleClick(e);
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
             OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, e);
+            base.OnMouseMove(e);
         }
 
         protected override void OnMouseWheel(MouseEventArgs e)
         {
-            Console.WriteLine("wheel");
             uint flags = 0;
 
             if (ModifierKeys.HasFlag(Keys.Control))
@@ -1269,6 +1277,7 @@ namespace QQ2564874169.Miniblink
                 flags |= (uint)wkeMouseFlags.WKE_RBUTTON;
 
             MBApi.wkeFireMouseWheelEvent(MiniblinkHandle, e.X, e.Y, e.Delta, flags);
+            base.OnMouseWheel(e);
         }
 
         private void OnWkeMouseEvent(WinConst msg, MouseEventArgs e)
@@ -1293,6 +1302,7 @@ namespace QQ2564874169.Miniblink
         protected override void OnMouseEnter(EventArgs e)
         {
             Focus();
+            base.OnMouseEnter(e);
         }
 
         private void SetWkeCursor()
@@ -1317,7 +1327,6 @@ namespace QQ2564874169.Miniblink
             WinApi.ImmSetCompositionWindow(imc, ref comp);
             WinApi.ImmReleaseContext(Handle, imc);
         }
-
 
         protected override void WndProc(ref Message m)
         {
@@ -1348,15 +1357,12 @@ namespace QQ2564874169.Miniblink
                 }
             }
 
-
-            switch ((WinConst) m.Msg)
+            if ((WinConst) m.Msg == WinConst.WM_SETCURSOR)
             {
-                case WinConst.WM_SETCURSOR:
-                {
-                    SetWkeCursor();
-                    break;
-                }
+                SetWkeCursor();
             }
         }
+
+        #endregion
     }
 }
