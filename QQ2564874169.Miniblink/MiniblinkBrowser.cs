@@ -828,13 +828,14 @@ namespace QQ2564874169.Miniblink
                 DidCreateScriptContext += HookTip;
                 DeviceParameter = new MBDeviceParameter(this);
                 RegisterJsFunc();
+                
             }
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
         {
-            LoadResourceHandlerList.Clear();
             _ref.Clear();
+            LoadResourceHandlerList.Clear();
             base.OnHandleDestroyed(e);
         }
 
@@ -868,7 +869,10 @@ namespace QQ2564874169.Miniblink
 
         public void ScrollTo(int x, int y)
         {
-            RunJs($"window.scrollTo({x},{y})");
+            if (IsDocumentReady)
+            {
+                RunJs($"window.scrollTo({x},{y})");
+            }
         }
 
         public void RegisterNetFunc(object target)
@@ -1301,14 +1305,35 @@ namespace QQ2564874169.Miniblink
 
         protected override void OnMouseEnter(EventArgs e)
         {
-            Focus();
+            MBApi.wkeSetFocus(MiniblinkHandle);
             base.OnMouseEnter(e);
         }
 
         private void SetWkeCursor()
         {
-            MBApi.wkeFireWindowsMessage(MiniblinkHandle, Handle, (uint)WinConst.WM_SETCURSOR, IntPtr.Zero,
-                IntPtr.Zero, IntPtr.Zero);
+            var type = MBApi.wkeGetCursorInfoType(MiniblinkHandle);
+            switch (type)
+            {
+                case wkeCursorInfo.Hand:
+                    if (Cursor != Cursors.Hand)
+                    {
+                        Cursor = Cursors.Hand;
+
+                    }
+                    break;
+                case wkeCursorInfo.IBeam:
+                    if (Cursor != Cursors.IBeam)
+                    {
+                        Cursor = Cursors.IBeam;
+                    }
+                    break;
+                case wkeCursorInfo.Pointer:
+                    if (Cursor != Cursors.Default)
+                    {
+                        Cursor = Cursors.Default;
+                    }
+                    break;
+            }
         }
 
         private void SetImeStartPos()
@@ -1333,7 +1358,7 @@ namespace QQ2564874169.Miniblink
             switch ((WinConst) m.Msg)
             {
                 case WinConst.WM_INPUTLANGCHANGE:
-                {
+                    {
                     DefWndProc(ref m);
                     break;
                 }
@@ -1350,16 +1375,18 @@ namespace QQ2564874169.Miniblink
                     break;
                 }
 
+                case WinConst.WM_SETCURSOR:
+                {
+                    SetWkeCursor();
+                    base.WndProc(ref m);
+                    break;
+                }
+
                 default:
                 {
                     base.WndProc(ref m);
                     break;
                 }
-            }
-
-            if ((WinConst) m.Msg == WinConst.WM_SETCURSOR)
-            {
-                SetWkeCursor();
             }
         }
 

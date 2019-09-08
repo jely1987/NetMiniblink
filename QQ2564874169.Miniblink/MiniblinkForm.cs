@@ -8,37 +8,24 @@ using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
 {
-	public partial class MiniblinkForm : Form, IMiniblink
-	{
+	public partial class MiniblinkForm : Form, IMiniblink, IMessageFilter
+    {
         /// <summary>
         /// 允许使用类样式控制窗体拖拽
         /// </summary>
         public bool DropByClass { get; set; }
-
-		private bool _noneBorderResize;
 		/// <summary>
-		/// 无边框模式下调整窗体大小
+		/// 是否允许在无边框模式下调整窗体大小
 		/// </summary>
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public bool NoneBorderResize
-		{
-			get { return _noneBorderResize; }
-			set
-			{
-				_noneBorderResize = value;
-
-				//if (_noneBorderResize)
-				//{
-				//	_browser.WndMsg += ResizeMsg;
-				//}
-				//else
-				//{
-				//	_browser.WndMsg -= ResizeMsg;
-				//}
-			}
-		}
-
-		public FormShadowWidth ShadowWidth { get; }
+		public bool NoneBorderResize { get; set; }
+        /// <summary>
+        /// 调整大小的触发范围
+        /// </summary>
+        public int ResizeWidth { get; set; }
+        /// <summary>
+        /// 窗体阴影长度
+        /// </summary>
+		public FormShadowWidth ShadowWidth { get; private set; }
 
 		public override ContextMenuStrip ContextMenuStrip
 		{
@@ -58,8 +45,6 @@ namespace QQ2564874169.Miniblink
 		private string _maxfunc;
 		private string _minfunc;
 		private string _closefunc;
-		private wkePaintUpdatedCallback _paintUpdated;
-		private bool m_aeroEnabled;
 		private const int CS_DROPSHADOW = 0x00020000;
 
 		public MiniblinkForm(): this(false)
@@ -69,28 +54,16 @@ namespace QQ2564874169.Miniblink
 
 		public MiniblinkForm(bool isTransparent)
 		{
+            Application.AddMessageFilter(this);
 			InitializeComponent();
-
 			IsTransparent = isTransparent;
+            ResizeWidth = 5;
 
             if (!Utils.IsDesignMode())
             {
                 if (IsTransparent)
                 {
-                    NoneBorderResize = true;
-                    FormBorderStyle = FormBorderStyle.None;
-                    var style = WinApi.GetWindowLong(Handle, (int)WinConst.GWL_EXSTYLE);
-                    if ((style & (int)WinConst.WS_EX_LAYERED) != (int) WinConst.WS_EX_LAYERED)
-                    {
-                        WinApi.SetWindowLong(Handle, (int)WinConst.GWL_EXSTYLE, style | (int)WinConst.WS_EX_LAYERED);
-                    }
-                    MBApi.wkeSetTransparent(_browser.MiniblinkHandle, true);
-                    _browser.PaintUpdated += Miniblink_Paint;
-                }
-
-                if (CheckAero())
-                {
-                    ShadowWidth = new FormShadowWidth();
+                    SetTransparent();
                 }
 
                 DropByClass = true;
@@ -104,6 +77,19 @@ namespace QQ2564874169.Miniblink
                 DocumentReady += RegisterJsEvent;
                 RegisterNetFunc(this);
             }
+        }
+
+        private void SetTransparent()
+        {
+            NoneBorderResize = true;
+            FormBorderStyle = FormBorderStyle.None;
+            var style = WinApi.GetWindowLong(Handle, (int)WinConst.GWL_EXSTYLE);
+            if ((style & (int)WinConst.WS_EX_LAYERED) != (int)WinConst.WS_EX_LAYERED)
+            {
+                WinApi.SetWindowLong(Handle, (int)WinConst.GWL_EXSTYLE, style | (int)WinConst.WS_EX_LAYERED);
+            }
+            MBApi.wkeSetTransparent(_browser.MiniblinkHandle, true);
+            _browser.PaintUpdated += Miniblink_Paint;
         }
 
         private void DropEvent(bool isRemove)
@@ -233,13 +219,18 @@ namespace QQ2564874169.Miniblink
 		{
 			get
 			{
-				m_aeroEnabled = CheckAero();
-
 				var cp = base.CreateParams;
-				if (!m_aeroEnabled)
-					cp.ClassStyle |= CS_DROPSHADOW;
 
-				return cp;
+                if (CheckAero() == false)
+                {
+                    cp.ClassStyle |= CS_DROPSHADOW;
+                }
+                else if (ShadowWidth == null)
+                {
+                    ShadowWidth = new FormShadowWidth();
+                }
+
+                return cp;
 			}
 		}
 
@@ -457,7 +448,103 @@ namespace QQ2564874169.Miniblink
 			}
 		}
 
-		private object MaxFunc(NetFuncContext context)
+        private bool ShowResizeCursor(Point point)
+        {
+            var rect = ClientRectangle;
+            var direct = ResizeDirect.None;
+
+            if (point.X <= ResizeWidth)
+            {
+                if (point.Y <= ResizeWidth)
+                {
+                    direct = ResizeDirect.LeftTop;
+                }
+                else if (point.Y + ResizeWidth >= rect.Height)
+                {
+                    direct = ResizeDirect.LeftBottom;
+                }
+                else
+                {
+                    direct = ResizeDirect.Left;
+                }
+            }
+            else if (point.Y <= ResizeWidth)
+            {
+                if (point.X <= ResizeWidth)
+                {
+                    direct = ResizeDirect.LeftTop;
+                }
+                else if (point.X + ResizeWidth >= rect.Width)
+                {
+                    direct = ResizeDirect.RightTop;
+                }
+                else
+                {
+                    direct = ResizeDirect.Top;
+                }
+            }
+            else if (point.X + ResizeWidth >= rect.Width)
+            {
+                if (point.Y <= ResizeWidth)
+                {
+                    direct = ResizeDirect.RightTop;
+                }
+                else if (point.Y + ResizeWidth >= rect.Height)
+                {
+                    direct = ResizeDirect.RightBottom;
+                }
+                else
+                {
+                    direct = ResizeDirect.Right;
+                }
+            }
+            else if (point.Y + ResizeWidth >= rect.Height)
+            {
+                if (point.X <= ResizeWidth)
+                {
+                    direct = ResizeDirect.LeftBottom;
+                }
+                else if (point.X + ResizeWidth >= rect.Width)
+                {
+                    direct = ResizeDirect.RightBottom;
+                }
+                else
+                {
+                    direct = ResizeDirect.Bottom;
+                }
+            }
+            else if (_isdrop == false)
+            {
+                if (Cursor != DefaultCursor)
+                {
+                    Cursor = DefaultCursor;
+                }
+            }
+
+            switch (direct)
+            {
+                case ResizeDirect.Bottom:
+                case ResizeDirect.Top:
+                    Cursor = Cursors.SizeNS;
+                    break;
+                case ResizeDirect.Left:
+                case ResizeDirect.Right:
+                    Cursor = Cursors.SizeWE;
+                    break;
+                case ResizeDirect.LeftTop:
+                case ResizeDirect.RightBottom:
+                    Cursor = Cursors.SizeNWSE;
+                    break;
+                case ResizeDirect.RightTop:
+                case ResizeDirect.LeftBottom:
+                    Cursor = Cursors.SizeNESW;
+                    break;
+            }
+
+            return direct == ResizeDirect.None;
+        }
+
+        private object MaxFunc(NetFuncContext context)
 		{
 			WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
 			return null;
@@ -525,7 +612,7 @@ namespace QQ2564874169.Miniblink
 
         [Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public bool IsTransparent { get; set; }
+		public bool IsTransparent { get; }
 
         #region IMiniblink成员
 
@@ -852,6 +939,57 @@ namespace QQ2564874169.Miniblink
 			RightTop,
 			RightBottom
 		}
+
+        public bool PreFilterMessage(ref Message m)
+        {
+            if (IsDisposed)
+            {
+                Application.RemoveMessageFilter(this);
+                return false;
+            }
+
+            if (IsActivated == false)
+            {
+                return false;
+            }
+
+            //鼠标单击
+            if (m.Msg == 0x2010)
+            {
+
+            }
+
+            //鼠标移动
+            if (m.Msg == 0x0200)
+            {
+                if (NoneBorderResize && FormBorderStyle == FormBorderStyle.None && WindowState == FormWindowState.Normal)
+                {
+                    if (ShowResizeCursor(PointToClient(MousePosition)) == false)
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+        /// <summary>
+        /// 是否是活动窗口
+        /// </summary>
+        public bool IsActivated { get; private set; }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            IsActivated = true;
+            base.OnActivated(e);
+        }
+
+        protected override void OnDeactivate(EventArgs e)
+        {
+            IsActivated = false;
+            Cursor = DefaultCursor;
+            base.OnDeactivate(e);
+        }
     }
 }
 
