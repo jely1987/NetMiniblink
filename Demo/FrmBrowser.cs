@@ -35,7 +35,6 @@ namespace Demo
 
         private void button1_Click(object sender, EventArgs e)
         {
-            mbbw.ImeMode = ImeMode.On;
             mbbw.LoadUri(textBox1.Text);
         }
 
@@ -54,10 +53,10 @@ namespace Demo
 
         private void mbbw_DragDrop(object sender, DragEventArgs e)
         {
-            var path = ((Array)e.Data.GetData(DataFormats.FileDrop)).GetValue(0).ToString();
-            Console.WriteLine(path);
+            var items = (Array) e.Data.GetData(DataFormats.FileDrop);
+            var files = items.Cast<string>().ToArray();
             var p = PointToClient(new Point(e.X, e.Y));
-            mbbw.OnDropFiles(p.X, p.Y, path);
+            mbbw.OnDropFiles(p.X, p.Y, files);
         }
     }
 }
