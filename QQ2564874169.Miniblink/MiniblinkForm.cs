@@ -11,6 +11,12 @@ namespace QQ2564874169.Miniblink
 	public partial class MiniblinkForm : Form, IMiniblink, IMessageFilter
     {
         /// <summary>
+        /// 是否透明模式
+        /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool IsTransparent { get; }
+        /// <summary>
         /// 允许使用类样式控制窗体拖拽
         /// </summary>
         public bool DropByClass { get; set; }
@@ -19,15 +25,15 @@ namespace QQ2564874169.Miniblink
 		/// </summary>
 		public bool NoneBorderResize { get; set; }
         /// <summary>
-        /// 调整大小的触发范围
-        /// </summary>
-        public int ResizeWidth { get; set; }
-        /// <summary>
         /// 窗体阴影长度
         /// </summary>
 		public FormShadowWidth ShadowWidth { get; private set; }
+        /// <summary>
+        /// 调整大小的触发范围
+        /// </summary>
+        public FormResizeWidth ResizeWidth { get; private set; }
 
-		public override ContextMenuStrip ContextMenuStrip
+        public override ContextMenuStrip ContextMenuStrip
 		{
 			get { return _browser.ContextMenuStrip; }
 			set { _browser.ContextMenuStrip = value; }
@@ -35,9 +41,9 @@ namespace QQ2564874169.Miniblink
 
 		private ResizeDirect _direct;
 		private bool _resizeing;
-		private Point _resize_start;
-		private Point _resize_pos;
-		private Size _resize_size;
+		private Point _resizeStart;
+		private Point _resizePos;
+		private Size _resizeSize;
 		private bool _isdrop;
 		private Point _dropstart;
 		private Point _dropWinstart;
@@ -45,7 +51,6 @@ namespace QQ2564874169.Miniblink
 		private string _maxfunc;
 		private string _minfunc;
 		private string _closefunc;
-		private const int CS_DROPSHADOW = 0x00020000;
 
 		public MiniblinkForm(): this(false)
 		{
@@ -57,7 +62,7 @@ namespace QQ2564874169.Miniblink
             Application.AddMessageFilter(this);
 			InitializeComponent();
 			IsTransparent = isTransparent;
-            ResizeWidth = 5;
+            ResizeWidth = new FormResizeWidth(5);
 
             if (!Utils.IsDesignMode())
             {
@@ -72,8 +77,7 @@ namespace QQ2564874169.Miniblink
                 BindNetFunc(new NetFunc(_maxfunc = "max" + tmp, MaxFunc));
                 BindNetFunc(new NetFunc(_minfunc = "min" + tmp, MinFunc));
                 BindNetFunc(new NetFunc(_closefunc = "close" + tmp, CloseFunc));
-                
-                //_browser.WndMsg += ResizeMsg;
+
                 DocumentReady += RegisterJsEvent;
                 RegisterNetFunc(this);
             }
@@ -151,19 +155,19 @@ namespace QQ2564874169.Miniblink
         }
 
         protected override void WndProc(ref Message m)
-	    {
-	        base.WndProc(ref m);
+        {
+            base.WndProc(ref m);
 
-	        if (IsTransparent && (WinConst) m.Msg == WinConst.WM_SYSCOMMAND)
-	        {
+            if (IsTransparent && m.Msg == (int) WinConst.WM_SYSCOMMAND)
+            {
                 //窗口还原消息
                 if (Utils.Dword(m.WParam).ToInt32() == 61728)
                 {
                     TransparentPaint(MBApi.wkeGetViewDC(MiniblinkHandle));
                 }
-	        }
+            }
 
-            if (m.Msg == (int)WinConst.WM_NCPAINT)
+            if (m.Msg == (int) WinConst.WM_NCPAINT)
             {
                 DrawShadow();
             }
@@ -223,7 +227,7 @@ namespace QQ2564874169.Miniblink
 
                 if (CheckAero() == false)
                 {
-                    cp.ClassStyle |= CS_DROPSHADOW;
+                    cp.ClassStyle |= (int) WinConst.CS_DROPSHADOW;
                 }
                 else if (ShadowWidth == null)
                 {
@@ -247,7 +251,7 @@ namespace QQ2564874169.Miniblink
 
         private void ResizeTask()
 		{
-			var last = _resize_start;
+			var last = _resizeStart;
 			var waiter = new SpinWait();
 
 			Task.Factory.StartNew(() =>
@@ -255,57 +259,61 @@ namespace QQ2564874169.Miniblink
 				while (_resizeing)
 				{
 					if (MouseButtons != MouseButtons.Left)
-						break;
+                    {
+                        _resizeing = false;
+                        this.UIInvoke(() => { Cursor = DefaultCursor; });
+                        break;
+                    }
                     
 					var curr = MousePosition;
 					if (curr.X != last.X || curr.Y != last.Y)
 					{
-						var xx = curr.X - _resize_start.X;
-						var xy = curr.Y - _resize_start.Y;
+						var xx = curr.X - _resizeStart.X;
+						var xy = curr.Y - _resizeStart.Y;
 						int nx = Left, ny = Top, nw = Width, nh = Height;
 
-						switch (_direct)
+                        switch (_direct)
 						{
 							case ResizeDirect.Left:
-								nw = _resize_size.Width - xx;
-								nx = _resize_pos.X + xx;
-								break;
+								nw = _resizeSize.Width - xx;
+								nx = _resizePos.X + xx;
+                                break;
 							case ResizeDirect.Right:
-								nw = _resize_size.Width + xx;
-								break;
+								nw = _resizeSize.Width + xx;
+                                break;
 							case ResizeDirect.Top:
-								nh = _resize_size.Height - xy;
-								ny = _resize_pos.Y + xy;
-								break;
+								nh = _resizeSize.Height - xy;
+								ny = _resizePos.Y + xy;
+                                break;
 							case ResizeDirect.Bottom:
-								nh = _resize_size.Height + xy;
-								break;
+								nh = _resizeSize.Height + xy;
+                                break;
 							case ResizeDirect.LeftTop:
-								nw = _resize_size.Width - xx;
-								nx = _resize_pos.X + xx;
-								nh = _resize_size.Height - xy;
-								ny = _resize_pos.Y + xy;
-								break;
+								nw = _resizeSize.Width - xx;
+								nx = _resizePos.X + xx;
+								nh = _resizeSize.Height - xy;
+								ny = _resizePos.Y + xy;
+                                break;
 							case ResizeDirect.LeftBottom:
-								nw = _resize_size.Width - xx;
-								nx = _resize_pos.X + xx;
-								nh = _resize_size.Height + xy;
-								break;
+								nw = _resizeSize.Width - xx;
+								nx = _resizePos.X + xx;
+								nh = _resizeSize.Height + xy;
+                                break;
 							case ResizeDirect.RightTop:
-								nw = _resize_size.Width + xx;
-								nh = _resize_size.Height - xy;
-								ny = _resize_pos.Y + xy;
-								break;
+								nw = _resizeSize.Width + xx;
+								nh = _resizeSize.Height - xy;
+								ny = _resizePos.Y + xy;
+                                break;
 							case ResizeDirect.RightBottom:
-								nw = _resize_size.Width + xx;
-								nh = _resize_size.Height + xy;
-								break;
+								nw = _resizeSize.Width + xx;
+								nh = _resizeSize.Height + xy;
+                                break;
 						}
 						this.UIInvoke(() =>
 						{
 							Size = new Size(nw, nh);
 							Location = new Point(nx, ny);
-						});
+                        });
 					}
 					last = curr;
 					waiter.SpinOnce();
@@ -313,153 +321,18 @@ namespace QQ2564874169.Miniblink
 			});
 		}
 
-		private void ResizeMsg(object sender, WndMsgEventArgs e)
-		{
-            if (FormBorderStyle != FormBorderStyle.None)
-            {
-                return;
-            }
-
-            var lParam = e.LParam;
-            var wMsg = (WinConst)e.Message;
-
-			switch (wMsg)
-			{
-				case WinConst.WM_LBUTTONDOWN:
-					if (_resizeing == false && _direct != ResizeDirect.None)
-					{
-						_resizeing = true;
-						_resize_start = MousePosition;
-						_resize_pos = Location;
-						_resize_size = Size;
-						ResizeTask();
-                        e.Result = IntPtr.Zero;
-					}
-                    break;
-				case WinConst.WM_LBUTTONUP:
-					if (_resizeing)
-					{
-						_resizeing = false;
-					}
-                    break;
-				case WinConst.WM_MOUSEMOVE:
-					if(_resizeing == false)
-					{
-						const int p = 5;
-						var x = Utils.LOWORD(lParam);
-						var y = Utils.HIWORD(lParam);
-						var rect = ClientRectangle;
-						var direct = ResizeDirect.None;
-
-						if (x <= p && x > 0)
-						{
-							if (y <= p && y > 0)
-							{
-								direct = ResizeDirect.LeftTop;
-							}
-							else if (y >= rect.Height - p && y < rect.Height)
-							{
-								direct = ResizeDirect.LeftBottom;
-							}
-							else
-							{
-								direct = ResizeDirect.Left;
-							}
-						}
-						else if (y <= p && y > 0)
-						{
-							if (x <= p && x > 0)
-							{
-								direct = ResizeDirect.LeftTop;
-							}
-							else if (x >= rect.Width - p && x < rect.Width)
-							{
-								direct = ResizeDirect.RightTop;
-							}
-							else
-							{
-								direct = ResizeDirect.Top;
-							}
-						}
-						else if (x >= rect.Width - p && x < rect.Width)
-						{
-							if (y <= p && y > 0)
-							{
-								direct = ResizeDirect.RightTop;
-							}
-							else if (y >= rect.Height - p && y < rect.Height)
-							{
-								direct = ResizeDirect.RightBottom;
-							}
-							else
-							{
-								direct = ResizeDirect.Right;
-							}
-						}
-						else if (y >= rect.Height - p && y < rect.Height)
-						{
-							if (x <= p && x > 0)
-							{
-								direct = ResizeDirect.LeftBottom;
-							}
-							else if (x >= rect.Width - p && x < rect.Width)
-							{
-								direct = ResizeDirect.RightBottom;
-							}
-							else
-							{
-								direct = ResizeDirect.Bottom;
-							}
-						}
-						else if (_direct != ResizeDirect.None)
-						{
-							Cursor = Cursors.Default;
-							_direct = ResizeDirect.None;
-							return;
-						}
-
-						_direct = direct;
-                    }
-                    else
-                    {
-                        e.Result = IntPtr.Zero;
-                    }
-
-					switch (_direct)
-					{
-						case ResizeDirect.Bottom:
-						case ResizeDirect.Top:
-							Cursor = Cursors.SizeNS;
-							break;
-						case ResizeDirect.Left:
-						case ResizeDirect.Right:
-							Cursor = Cursors.SizeWE;
-							break;
-						case ResizeDirect.LeftTop:
-						case ResizeDirect.RightBottom:
-							Cursor = Cursors.SizeNWSE;
-							break;
-						case ResizeDirect.RightTop:
-						case ResizeDirect.LeftBottom:
-							Cursor = Cursors.SizeNESW;
-							break;
-					}
-                    break;
-			}
-		}
-
-        private bool ShowResizeCursor(Point point)
+        private ResizeDirect ShowResizeCursor(Point point)
         {
             var rect = ClientRectangle;
             var direct = ResizeDirect.None;
 
-            if (point.X <= ResizeWidth)
+            if (point.X <= ResizeWidth.Left)
             {
-                if (point.Y <= ResizeWidth)
+                if (point.Y <= ResizeWidth.Top)
                 {
                     direct = ResizeDirect.LeftTop;
                 }
-                else if (point.Y + ResizeWidth >= rect.Height)
+                else if (point.Y + ResizeWidth.Right >= rect.Height)
                 {
                     direct = ResizeDirect.LeftBottom;
                 }
@@ -468,13 +341,13 @@ namespace QQ2564874169.Miniblink
                     direct = ResizeDirect.Left;
                 }
             }
-            else if (point.Y <= ResizeWidth)
+            else if (point.Y <= ResizeWidth.Top)
             {
-                if (point.X <= ResizeWidth)
+                if (point.X <= ResizeWidth.Left)
                 {
                     direct = ResizeDirect.LeftTop;
                 }
-                else if (point.X + ResizeWidth >= rect.Width)
+                else if (point.X + ResizeWidth.Right >= rect.Width)
                 {
                     direct = ResizeDirect.RightTop;
                 }
@@ -483,13 +356,13 @@ namespace QQ2564874169.Miniblink
                     direct = ResizeDirect.Top;
                 }
             }
-            else if (point.X + ResizeWidth >= rect.Width)
+            else if (point.X + ResizeWidth.Right >= rect.Width)
             {
-                if (point.Y <= ResizeWidth)
+                if (point.Y <= ResizeWidth.Top)
                 {
                     direct = ResizeDirect.RightTop;
                 }
-                else if (point.Y + ResizeWidth >= rect.Height)
+                else if (point.Y + ResizeWidth.Bottom >= rect.Height)
                 {
                     direct = ResizeDirect.RightBottom;
                 }
@@ -498,13 +371,13 @@ namespace QQ2564874169.Miniblink
                     direct = ResizeDirect.Right;
                 }
             }
-            else if (point.Y + ResizeWidth >= rect.Height)
+            else if (point.Y + ResizeWidth.Bottom >= rect.Height)
             {
-                if (point.X <= ResizeWidth)
+                if (point.X <= ResizeWidth.Left)
                 {
                     direct = ResizeDirect.LeftBottom;
                 }
-                else if (point.X + ResizeWidth >= rect.Width)
+                else if (point.X + ResizeWidth.Right >= rect.Width)
                 {
                     direct = ResizeDirect.RightBottom;
                 }
@@ -541,7 +414,7 @@ namespace QQ2564874169.Miniblink
                     break;
             }
 
-            return direct == ResizeDirect.None;
+            return direct;
         }
 
         private object MaxFunc(NetFuncContext context)
@@ -609,10 +482,6 @@ namespace QQ2564874169.Miniblink
                 }
             ");
 		}
-
-        [Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public bool IsTransparent { get; }
 
         #region IMiniblink成员
 
@@ -948,47 +817,59 @@ namespace QQ2564874169.Miniblink
                 return false;
             }
 
-            if (IsActivated == false)
+            var ctrl = FromChildHandle(m.HWnd);
+
+            if (ctrl == null || ctrl.FindForm() != this)
             {
                 return false;
             }
 
             //鼠标单击
-            if (m.Msg == 0x2010)
+            if (m.Msg == (int) WinConst.WM_LBUTTONDOWN && _direct != ResizeDirect.None)
             {
-
+                _resizeing = true;
+                _resizeStart = MousePosition;
+                _resizePos = Location;
+                _resizeSize = Size;
+                ResizeTask();
+                return true;
             }
 
             //鼠标移动
-            if (m.Msg == 0x0200)
+            if (m.Msg == (int) WinConst.WM_MOUSEMOVE)
             {
-                if (NoneBorderResize && FormBorderStyle == FormBorderStyle.None && WindowState == FormWindowState.Normal)
+                if (_resizeing)
                 {
-                    if (ShowResizeCursor(PointToClient(MousePosition)) == false)
+                    switch (_direct)
                     {
-                        return true;
+                        case ResizeDirect.Bottom:
+                        case ResizeDirect.Top:
+                            Cursor = Cursors.SizeNS;
+                            break;
+                        case ResizeDirect.Left:
+                        case ResizeDirect.Right:
+                            Cursor = Cursors.SizeWE;
+                            break;
+                        case ResizeDirect.LeftTop:
+                        case ResizeDirect.RightBottom:
+                            Cursor = Cursors.SizeNWSE;
+                            break;
+                        case ResizeDirect.RightTop:
+                        case ResizeDirect.LeftBottom:
+                            Cursor = Cursors.SizeNESW;
+                            break;
                     }
+                    return true;
+                }
+                if (NoneBorderResize && FormBorderStyle == FormBorderStyle.None &&
+                    WindowState == FormWindowState.Normal)
+                {
+                    _direct = ShowResizeCursor(PointToClient(MousePosition));
+                    return _direct != ResizeDirect.None;
                 }
             }
-            
+
             return false;
-        }
-        /// <summary>
-        /// 是否是活动窗口
-        /// </summary>
-        public bool IsActivated { get; private set; }
-
-        protected override void OnActivated(EventArgs e)
-        {
-            IsActivated = true;
-            base.OnActivated(e);
-        }
-
-        protected override void OnDeactivate(EventArgs e)
-        {
-            IsActivated = false;
-            Cursor = DefaultCursor;
-            base.OnDeactivate(e);
         }
     }
 }

@@ -49,6 +49,7 @@
         WM_NCDESTROY = 130,
         WM_NCPAINT = 0x0085,
         WM_SYSCOMMAND = 274,
-        WM_DROPFILES = 0x0233
+        WM_DROPFILES = 0x0233,
+        CS_DROPSHADOW = 0x00020000
     }
 }
