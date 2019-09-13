@@ -43,6 +43,12 @@
     <Compile Include="Exts.cs" />
     <Compile Include="FormResizeWidth.cs" />
     <Compile Include="FrameContext.cs" />
+    <Compile Include="FrmAlert.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmAlert.Designer.cs">
+      <DependentUpon>FrmAlert.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmPromptBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -96,6 +102,9 @@
     <Compile Include="WKEException.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="FrmAlert.resx">
+      <DependentUpon>FrmAlert.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmPromptBox.resx">
       <DependentUpon>FrmPromptBox.cs</DependentUpon>
     </EmbeddedResource>
@@ -105,6 +114,9 @@
     <EmbeddedResource Include="MiniblinkBrowser.resx">
       <DependentUpon>MiniblinkBrowser.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Js\pop.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

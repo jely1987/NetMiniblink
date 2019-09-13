@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using QQ2564874169.Miniblink;
 
 namespace Demo
 {

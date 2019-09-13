@@ -209,7 +209,7 @@ namespace Demo
 
         private void FrmWindow_AlertBefore(object sender, AlertEventArgs e)
         {
-            e.Message += " hook alert";
+
         }
 
         private void FrmTest_LoadUrlBegin(object sender, LoadUrlBeginEventArgs e)

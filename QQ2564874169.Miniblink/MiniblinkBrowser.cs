@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
@@ -815,7 +816,7 @@ namespace QQ2564874169.Miniblink
         #endregion
 
         internal static MiniblinkBrowser InvokeBro { get; private set; }
-        private static string _hoolTipName = "func" + Guid.NewGuid().ToString().Replace("-", "");
+        private static string _popHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private static string _promptName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private EventHandler<PaintUpdatedEventArgs> _browserPaintUpdated;
         private Hashtable _ref = new Hashtable();
@@ -1011,7 +1012,7 @@ namespace QQ2564874169.Miniblink
 
         private void RegisterJsFunc()
         {
-            BindNetFunc(new NetFunc(_hoolTipName, OnHookTip));
+            BindNetFunc(new NetFunc(_popHookName, OnHookTip));
             BindNetFunc(new NetFunc(_promptName, ShowPrompt));
         }
 
@@ -1037,57 +1038,65 @@ namespace QQ2564874169.Miniblink
 
         private void HookTip(object sender, DidCreateScriptContextEventArgs e)
         {
-            e.Frame.RunJs(@"
-                var abak=alert;
-                alert=function(msg){
-                    var data =" + _hoolTipName + @"('alert',msg);
-                    if(data.cancel===false){
-                        abak(data.msg);
+            var popJs = string.Join(".", GetType().Namespace, "Js", "pop.js");
+
+            using (var sm = GetType().Assembly.GetManifestResourceStream(popJs))
+            {
+                if (sm != null)
+                {
+                    using (var reader = new StreamReader(sm, Encoding.UTF8))
+                    {
+                        popJs = reader.ReadToEnd();
                     }
                 }
-                var cbak=confirm;
-                confirm=function(msg){
-                    var data =" + _hoolTipName + @"('confirm',msg);
-                    var rs = data.rs;
-                    if(data.cancel===false){
-                        rs = cbak(data.msg);
-                        rs = data.rs||rs;
-                    }
-                    return rs;
+            }
+
+            popJs = "var popHookName='" + _popHookName + "';" + popJs;
+
+            e.Frame.RunJs(popJs);
+        }
+
+        private void OnAlert(string message, string title)
+        {
+            var args = new AlertEventArgs
+            {
+                Window = new FrmAlert
+                {
+                    Message = message,
+                    Text = title
                 }
-                prompt=function(msg,value){
-                    var data =" + _hoolTipName + @"('prompt',msg,value);
-                    var rs = data.rs;
-                    if(data.cancel===false){
-                        rs = " + _promptName + @"(data.msg,data.value);
-                        rs = data.rs||rs;
-                    }
-                    return rs;
-                }");
+            };
+            OnAlertBefore(args);
+            args.Window?.ShowDialog();
         }
 
         private object OnHookTip(NetFuncContext context)
         {
-            var type = context.Paramters[0].ToString();
-            switch (type)
+            if (context.Paramters.Length < 1)
             {
-                case "alert":
+                return null;
+            }
+            var type = context.Paramters[0].ToString().ToLower();
+
+            if ("alert" == type)
+            {
+                var msg = "";
+                var title = new Uri(Url).Host;
+                if (context.Paramters.Length > 1 && context.Paramters[1] != null)
                 {
-                    var ae = new AlertEventArgs();
-                    if (context.Paramters.Length > 1 && context.Paramters[1] != null)
-                    {
-                        ae.Message = context.Paramters[1].ToString();
-                    }
-
-                    OnAlertBefore(ae);
-
-                    return new
-                    {
-                        msg = ae.Message,
-                        cancel = ae.Cancel
-                    };
+                    msg = context.Paramters[1].ToString();
                 }
 
+                if (context.Paramters.Length > 2 && context.Paramters[2] != null)
+                {
+                    title = context.Paramters[2].ToString();
+                }
+
+                OnAlert(msg, title);
+                return null;
+            }
+            switch (type)
+            {
                 case "confirm":
                 {
                     var ce = new ConfirmEventArgs();

@@ -215,8 +215,7 @@ namespace QQ2564874169.Miniblink
 
     public class AlertEventArgs : EventArgs
     {
-        public string Message { get; set; }
-        public bool Cancel { get; set; }
+        public FrmAlert Window { get; set; }
 
         internal AlertEventArgs()
         {
