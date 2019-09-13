@@ -82,8 +82,6 @@
             this.mbbw.Name = "mbbw";
             this.mbbw.Size = new System.Drawing.Size(550, 438);
             this.mbbw.TabIndex = 0;
-            this.mbbw.DragDrop += new System.Windows.Forms.DragEventHandler(this.mbbw_DragDrop);
-            this.mbbw.DragEnter += new System.Windows.Forms.DragEventHandler(this.mbbw_DragEnter);
             // 
             // FrmBrowser
             // 

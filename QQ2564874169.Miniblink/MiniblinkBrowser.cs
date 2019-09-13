@@ -23,6 +23,33 @@ namespace QQ2564874169.Miniblink
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public MBDeviceParameter DeviceParameter { get; }
 
+        private bool _fireDropFile;
+
+        public bool FireDropFile
+        {
+            get { return _fireDropFile; }
+            set
+            {
+                if (_fireDropFile == value)
+                {
+                    return;
+                }
+
+                if (value)
+                {
+                    DragDrop += DragFileDrop;
+                    DragEnter += DragFileEnter;
+                }
+                else
+                {
+                    DragDrop -= DragFileDrop;
+                    DragEnter -= DragFileEnter;
+                }
+
+                _fireDropFile = value;
+            }
+        }
+
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Url => MBApi.wkeGetURL(MiniblinkHandle).ToUTF8String() ?? string.Empty;
@@ -1115,7 +1142,7 @@ namespace QQ2564874169.Miniblink
             new PrintUtil(this).Start(callback);
         }
 
-        public void OnDropFiles(int x, int y, params string[] files)
+        private void OnDropFiles(int x, int y, params string[] files)
         {
             for (var i = 0; i < files.Length; i++)
             {
@@ -1127,7 +1154,7 @@ namespace QQ2564874169.Miniblink
             x += ScrollLeft;
             y += ScrollTop;
             RunJs($@"
-                var e = new CustomEvent(""dropData"",
+                var e = new CustomEvent(""dropFile"",
                 {{
                     detail:{{
                         files:[{data}],
@@ -1137,6 +1164,19 @@ namespace QQ2564874169.Miniblink
                 }});
                 (window.dispatchEvent || window.fireEvent)(e);
             ");
+        }
+
+        private void DragFileEnter(object sender, DragEventArgs e)
+        {
+            e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.All : DragDropEffects.None;
+        }
+
+        private void DragFileDrop(object sender, DragEventArgs e)
+        {
+            var items = (Array) e.Data.GetData(DataFormats.FileDrop);
+            var files = items.Cast<string>().ToArray();
+            var p = PointToClient(new Point(e.X, e.Y));
+            OnDropFiles(p.X, p.Y, files);
         }
 
         #region 消息处理

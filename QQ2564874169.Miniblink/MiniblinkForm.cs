@@ -582,6 +582,11 @@ namespace QQ2564874169.Miniblink
         public bool CanGoBack => _browser.CanGoBack;
 		public bool CanGoForward => _browser.CanGoForward;
         public MBDeviceParameter DeviceParameter => _browser.DeviceParameter;
+        public bool FireDropFile
+        {
+            get { return _browser.FireDropFile;}
+            set { _browser.FireDropFile = value; }
+        }
         public IList<ILoadResource> LoadResourceHandlerList => _browser.LoadResourceHandlerList;
 
         public event EventHandler<UrlChangedEventArgs> UrlChanged
