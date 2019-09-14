@@ -245,6 +245,35 @@ namespace QQ2564874169.Miniblink
             remove { _didCreateScriptContextCallback -= value; }
         }
 
+        public event EventHandler<WindowOpenEventArgs> WindowOpen;
+
+        protected virtual WindowOpenEventArgs OnWindowOpen(string url, string name,
+            IDictionary<string, string> specs, bool replace)
+        {
+            var args = new WindowOpenEventArgs
+            {
+                Name = name,
+                Url = url,
+                Replace = replace
+            };
+            if (specs != null)
+            {
+                foreach (var item in specs)
+                {
+                    args.Specs.Add(item);
+                }
+            }
+
+            WindowOpen?.Invoke(this, args);
+
+            if (args.LoadUrl && url != null)
+            {
+                LoadUri(url);
+            }
+
+            return args;
+        }
+
         protected virtual void onWkeDidCreateScriptContextCallback(IntPtr webView, IntPtr param, IntPtr frame,
             IntPtr context,
             int extensionGroup, int worldId)
@@ -317,9 +346,31 @@ namespace QQ2564874169.Miniblink
 
             var e = new NavigateEventArgs
             {
-                Url = url.WKEToUTF8String(),
-                Type = type
+                Url = url.WKEToUTF8String()
             };
+            switch (type)
+            {
+                case wkeNavigationType.BackForward:
+                    e.Type = NavigateType.BackForward;
+                    break;
+                case wkeNavigationType.FormReSubmit:
+                    e.Type = NavigateType.ReSubmit;
+                    break;
+                case wkeNavigationType.FormSubmit:
+                    e.Type = NavigateType.Submit;
+                    break;
+                case wkeNavigationType.LinkClick:
+                    e.Type = NavigateType.LinkClick;
+                    break;
+                case wkeNavigationType.ReLoad:
+                    e.Type = NavigateType.ReLoad;
+                    break;
+                case wkeNavigationType.Other:
+                    e.Type = NavigateType.Other;
+                    break;
+                default:
+                    throw new Exception("未知的重定向类型：" + type);
+            }
             _navigateBefore(this, e);
 
             return (byte) (e.Cancel ? 0 : 1);
@@ -346,7 +397,10 @@ namespace QQ2564874169.Miniblink
 
         protected virtual void OnDocumentReady(IntPtr mb, IntPtr param, IntPtr frameId)
         {
-            _documentReady?.Invoke(this, new DocumentReadyEventArgs() {Frame = new FrameContext(this, frameId)});
+            _documentReady?.Invoke(this, new DocumentReadyEventArgs
+            {
+                Frame = new FrameContext(this, frameId)
+            });
         }
 
         private wkeConsoleCallback _wkeConsoleMessage;
@@ -817,7 +871,7 @@ namespace QQ2564874169.Miniblink
 
         internal static MiniblinkBrowser InvokeBro { get; private set; }
         private static string _popHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
-        private static string _promptName = "func" + Guid.NewGuid().ToString().Replace("-", "");
+        private static string _openHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private EventHandler<PaintUpdatedEventArgs> _browserPaintUpdated;
         private Hashtable _ref = new Hashtable();
         public IList<ILoadResource> LoadResourceHandlerList { get; private set; }
@@ -1008,26 +1062,28 @@ namespace QQ2564874169.Miniblink
         private void RegisterJsFunc()
         {
             BindNetFunc(new NetFunc(_popHookName, OnHookPop));
+            BindNetFunc(new NetFunc(_openHookName, OnHookWindowOpen));
         }
 
         private void HookPop(object sender, DidCreateScriptContextEventArgs e)
         {
-            var popJs = string.Join(".", GetType().Namespace, "Js", "pop.js");
+            var js = string.Join(".", GetType().Namespace, "Js", "hook.js");
 
-            using (var sm = GetType().Assembly.GetManifestResourceStream(popJs))
+            using (var sm = GetType().Assembly.GetManifestResourceStream(js))
             {
                 if (sm != null)
                 {
                     using (var reader = new StreamReader(sm, Encoding.UTF8))
                     {
-                        popJs = reader.ReadToEnd();
+                        js = reader.ReadToEnd();
                     }
                 }
             }
 
-            popJs = "var popHookName='" + _popHookName + "';" + popJs;
+            js = "var popHookName='" + _popHookName + "';" + js;
+            js += "var openHookName='" + _openHookName + "';" + js;
 
-            e.Frame.RunJs(popJs);
+            e.Frame.RunJs(js);
         }
 
         private AlertEventArgs OnAlert(string message, string title)
@@ -1167,6 +1223,55 @@ namespace QQ2564874169.Miniblink
             }
 
             return null;
+        }
+
+        private object OnHookWindowOpen(NetFuncContext context)
+        {
+            string url = null;
+            string name = null;
+            string specs = null;
+            string replace = null;
+            var map = new Dictionary<string, string>();
+
+            if (context.Paramters.Length > 0 && context.Paramters[0] != null)
+            {
+                url = context.Paramters[0].ToString();
+            }
+
+            if (context.Paramters.Length > 1 && context.Paramters[1] != null)
+            {
+                name = context.Paramters[1].ToString();
+            }
+
+            if (context.Paramters.Length > 2 && context.Paramters[2] != null)
+            {
+                specs = context.Paramters[2].ToString();
+            }
+
+            if (context.Paramters.Length > 3 && context.Paramters[3] != null)
+            {
+                replace = context.Paramters[3].ToString();
+            }
+
+            if (specs != null)
+            {
+                var items = specs.Split(',');
+                foreach (var item in items)
+                {
+                    var kv = item.Split('=');
+                    if (kv.Length == 1)
+                    {
+                        map[kv[0]] = "";
+                    }
+                    else if (kv.Length == 2)
+                    {
+                        map[kv[0]] = kv[1];
+                    }
+                }
+            }
+
+            var e = OnWindowOpen(url, name, map, "true" == replace);
+            return e.ReturnValue;
         }
 
         public void Print(Action<PrintPreviewDialog> callback)

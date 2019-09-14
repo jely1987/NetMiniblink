@@ -587,6 +587,7 @@ namespace QQ2564874169.Miniblink
             get { return _browser.FireDropFile;}
             set { _browser.FireDropFile = value; }
         }
+        
         public IList<ILoadResource> LoadResourceHandlerList => _browser.LoadResourceHandlerList;
 
         public event EventHandler<UrlChangedEventArgs> UrlChanged
@@ -653,6 +654,12 @@ namespace QQ2564874169.Miniblink
 	        add { _browser.DidCreateScriptContext += value; }
 	        remove { _browser.DidCreateScriptContext -= value; }
 	    }
+
+        public event EventHandler<WindowOpenEventArgs> WindowOpen
+        {
+            add { _browser.WindowOpen += value; }
+            remove { _browser.WindowOpen -= value; }
+        }
 
         public void ScrollTo(int x, int y)
         {

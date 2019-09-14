@@ -95,6 +95,7 @@
     <Compile Include="MiniblinkBrowser.Designer.cs">
       <DependentUpon>MiniblinkBrowser.cs</DependentUpon>
     </Compile>
+    <Compile Include="NavigateType.cs" />
     <Compile Include="NetFunc.cs" />
     <Compile Include="MBApi.cs" />
     <Compile Include="MBDelegates.cs" />
@@ -135,7 +136,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Js\pop.js" />
+    <EmbeddedResource Include="Js\hook.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

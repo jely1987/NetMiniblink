@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace QQ2564874169.Miniblink
 {
@@ -23,7 +24,7 @@ namespace QQ2564874169.Miniblink
     public class NavigateEventArgs : MiniblinkEventArgs
     {
         public string Url { get; internal set; }
-        public wkeNavigationType Type { get; internal set; }
+        public NavigateType Type { get; internal set; }
         public bool Cancel { get; set; }
 
         internal NavigateEventArgs()
@@ -252,6 +253,22 @@ namespace QQ2564874169.Miniblink
         internal DidCreateScriptContextEventArgs()
         {
 
+        }
+    }
+
+    public class WindowOpenEventArgs : MiniblinkEventArgs
+    {
+        public string Url { get; set; }
+        public string Name { get; set; }
+        public IDictionary<string, string> Specs { get; private set; }
+        public bool Replace { get; set; }
+        public string ReturnValue { get; set; }
+        public bool LoadUrl { get; set; }
+
+        internal WindowOpenEventArgs()
+        {
+            Specs = new Dictionary<string, string>();
+            LoadUrl = true;
         }
     }
 }

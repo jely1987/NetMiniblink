@@ -13,3 +13,11 @@ if (window[popHookName]) {
     };
 }
 
+if (window[openHookName]) {
+    var openFunc = window[openHookName];
+
+    window.open = function (url, name, specs, replace) {
+        return openFunc(url, name, specs, replace);
+    };
+}
+
