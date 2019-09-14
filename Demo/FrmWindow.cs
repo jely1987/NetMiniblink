@@ -199,12 +199,12 @@ namespace Demo
 
         private void FrmWindow_PromptBefore(object sender, PromptEventArgs e)
         {
-            e.Message += " hook prompt";
+
         }
 
         private void FrmWindow_ConfirmBefore(object sender, ConfirmEventArgs e)
         {
-            e.Message += " hook confirm";
+
         }
 
         private void FrmWindow_AlertBefore(object sender, AlertEventArgs e)

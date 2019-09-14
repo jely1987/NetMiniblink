@@ -842,18 +842,13 @@ namespace QQ2564874169.Miniblink
                 {
                     throw new WKECreateException();
                 }
-                //_wndProcCallback = new WndProcCallback(OnWndMsg);
-                //_bakWndProc = WinApi.SetWindowLong(Handle, (int)WinConst.GWL_WNDPROC, _wndProcCallback);
-                //MBApi.wkeSetHandle(MiniblinkHandle, Handle);
-                //MBApi.wkeSetDragEnable(MiniblinkHandle, false);
-                //MBApi.wkeSetDragDropEnable(MiniblinkHandle, false);
                 _browserPaintUpdated += BrowserPaintUpdated;
                 var wkePaintUpdated = new wkePaintUpdatedCallback(OnPaintUpdated);
                 _ref.Add(Guid.NewGuid(), wkePaintUpdated);
                 MBApi.wkeOnPaintUpdated(MiniblinkHandle, wkePaintUpdated, Handle);
 
                 LoadUrlBegin += LoadResource;
-                DidCreateScriptContext += HookTip;
+                DidCreateScriptContext += HookPop;
                 DeviceParameter = new MBDeviceParameter(this);
                 RegisterJsFunc();
                 
@@ -1012,31 +1007,10 @@ namespace QQ2564874169.Miniblink
 
         private void RegisterJsFunc()
         {
-            BindNetFunc(new NetFunc(_popHookName, OnHookTip));
-            BindNetFunc(new NetFunc(_promptName, ShowPrompt));
+            BindNetFunc(new NetFunc(_popHookName, OnHookPop));
         }
 
-        private object ShowPrompt(NetFuncContext context)
-        {
-            var title = new Uri(Url).Host;
-            string msg = null;
-            string value = null;
-            if (context.Paramters.Length > 0 && context.Paramters[0] != null)
-            {
-                msg = context.Paramters[0].ToString();
-            }
-
-            if (context.Paramters.Length > 1 && context.Paramters[1] != null)
-            {
-                value = context.Paramters[1].ToString();
-            }
-
-            var frm = new FrmPromptBox(title, msg, value);
-            frm.ShowDialog();
-            return frm.GetValue();
-        }
-
-        private void HookTip(object sender, DidCreateScriptContextEventArgs e)
+        private void HookPop(object sender, DidCreateScriptContextEventArgs e)
         {
             var popJs = string.Join(".", GetType().Namespace, "Js", "pop.js");
 
@@ -1056,7 +1030,7 @@ namespace QQ2564874169.Miniblink
             e.Frame.RunJs(popJs);
         }
 
-        private void OnAlert(string message, string title)
+        private AlertEventArgs OnAlert(string message, string title)
         {
             var args = new AlertEventArgs
             {
@@ -1068,9 +1042,51 @@ namespace QQ2564874169.Miniblink
             };
             OnAlertBefore(args);
             args.Window?.ShowDialog();
+            return args;
         }
 
-        private object OnHookTip(NetFuncContext context)
+        private ConfirmEventArgs OnConfirm(string message, string title)
+        {
+            var args = new ConfirmEventArgs
+            {
+                Window = new FrmConfirm
+                {
+                    Message = message,
+                    Text = title
+                }
+            };
+            OnConfirmBefore(args);
+            args.Window?.ShowDialog();
+            if (args.Result.HasValue == false && args.Window != null)
+            {
+                args.Result = args.Window.IsOk;
+            }
+
+            return args;
+        }
+
+        private PromptEventArgs OnPrompt(string message, string input, string title)
+        {
+            var args = new PromptEventArgs
+            {
+                Window = new FrmPrompt
+                {
+                    Text = title,
+                    Message = message,
+                    Value = input
+                }
+            };
+            OnPromptBefore(args);
+            args.Window?.ShowDialog();
+            if (args.Result == null && args.Window != null)
+            {
+                args.Result = args.Window.Value;
+            }
+
+            return args;
+        }
+
+        private object OnHookPop(NetFuncContext context)
         {
             if (context.Paramters.Length < 1)
             {
@@ -1089,61 +1105,68 @@ namespace QQ2564874169.Miniblink
 
                 if (context.Paramters.Length > 2 && context.Paramters[2] != null)
                 {
-                    title = context.Paramters[2].ToString();
+                    dynamic opt = context.Paramters[2];
+                    if (opt.title != null)
+                    {
+                        title = opt.title.ToString();
+                    }
                 }
 
                 OnAlert(msg, title);
                 return null;
             }
-            switch (type)
+
+            if ("confirm" == type)
             {
-                case "confirm":
+                var msg = "";
+                var title = new Uri(Url).Host;
+                if (context.Paramters.Length > 1 && context.Paramters[1] != null)
                 {
-                    var ce = new ConfirmEventArgs();
-
-                    if (context.Paramters.Length > 1 && context.Paramters[1] != null)
-                    {
-                        ce.Message = context.Paramters[1].ToString();
-                    }
-
-                    OnConfirmBefore(ce);
-
-                    return new
-                    {
-                        cancel = ce.Cancel,
-                        msg = ce.Message,
-                        rs = ce.Result
-                    };
+                    msg = context.Paramters[1].ToString();
                 }
 
-                case "prompt":
+                if (context.Paramters.Length > 2 && context.Paramters[2] != null)
                 {
-                    var pe = new PromptEventArgs();
-
-                    if (context.Paramters.Length > 1 && context.Paramters[1] != null)
+                    dynamic opt = context.Paramters[2];
+                    if (opt.title != null)
                     {
-                        pe.Message = context.Paramters[1].ToString();
+                        title = opt.title.ToString();
                     }
-
-                    if (context.Paramters.Length > 2 && context.Paramters[2] != null)
-                    {
-                        pe.Value = context.Paramters[2].ToString();
-                    }
-
-                    OnPromptBefore(pe);
-
-                    return new
-                    {
-                        cancel = pe.Cancel,
-                        msg = pe.Message,
-                        rs = pe.Result,
-                        value = pe.Value
-                    };
                 }
 
-                default:
-                    throw new ArgumentException("未知的参数值：" + type);
+                var e = OnConfirm(msg, title);
+                return e.Result.GetValueOrDefault();
             }
+
+            if ("prompt" == type)
+            {
+                var msg = "";
+                var input = "";
+                var title = new Uri(Url).Host;
+                if (context.Paramters.Length > 1 && context.Paramters[1] != null)
+                {
+                    msg = context.Paramters[1].ToString();
+                }
+
+                if (context.Paramters.Length > 2 && context.Paramters[2] != null)
+                {
+                    input = context.Paramters[2].ToString();
+                }
+
+                if (context.Paramters.Length > 3 && context.Paramters[3] != null)
+                {
+                    dynamic opt = context.Paramters[3];
+                    if (opt.title != null)
+                    {
+                        title = opt.title.ToString();
+                    }
+                }
+
+                var e = OnPrompt(msg, input, title);
+                return e.Result;
+            }
+
+            return null;
         }
 
         public void Print(Action<PrintPreviewDialog> callback)

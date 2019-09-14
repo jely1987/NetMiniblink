@@ -31,6 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -41,19 +42,31 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exts.cs" />
+    <Compile Include="ExtTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ExtTextBox.Designer.cs">
+      <DependentUpon>ExtTextBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormResizeWidth.cs" />
     <Compile Include="FrameContext.cs" />
+    <Compile Include="FrmPrompt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPrompt.Designer.cs">
+      <DependentUpon>FrmPrompt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmConfirm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmConfirm.Designer.cs">
+      <DependentUpon>FrmConfirm.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmAlert.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FrmAlert.Designer.cs">
       <DependentUpon>FrmAlert.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FrmPromptBox.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmPromptBox.Designer.cs">
-      <DependentUpon>FrmPromptBox.cs</DependentUpon>
     </Compile>
     <Compile Include="ILoadResource.cs" />
     <Compile Include="IMiniblink.cs" />
@@ -102,11 +115,17 @@
     <Compile Include="WKEException.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ExtTextBox.resx">
+      <DependentUpon>ExtTextBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPrompt.resx">
+      <DependentUpon>FrmPrompt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmConfirm.resx">
+      <DependentUpon>FrmConfirm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmAlert.resx">
       <DependentUpon>FrmAlert.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FrmPromptBox.resx">
-      <DependentUpon>FrmPromptBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MiniblinkForm.resx">
       <DependentUpon>MiniblinkForm.cs</DependentUpon>

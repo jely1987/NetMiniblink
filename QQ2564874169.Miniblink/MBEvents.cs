@@ -225,9 +225,8 @@ namespace QQ2564874169.Miniblink
 
     public class ConfirmEventArgs : MiniblinkEventArgs
     {
-        public string Message { get; set; }
-        public bool Cancel { get; set; }
-        public bool Result { get; set; }
+        public FrmConfirm Window { get; set; }
+        public bool? Result { get; set; }
 
         internal ConfirmEventArgs()
         {
@@ -237,9 +236,7 @@ namespace QQ2564874169.Miniblink
 
     public class PromptEventArgs : MiniblinkEventArgs
     {
-        public string Message { get; set; }
-        public string Value { get; set; }
-        public bool Cancel { get; set; }
+        public FrmPrompt Window { get; set; }
         public string Result { get; set; }
 
         internal PromptEventArgs()
