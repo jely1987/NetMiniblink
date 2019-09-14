@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Net;
 using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
@@ -30,6 +31,7 @@ namespace QQ2564874169.Miniblink
         /// 是否在接收到拖放的文件时触发window的dropFile事件
         /// </summary>
         bool FireDropFile { get; set; }
+        CookieCollection Cookies { get; }
 
         event EventHandler<UrlChangedEventArgs> UrlChanged;
 		event EventHandler<NavigateEventArgs> NavigateBefore;
