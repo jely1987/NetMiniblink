@@ -622,8 +622,8 @@ namespace QQ2564874169.Miniblink
 
         protected virtual bool OnLoadUrlBegin(IntPtr mb, IntPtr param, IntPtr url, IntPtr job)
         {
-            if (_loadUrlBegin == null) return false;
-
+            if (_loadUrlBegin == null)
+                return false;
             var rawurl = url.ToUTF8String();
             var e = new LoadUrlBeginEventArgs
             {
@@ -632,12 +632,21 @@ namespace QQ2564874169.Miniblink
                 RequestMethod = MBApi.wkeNetGetRequestMethod(job)
             };
             e.Job.BeginArgs = e;
-
             _loadUrlBegin(this, e);
 
             if (e.Job.IsAsync)
             {
                 return false;
+            }
+
+            if (e.Data != null)
+            {
+                if (!e.HookRequest || !OnLoadUrlEnd(mb, job, e.Data))
+                {
+                    NetSetData(job, e.Data);
+                }
+
+                return true;
             }
 
             if (e.HookRequest)
@@ -647,15 +656,9 @@ namespace QQ2564874169.Miniblink
                     OnLoadUrlEnd(mb, job, e.Data);
                     return true;
                 }
-
+                
                 MBApi.wkeNetHookRequest(job);
                 return false;
-            }
-
-            if (e.Data != null)
-            {
-                NetSetData(job, e.Data);
-                return true;
             }
 
             if (e.Cancel)
@@ -674,16 +677,19 @@ namespace QQ2564874169.Miniblink
             OnLoadUrlEnd(mb, job, data);
         }
 
-        protected virtual void OnLoadUrlEnd(IntPtr webview, IntPtr job, byte[] data = null)
+        protected virtual bool OnLoadUrlEnd(IntPtr mb, IntPtr job, byte[] data = null)
         {
             var begin = LoadUrlBeginEventArgs.GetByJob(job);
-            if (begin == null || _wkeLoadUrlEnd == null) return;
-
-            var end = begin.OnLoadUrlEnd(data);
-            if (end.Modify)
+            if (begin != null)
             {
-                NetSetData(job, end.Data);
+                var end = begin.OnLoadUrlEnd(data);
+                if (end.Modify || begin.IsLocalFile)
+                {
+                    NetSetData(job, end.Data);
+                    return true;
+                }
             }
+            return false;
         }
 
         private static void NetSetData(IntPtr job, byte[] data = null)
@@ -1038,21 +1044,18 @@ namespace QQ2564874169.Miniblink
                 return;
 
             var uri = new Uri(url);
-            byte[] data = null;
 
             foreach (var handler in LoadResourceHandlerList.ToArray())
             {
-                data = handler.ByUri(uri);
+                if (handler.Domain.Equals(uri.Host, StringComparison.OrdinalIgnoreCase) == false)
+                    continue;
+                e.IsLocalFile = true;
+                var data = handler.ByUri(uri);
                 if (data != null)
                 {
+                    e.Data = data;
                     break;
                 }
-            }
-
-            if (data != null)
-            {
-                e.IsLocalFile = true;
-                e.Data = data;
             }
         }
 

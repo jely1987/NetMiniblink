@@ -20,9 +20,6 @@ namespace QQ2564874169.Miniblink.LoadResourceImpl
 
         public byte[] ByUri(Uri uri)
         {
-            if (string.Equals(uri.Host, _domain, StringComparison.OrdinalIgnoreCase) == false)
-                return null;
-
             var path = string.Join(".", _namespace, _dir, uri.AbsolutePath.TrimStart('/').Replace("/", "."));
 
             using (var sm = _assembly.GetManifestResourceStream(path))
@@ -37,5 +34,7 @@ namespace QQ2564874169.Miniblink.LoadResourceImpl
                 return data;
             }
         }
+
+        public string Domain => _domain;
     }
 }

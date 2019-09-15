@@ -84,13 +84,13 @@ namespace QQ2564874169.Miniblink
         public bool Cancel { get; set; }
         public bool IsLocalFile { get; internal set; }
         internal bool HookRequest { get; set; }
-        private Action<LoadUrlEndArgs> _loadUrlEnd;
-        private object _endState;
+        private List<Tuple<Action<LoadUrlEndArgs>, object>> _loadUrlEnd;
         internal bool Ended;
         private PostBody _postBody;
 
         internal LoadUrlBeginEventArgs()
         {
+            _loadUrlEnd = new List<Tuple<Action<LoadUrlEndArgs>, object>>();
         }
 
         public PostBody GetPostBody()
@@ -110,13 +110,7 @@ namespace QQ2564874169.Miniblink
 
         public void WatchLoadUrlEnd(Action<LoadUrlEndArgs> callback, object state = null)
         {
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
-
-            _loadUrlEnd = callback;
-            _endState = state;
+            _loadUrlEnd.Add(new Tuple<Action<LoadUrlEndArgs>, object>(callback, state));
 
             if (HookRequest == false)
             {
@@ -138,10 +132,13 @@ namespace QQ2564874169.Miniblink
                 Data = data,
                 Job = Job.Handle,
                 RequestMethod = RequestMethod,
-                Url = Url,
-                State = _endState
+                Url = Url
             };
-            _loadUrlEnd(e);
+            _loadUrlEnd.ForEach(item =>
+            {
+                e.State = item.Item2;
+                item.Item1.Invoke(e);
+            });
 
             return e;
         }

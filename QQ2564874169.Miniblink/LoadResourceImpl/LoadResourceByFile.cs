@@ -16,10 +16,10 @@ namespace QQ2564874169.Miniblink.LoadResourceImpl
 
         public byte[] ByUri(Uri uri)
         {
-            if (string.Equals(uri.Host, _domain, StringComparison.OrdinalIgnoreCase) == false)
-                return null;
             var path = _dir + uri.AbsolutePath.Replace("/", Path.DirectorySeparatorChar.ToString());
             return File.Exists(path) ? File.ReadAllBytes(path) : null;
         }
+
+        public string Domain => _domain;
     }
 }
