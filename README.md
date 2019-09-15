@@ -11,6 +11,15 @@
 - x64的dll不是作者编译的，我也是从网上找的，版本肯定没有x86的那么新，所以x64下某些功能缺失报错是正常现象。
 
 
+### 2019-09-15
+- 消息处理不再基于拦截winform的处理过程，改为winform本身提供的方式。
+- 重新实现并增强alert,confirm,prompt，通过对应的事件有完全控制能力。
+- 资源加载默认提供本地资源和嵌入式资源两个handler。
+- 新增一个Cookies属性，读取方便些。
+- 提供window.open事件，默认会自动加载open的地址。
+- 文件拖拽控制与事件：window.addEventListener("dropFile", function(e){  });
+
+
 ### 2019-08-18
 - 新增打印功能
 - 新增禁用cookie

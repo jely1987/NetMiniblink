@@ -45,5 +45,10 @@ namespace Demo
         {
             new FrmPrint().Show();
         }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            new FrmPkg().Show();
+        }
     }
 }
