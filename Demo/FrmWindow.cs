@@ -189,8 +189,6 @@ namespace Demo
 
             //指定了本地站点后，所有文件加载方式都和web中一致
             LoadUri("http://loc.webres/index.html");
-            //LoadUri("/input.html");
-            //LoadUri("/device.html");
             //LoadUri("https://jbaysolutions.github.io/vue-grid-layout/examples/01-basic.html");
             //LoadUri("https://www.baidu.com");
             //LoadUri("https://www.cnblogs.com/wangkongming/p/6195903.html");
@@ -215,7 +213,6 @@ namespace Demo
         private void FrmTest_LoadUrlBegin(object sender, LoadUrlBeginEventArgs e)
         {
             //以下全部是替换指定资源的返回结果
-
 			if (e.Url.Contains("hook.js"))
 			{
 				e.Data = Encoding.UTF8.GetBytes("function hook(){alert('hook')}");

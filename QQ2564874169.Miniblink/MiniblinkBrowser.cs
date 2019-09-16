@@ -904,6 +904,9 @@ namespace QQ2564874169.Miniblink
                 {
                     throw new WKECreateException();
                 }
+                MBApi.wkeSetDragEnable(MiniblinkHandle, false);
+                MBApi.wkeSetDragDropEnable(MiniblinkHandle, false);
+                MBApi.wkeSetHandle(MiniblinkHandle, Handle);
                 _browserPaintUpdated += BrowserPaintUpdated;
                 var wkePaintUpdated = new wkePaintUpdatedCallback(OnPaintUpdated);
                 _ref.Add(Guid.NewGuid(), wkePaintUpdated);

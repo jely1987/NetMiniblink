@@ -1,26 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using QQ2564874169.Miniblink;
 using QQ2564874169.Miniblink.LoadResourceImpl;
-using QQ2564874169.Miniblink.LocalHttp;
+using System.Runtime.InteropServices;
 
 namespace Demo
 {
-	public partial class FrmBrowser : Form
+    public partial class FrmBrowser : Form
 	{
-		public FrmBrowser()
+        public FrmBrowser()
 		{
 			InitializeComponent();
-
             mbbw.LoadResourceHandlerList.Add(new LoadResourceByFile(
                 Path.Combine(Application.StartupPath, "webres"), 
                 "loc.webres"));
@@ -32,6 +22,7 @@ namespace Demo
 			mbbw.LoadUri("http://loc.webres/control.html");
             mbbw.AllowDrop = true;
             mbbw.FireDropFile = true;
+
         }
 
         private void button1_Click(object sender, EventArgs e)
