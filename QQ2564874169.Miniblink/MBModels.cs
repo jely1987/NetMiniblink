@@ -51,7 +51,7 @@ namespace QQ2564874169.Miniblink
     /// 设置
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct WKESettings
+    internal struct WKESettings
     {
         /// <summary>
         /// 代理

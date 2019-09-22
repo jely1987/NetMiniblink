@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Net;
 using System.Windows.Forms;
@@ -66,7 +67,7 @@ namespace QQ2564874169.Miniblink
 		void LoadHtml(string html, string baseUrl = null);
 		void StopLoading();
 		void Reload();
-        void DrawToBitmap(Action<Image> callback);
+        void DrawToBitmap(Action<ScreenshotImage> callback);
         void Print(Action<PrintPreviewDialog> callback);
     }
 }

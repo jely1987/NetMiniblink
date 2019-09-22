@@ -13,8 +13,8 @@ namespace QQ2564874169.Miniblink
     internal delegate void wkeURLChangedCallback2(IntPtr webView, IntPtr param, IntPtr frame, IntPtr url);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void wkePaintUpdatedCallback(IntPtr webView, IntPtr param, IntPtr hdc, int x, int y, int cx,
-        int cy);
+    internal delegate void wkePaintUpdatedCallback(IntPtr webView, IntPtr param, IntPtr hdc, 
+        int x, int y, int cx, int cy);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void wkeAlertBoxCallback(IntPtr webView, IntPtr param, IntPtr msg);

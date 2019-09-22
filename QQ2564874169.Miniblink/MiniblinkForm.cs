@@ -798,7 +798,7 @@ namespace QQ2564874169.Miniblink
 			_browser.Reload();
 		}
 
-        public void DrawToBitmap(Action<Image> callback)
+        public void DrawToBitmap(Action<ScreenshotImage> callback)
         {
             _browser.DrawToBitmap(callback);
         }

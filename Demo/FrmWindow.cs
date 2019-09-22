@@ -61,11 +61,9 @@ namespace Demo
 
         private void Btn3_Click(object sender, EventArgs e)
         {
-            DrawToBitmap(image =>
+            DrawToBitmap(images =>
             {
-                var filename = Guid.NewGuid() + ".png";
-                image.Save(filename, ImageFormat.Png);
-                MessageBox.Show(filename + " 已保存");
+
             });
         }
 
@@ -188,11 +186,13 @@ namespace Demo
             PromptBefore += FrmWindow_PromptBefore;
 
             //指定了本地站点后，所有文件加载方式都和web中一致
-            LoadUri("http://loc.webres/index.html");
+            //LoadUri("http://loc.webres/index.html");
             //LoadUri("https://jbaysolutions.github.io/vue-grid-layout/examples/01-basic.html");
             //LoadUri("https://www.baidu.com");
-            //LoadUri("https://www.cnblogs.com/wangkongming/p/6195903.html");
+            LoadUri("https://www.cnblogs.com/wangkongming/p/6195903.html");
             //LoadUri("https://myliang.github.io/x-spreadsheet/");
+            //LoadUri("https://www.qq.com");
+            //LoadUri("https://www.acfun.cn");
         }
 
         private void FrmWindow_PromptBefore(object sender, PromptEventArgs e)

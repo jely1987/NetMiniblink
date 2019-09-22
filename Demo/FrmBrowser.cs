@@ -19,7 +19,8 @@ namespace Demo
 		private void FrmTestBrowser_Load(object sender, EventArgs e)
 		{
 			//指定了本地站点后，所有文件加载方式都和web中一致
-			mbbw.LoadUri("http://loc.webres/control.html");
+			//mbbw.LoadUri("http://loc.webres/control.html");
+            mbbw.LoadUri("https://www.qq.com");
             mbbw.AllowDrop = true;
             mbbw.FireDropFile = true;
 
@@ -27,7 +28,20 @@ namespace Demo
 
         private void button1_Click(object sender, EventArgs e)
         {
-            mbbw.LoadUri(textBox1.Text);
+            var url = textBox1.Text;
+            if (url.StartsWith("http") == false)
+            {
+                url = "http://" + url;
+            }
+            mbbw.LoadUri(url);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            mbbw.DrawToBitmap(imgs =>
+            {
+
+            });
         }
     }
 }

@@ -922,6 +922,7 @@ namespace QQ2564874169.Miniblink
 
         protected override void OnHandleDestroyed(EventArgs e)
         {
+            //todo 还需要释放所有回调
             _ref.Clear();
             LoadResourceHandlerList.Clear();
             base.OnHandleDestroyed(e);
@@ -1062,7 +1063,7 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        public void DrawToBitmap(Action<Image> callback)
+        public void DrawToBitmap(Action<ScreenshotImage> callback)
         {
             new DrawToBitmapUtil(this).ToImage(callback);
         }
