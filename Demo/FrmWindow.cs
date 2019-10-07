@@ -153,13 +153,6 @@ namespace Demo
             MessageBox.Show(result.ToString());
         }
 
-		[NetFunc]
-	    public void opensdk()
-		{
-			Process.Start("https://gitee.com/aochulai/NetMiniblink");
-		}
-
-
         private void FrmTest_Load(object sender, EventArgs e)
         {
             FormBorderStyle = FormBorderStyle.None;

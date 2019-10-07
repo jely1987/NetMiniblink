@@ -37,7 +37,7 @@ namespace Demo
 
         private void ShowMsg()
         {
-            MessageBox.Show(@"实现方式是滚动截屏，所以需要各位自己维护目标内容了。");
+            MessageBox.Show(@"实现方式是滚动截屏，为了稳定建议各位自己维护下目标内容。");
         }
 
         private void FrmPrint_Load(object sender, EventArgs e)
