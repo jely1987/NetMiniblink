@@ -23,7 +23,7 @@ namespace QQ2564874169.Miniblink
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MBDeviceParameter DeviceParameter { get; }
+        public DeviceParameter DeviceParameter { get; }
 
         private bool _fireDropFile;
 
@@ -914,17 +914,30 @@ namespace QQ2564874169.Miniblink
 
                 LoadUrlBegin += LoadResource;
                 DidCreateScriptContext += HookPop;
-                DeviceParameter = new MBDeviceParameter(this);
+                DeviceParameter = new DeviceParameter(this);
                 RegisterJsFunc();
                 
             }
         }
 
+        private void DestroyCallback()
+        {
+            MBApi.wkeOnPaintUpdated(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnURLChanged2(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnNavigation(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnDocumentReady2(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnConsole(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeNetOnResponse(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnLoadUrlBegin(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnDownload(MiniblinkHandle, null, IntPtr.Zero);
+        }
+
         protected override void OnHandleDestroyed(EventArgs e)
         {
-            //todo 还需要释放所有回调
-            _ref.Clear();
+            DestroyCallback();
             LoadResourceHandlerList.Clear();
+            _ref.Clear();
             base.OnHandleDestroyed(e);
         }
 
@@ -1550,12 +1563,6 @@ namespace QQ2564874169.Miniblink
                 flags |= (int)wkeMouseFlags.WKE_RBUTTON;
 
             MBApi.wkeFireMouseEvent(MiniblinkHandle, (int)msg, e.X, e.Y, flags);
-        }
-
-        protected override void OnMouseEnter(EventArgs e)
-        {
-            MBApi.wkeSetFocus(MiniblinkHandle);
-            base.OnMouseEnter(e);
         }
 
         private void SetWkeCursor()

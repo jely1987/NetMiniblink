@@ -27,7 +27,7 @@ namespace QQ2564874169.Miniblink
 		float Zoom { get; set; }
 		bool CookieEnabled { get; set; }
 		string UserAgent { get; set; }
-        MBDeviceParameter DeviceParameter { get; }
+        DeviceParameter DeviceParameter { get; }
         /// <summary>
         /// 是否在接收到拖放的文件时触发window的dropFile事件
         /// </summary>

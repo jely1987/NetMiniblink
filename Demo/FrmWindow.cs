@@ -43,14 +43,6 @@ namespace Demo
 	        btn2.Click += Btn2_Click;
 	        Controls.Add(btn2);
 
-            var btn3 = new Button
-            {
-                Dock = DockStyle.Bottom,
-                Text = "截图"
-            };
-            btn3.Click += Btn3_Click;
-            Controls.Add(btn3);
-
             //允许在无边框模式下调整窗体大小
             NoneBorderResize = true;
 			//设置边框阴影
@@ -58,14 +50,6 @@ namespace Demo
             //注册一个js函数，方便在页面里调用NetApi
             BindNetFunc(new NetFunc("netapi", ctx => FrmMain.NetApi.Domain + "/" + ctx.Paramters[0]));
 		}
-
-        private void Btn3_Click(object sender, EventArgs e)
-        {
-            DrawToBitmap(images =>
-            {
-
-            });
-        }
 
         private void Btn2_Click(object sender, EventArgs e)
         {
@@ -186,10 +170,10 @@ namespace Demo
             PromptBefore += FrmWindow_PromptBefore;
 
             //指定了本地站点后，所有文件加载方式都和web中一致
-            //LoadUri("http://loc.webres/index.html");
+            LoadUri("http://loc.webres/index.html");
             //LoadUri("https://jbaysolutions.github.io/vue-grid-layout/examples/01-basic.html");
             //LoadUri("https://www.baidu.com");
-            LoadUri("https://www.cnblogs.com/wangkongming/p/6195903.html");
+            //LoadUri("https://www.cnblogs.com/wangkongming/p/6195903.html");
             //LoadUri("https://myliang.github.io/x-spreadsheet/");
             //LoadUri("https://www.qq.com");
             //LoadUri("https://www.acfun.cn");

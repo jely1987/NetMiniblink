@@ -11,12 +11,9 @@ namespace QQ2564874169.Miniblink
     internal class PrintUtil
     {
         private IMiniblink _miniblink;
-        private int _bakWidth;
-        private int _bakHeight;
-        private int _preY;
-        private int _width;
-        private int _height;
+        private ScreenshotImage _screenshotImage;
         private Action<PrintPreviewDialog> _callback;
+        private int _preY;
 
         public PrintUtil(IMiniblink miniblink)
         {
@@ -26,34 +23,16 @@ namespace QQ2564874169.Miniblink
         public void Start(Action<PrintPreviewDialog> callback)
         {
             _callback = callback;
-            _bakWidth = _miniblink.ViewWidth;
-            _bakHeight = _miniblink.ViewHeight;
-            _width = _miniblink.ContentWidth;
-            _height = _miniblink.ContentHeight;
-            _miniblink.PaintUpdated += WaitPaint;
-            MBApi.wkeResize(_miniblink.MiniblinkHandle, _width, _height);
-        }
+            _miniblink.DrawToBitmap(img =>
+            {
+                _screenshotImage = img;
+                img.GetImage().Save(Guid.NewGuid() + ".png");
 
-        private void DisablePaintUpdated(object sender, PaintUpdatedEventArgs e)
-        {
-            e.Cancel = true;
-        }
-
-        private void OnceDisablePaintUpdated(object sender, PaintUpdatedEventArgs e)
-        {
-            _miniblink.PaintUpdated -= OnceDisablePaintUpdated;
-            e.Cancel = true;
-        }
-
-        private void WaitPaint(object sender, PaintUpdatedEventArgs e)
-        {
-            e.Cancel = true;
-            _miniblink.PaintUpdated -= WaitPaint;
-            _miniblink.PaintUpdated += DisablePaintUpdated;
-            var pre = CreatePrintPreviewDialog();
-            pre.Document.BeginPrint += Document_BeginPrint;
-            pre.Document.PrintPage += Document_PrintPage;
-            _callback?.Invoke(pre);
+                var pre = CreatePrintPreviewDialog();
+                pre.Document.BeginPrint += Document_BeginPrint;
+                pre.Document.PrintPage += Document_PrintPage;
+                _callback?.Invoke(pre);
+            });
         }
 
         private PrintPreviewDialog CreatePrintPreviewDialog()
@@ -61,9 +40,8 @@ namespace QQ2564874169.Miniblink
             var pre = new PrintPreviewDialog { Document = new PrintDocument() };
             pre.Closed += (s, e) =>
             {
-                _miniblink.PaintUpdated -= DisablePaintUpdated;
-                _miniblink.PaintUpdated += OnceDisablePaintUpdated;
-                MBApi.wkeResize(_miniblink.MiniblinkHandle, _bakWidth, _bakHeight);
+                _screenshotImage.Dispose();
+                _screenshotImage = null;
             };
             ToolStrip strip = null;
             foreach (var control in pre.Controls)
@@ -106,44 +84,22 @@ namespace QQ2564874169.Miniblink
             var margin = e.MarginBounds;
             var w = margin.Width;
             var h = margin.Height;
-            var srcW = _width;
+            var srcW = _screenshotImage.Width;
             var rate = (double)srcW / w;
             var srcH = (int)(h * rate);
-            var srcY = _preY;
-            var getH = srcH;
 
-            if (srcY + srcH > _height)
+            using (var img = _screenshotImage.GetImage(0, _preY, srcW, srcH))
             {
-                getH = _height - srcY;
-                e.HasMorePages = false;
-            }
-            else
-            {
-                e.HasMorePages = true;
-            }
-
-            var bmp = new Bitmap(srcW, srcH);
-            using (var gdi = Graphics.FromImage(bmp))
-            {
-                //gdi.DrawImage(jietu,
-                //    0, 0,
-                //    new Rectangle(0, srcY, bmp.Width, getH),
-                //    GraphicsUnit.Pixel);
-
-                WinApi.BitBlt(gdi.GetHdc(), 0, 0, bmp.Width, getH,
-                    MBApi.wkeGetViewDC(_miniblink.MiniblinkHandle), 0, srcY,
-                    (int)WinConst.SRCCOPY);
+                using (var reduce = Utils.GetReducedImage(w, h, img))
+                {
+                    e.Graphics.DrawImage(reduce,
+                        new Rectangle(margin.X, margin.Y, reduce.Width, reduce.Height),
+                        new Rectangle(0, 0, reduce.Width, reduce.Height),
+                        GraphicsUnit.Pixel);
+                }
             }
 
-            var img = Utils.GetReducedImage(w, h, bmp);
-            bmp.Dispose();
-
-            e.Graphics.DrawImage(img,
-                new Rectangle(margin.X, margin.Y, img.Width, img.Height),
-                new Rectangle(0, 0, img.Width, img.Height),
-                GraphicsUnit.Pixel);
-            img.Dispose();
-
+            e.HasMorePages = _preY + srcH <= _screenshotImage.Height;
             _preY += srcH;
         }
 

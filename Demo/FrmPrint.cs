@@ -1,14 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using QQ2564874169.Miniblink;
 
@@ -23,12 +13,31 @@ namespace Demo
 
         private void button1_Click(object sender, EventArgs e)
         {
+            ShowMsg();
             miniblinkBrowser1.Print(dialog =>
             {
                 //如有需要，可以先设置一下
                 dialog.StartPosition = FormStartPosition.CenterScreen;
                 dialog.ShowDialog();
             });
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            ShowMsg();
+            miniblinkBrowser1.DrawToBitmap(s =>
+            {
+                using (var img = s.GetImage())
+                {
+                    img.Save(Guid.NewGuid() + ".png");
+                    MessageBox.Show("截图已保存");
+                }
+            });
+        }
+
+        private void ShowMsg()
+        {
+            MessageBox.Show(@"实现方式是滚动截屏，所以需要各位自己维护目标内容了。");
         }
 
         private void FrmPrint_Load(object sender, EventArgs e)
@@ -41,11 +50,13 @@ namespace Demo
         private void MiniblinkBrowser1_NavigateBefore(object sender, QQ2564874169.Miniblink.NavigateEventArgs e)
         {
             button1.Enabled = false;
+            button2.Enabled = false;
         }
 
         private void MiniblinkBrowser1_DocumentReady(object sender, DocumentReadyEventArgs e)
         {
             button1.Enabled = true;
+            button2.Enabled = true;
             Text = miniblinkBrowser1.DocumentTitle;
         }
     }

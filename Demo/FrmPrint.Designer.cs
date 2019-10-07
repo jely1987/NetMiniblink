@@ -30,6 +30,7 @@
         {
             this.button1 = new System.Windows.Forms.Button();
             this.miniblinkBrowser1 = new QQ2564874169.Miniblink.MiniblinkBrowser();
+            this.button2 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -47,16 +48,29 @@
             // 
             this.miniblinkBrowser1.BackColor = System.Drawing.Color.White;
             this.miniblinkBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.miniblinkBrowser1.FireDropFile = false;
             this.miniblinkBrowser1.Location = new System.Drawing.Point(0, 0);
             this.miniblinkBrowser1.Name = "miniblinkBrowser1";
             this.miniblinkBrowser1.Size = new System.Drawing.Size(795, 540);
             this.miniblinkBrowser1.TabIndex = 1;
+            // 
+            // button2
+            // 
+            this.button2.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.button2.Location = new System.Drawing.Point(0, 517);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(795, 23);
+            this.button2.TabIndex = 2;
+            this.button2.Text = "截图当前内容";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // FrmPrint
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(795, 563);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.miniblinkBrowser1);
             this.Controls.Add(this.button1);
             this.Name = "FrmPrint";
@@ -69,5 +83,6 @@
 
         private System.Windows.Forms.Button button1;
         private QQ2564874169.Miniblink.MiniblinkBrowser miniblinkBrowser1;
+        private System.Windows.Forms.Button button2;
     }
 }

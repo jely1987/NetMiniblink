@@ -8,8 +8,8 @@ namespace QQ2564874169.Miniblink
     public class DrawToBitmapUtil
     {
         private MiniblinkBrowser _miniblink;
-        private Action<ScreenshotImage> _imgCallback;
-        private List<Image> _images = new List<Image>();
+        private Action<ScreenshotImage> _callback;
+        private IDictionary<int, Image> _images = new SortedDictionary<int, Image>();
         private int _scrollTopBak;
         private int _imageHeight;
         private int _contentHeight;
@@ -23,7 +23,7 @@ namespace QQ2564874169.Miniblink
 
         public void ToImage(Action<ScreenshotImage> callback)
         {
-            _imgCallback = callback;
+            _callback = callback;
             _cssBak = _miniblink.RunJs(@"
                 var b = document.getElementsByTagName('body')[0];
                 var v = b.style.overflow;
@@ -31,7 +31,18 @@ namespace QQ2564874169.Miniblink
                 return v;").ToString();
             _contentHeight = _miniblink.ScrollHeight;
             _contentWidth = _miniblink.ContentWidth;
+
+            if (_contentWidth > Screen.PrimaryScreen.WorkingArea.Width)
+            {
+                _contentWidth = Screen.PrimaryScreen.WorkingArea.Width;
+            }
+
+            if (_contentWidth < _miniblink.ViewWidth)
+            {
+                _contentWidth = _miniblink.ViewWidth;
+            }
             _imageHeight = Screen.PrimaryScreen.WorkingArea.Height;
+
             if (_contentHeight < _imageHeight)
             {
                 _imageHeight = _contentHeight;
@@ -45,10 +56,11 @@ namespace QQ2564874169.Miniblink
         private void WaitToImagePaint(object sender, PaintUpdatedEventArgs e)
         {
             e.Cancel = true;
-            var w = MBApi.wkeGetWidth(_miniblink.MiniblinkHandle);
-            var h = MBApi.wkeGetHeight(_miniblink.MiniblinkHandle);
-            if (w != _contentWidth || h != _imageHeight)
+
+            if (_miniblink.ViewWidth != _contentWidth || _miniblink.ViewHeight != _imageHeight)
+            {
                 return;
+            }
 
             var height = _imageHeight;
             var scrTop = _imageHeight;
@@ -70,8 +82,7 @@ namespace QQ2564874169.Miniblink
                     MBApi.wkeGetViewDC(_miniblink.MiniblinkHandle), 0, srcY,
                     (int) WinConst.SRCCOPY);
             }
-
-            _images.Add(bmp);
+            _images[_miniblink.ScrollTop] = bmp;
 
             if (isLast)
             {
@@ -80,12 +91,11 @@ namespace QQ2564874169.Miniblink
                 _miniblink.RunJs($"document.getElementsByTagName('body')[0].style.overflow='{_cssBak}'");
                 _miniblink.PaintUpdated += DisablePaintUpdated;
                 MBApi.wkeResize(_miniblink.MiniblinkHandle, _miniblink.Width, _miniblink.Height);
-                using (var ss = new ScreenshotImage(_images))
-                {
-                    _imgCallback?.Invoke(ss);
-                }
+
+                var ss = new ScreenshotImage(_contentWidth, _contentHeight, _images.Values);
                 _images.Clear();
-                _imgCallback = null;
+                _callback?.Invoke(ss);
+                _callback = null;
             }
             else
             {

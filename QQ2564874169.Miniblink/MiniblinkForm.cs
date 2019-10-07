@@ -132,6 +132,7 @@ namespace QQ2564874169.Miniblink
             nx = _dropWinstart.X + nx;
             ny = _dropWinstart.Y + ny;
             Location = new Point(nx, ny);
+            Cursor = Cursors.SizeAll;
         }
 
 		private object DropStart(NetFuncContext context)
@@ -582,7 +583,7 @@ namespace QQ2564874169.Miniblink
         public int ViewHeight => _browser.ViewHeight;
         public bool CanGoBack => _browser.CanGoBack;
 		public bool CanGoForward => _browser.CanGoForward;
-        public MBDeviceParameter DeviceParameter => _browser.DeviceParameter;
+        public DeviceParameter DeviceParameter => _browser.DeviceParameter;
         public IList<ILoadResource> LoadResourceHandlerList => _browser.LoadResourceHandlerList;
         public CookieCollection Cookies => _browser.Cookies;
 

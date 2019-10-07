@@ -5,11 +5,11 @@ using System.Text;
 
 namespace QQ2564874169.Miniblink
 {
-    public class MBDeviceParameter
+    public class DeviceParameter
     {
         private IMiniblink _mb;
 
-        internal MBDeviceParameter(IMiniblink miniblink)
+        internal DeviceParameter(IMiniblink miniblink)
         {
             _mb = miniblink;
         }
