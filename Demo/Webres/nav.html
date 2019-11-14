@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <script>
+        window.onload = function () {
+            var tick = 0;
+            setInterval(function() {
+                    tick++;
+                    document.getElementById("time").innerText = tick;
+                },
+                1000);
+            var alist = document.getElementsByTagName("a");
+            for (var index in alist) {
+                if (alist[index].getAttribute("target") === "_blank") {
+                    alist[index].addEventListener("click",
+                        function(e) {
+                            NewPage(location.origin + this.getAttribute("href"));
+                            e.preventDefault();
+                        });
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+<div id="time"></div>
+<a href="/nav.html">普通A链接</a>
+<a href="/nav.html" target="_blank">新窗口打开</a>
+</body>
+</html>

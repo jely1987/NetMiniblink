@@ -64,6 +64,12 @@
     <Compile Include="FrmPrint.Designer.cs">
       <DependentUpon>FrmPrint.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmTab.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmTab.Designer.cs">
+      <DependentUpon>FrmTab.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -100,6 +106,9 @@
     <EmbeddedResource Include="FrmPrint.resx">
       <DependentUpon>FrmPrint.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FrmTab.resx">
+      <DependentUpon>FrmTab.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmWindow.resx">
       <DependentUpon>FrmWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -119,6 +128,7 @@
     <EmbeddedResource Include="Res\images\img.png" />
     <EmbeddedResource Include="Res\js\jquery.js" />
     <EmbeddedResource Include="Res\pkg.html" />
+    <Content Include="Webres\nav.html" />
     <Content Include="Webres\device.html" />
     <Content Include="Webres\control.html" />
     <Content Include="Webres\index.html" />
