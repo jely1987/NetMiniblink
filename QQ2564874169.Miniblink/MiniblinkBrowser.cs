@@ -372,9 +372,14 @@ namespace QQ2564874169.Miniblink
                 default:
                     throw new Exception("未知的重定向类型：" + type);
             }
-            _navigateBefore(this, e);
+            OnNavigateBefore(e);
 
             return (byte) (e.Cancel ? 0 : 1);
+        }
+
+        protected virtual void OnNavigateBefore(NavigateEventArgs args)
+        {
+            _navigateBefore(this, args);
         }
 
         private wkeDocumentReady2Callback _wkeDocumentReady;
@@ -645,7 +650,7 @@ namespace QQ2564874169.Miniblink
                 {
                     NetSetData(job, e.Data);
                 }
-
+                MBApi.wkeNetCancelRequest(job);
                 return true;
             }
 
@@ -654,6 +659,7 @@ namespace QQ2564874169.Miniblink
                 if (e.IsLocalFile)
                 {
                     OnLoadUrlEnd(mb, job, e.Data);
+                    MBApi.wkeNetCancelRequest(job);
                     return true;
                 }
                 
@@ -760,11 +766,6 @@ namespace QQ2564874169.Miniblink
         public void SetNpapiPluginsEnable(bool enable)
         {
             MBApi.wkeSetNpapiPluginsEnabled(MiniblinkHandle, enable);
-        }
-
-        public void SetNavigationToNewWindow(bool enable)
-        {
-            MBApi.wkeSetNavigationToNewWindowEnable(MiniblinkHandle, enable);
         }
 
         public void SetCspCheckEnable(bool enable)
@@ -907,6 +908,8 @@ namespace QQ2564874169.Miniblink
                 MBApi.wkeSetDragEnable(MiniblinkHandle, false);
                 MBApi.wkeSetDragDropEnable(MiniblinkHandle, false);
                 MBApi.wkeSetHandle(MiniblinkHandle, Handle);
+                MBApi.wkeSetNavigationToNewWindowEnable(MiniblinkHandle, true);
+                MBApi.wkeOnCreateView(MiniblinkHandle, OnCreateView, IntPtr.Zero);
                 _browserPaintUpdated += BrowserPaintUpdated;
                 var wkePaintUpdated = new wkePaintUpdatedCallback(OnPaintUpdated);
                 _ref.Add(Guid.NewGuid(), wkePaintUpdated);
@@ -920,6 +923,25 @@ namespace QQ2564874169.Miniblink
             }
         }
 
+        private IntPtr OnCreateView(IntPtr mb, IntPtr param, wkeNavigationType type, IntPtr url, IntPtr windowFeatures)
+        {
+            if (type == wkeNavigationType.LinkClick)
+            {
+                var e = new NavigateEventArgs
+                {
+                    Url = url.ToUTF8String(),
+                    Type = NavigateType.BlankLink
+                };
+                OnNavigateBefore(e);
+            }
+            else
+            {
+                OnNavigateBefore(mb, param, type, url);
+            }
+
+            return IntPtr.Zero;
+        }
+
         private void DestroyCallback()
         {
             MBApi.wkeOnPaintUpdated(MiniblinkHandle, null, IntPtr.Zero);
@@ -931,6 +953,7 @@ namespace QQ2564874169.Miniblink
             MBApi.wkeOnLoadUrlBegin(MiniblinkHandle, null, IntPtr.Zero);
             MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, null, IntPtr.Zero);
             MBApi.wkeOnDownload(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnCreateView(MiniblinkHandle, null, IntPtr.Zero);
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
@@ -1292,6 +1315,16 @@ namespace QQ2564874169.Miniblink
                 }
             }
 
+            var navArgs = new NavigateEventArgs
+            {
+                Url = url,
+                Type = NavigateType.WindowOpen
+            };
+            OnNavigateBefore(navArgs);
+            if (navArgs.Cancel)
+            {
+                return null;
+            }
             var e = OnWindowOpen(url, name, map, "true" == replace);
             return e.ReturnValue;
         }

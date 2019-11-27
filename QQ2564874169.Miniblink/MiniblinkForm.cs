@@ -704,11 +704,6 @@ namespace QQ2564874169.Miniblink
 			_browser.SetNpapiPluginsEnable(enable);
 		}
 
-		public void SetNavigationToNewWindow(bool enable)
-		{
-			_browser.SetNavigationToNewWindow(enable);
-		}
-
 		public void SetCspCheckEnable(bool enable)
 		{
 			_browser.SetCspCheckEnable(enable);

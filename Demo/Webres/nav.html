@@ -11,22 +11,18 @@
                     document.getElementById("time").innerText = tick;
                 },
                 1000);
-            var alist = document.getElementsByTagName("a");
-            for (var index in alist) {
-                if (alist[index].getAttribute("target") === "_blank") {
-                    alist[index].addEventListener("click",
-                        function(e) {
-                            NewPage(location.origin + this.getAttribute("href"));
-                            e.preventDefault();
-                        });
-                }
-            }
+
+            document.getElementById("btnOpen").addEventListener("click",
+                function (e) {
+                    window.open(location.href, '_blank', 'width=100,height=80', true);
+                });
         }
     </script>
 </head>
 <body>
-<div id="time"></div>
+<div id="time">0</div>
 <a href="/nav.html">普通A链接</a>
-<a href="/nav.html" target="_blank">新窗口打开</a>
+<a href="/nav.html" target="_blank">_blank链接</a>
+<button id="btnOpen" href="javascript:;">window.open</button>
 </body>
 </html>

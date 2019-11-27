@@ -25,6 +25,14 @@
         /// <summary>
         /// 其他
         /// </summary>
-        Other
+        Other,
+        /// <summary>
+        /// window.open引发
+        /// </summary>
+        WindowOpen,
+        /// <summary>
+        /// 拥有target=blank属性的a链接引发
+        /// </summary>
+        BlankLink
     }
 }

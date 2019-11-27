@@ -13,34 +13,31 @@ using QQ2564874169.Miniblink.LoadResourceImpl;
 
 namespace Demo
 {
-    public partial class FrmTab : Form
+    public partial class FrmTab : MiniblinkForm
     {
         private string dir = Path.Combine(Application.StartupPath, "webres");
 
         public FrmTab()
         {
             InitializeComponent();
+            LoadResourceHandlerList.Add(new LoadResourceByFile(dir, "loc.web"));
         }
 
         private void FrmTab_Load(object sender, EventArgs e)
         {
-            NewPage("http://loc.web/nav.html");
+            NavigateBefore += FrmTab_NavigateBefore;
+            DocumentReady += FrmTab_DocumentReady;
+            LoadUri("http://loc.web/nav.html");
         }
 
-        [NetFunc]
-        private void NewPage(string url)
+        private void FrmTab_DocumentReady(object sender, DocumentReadyEventArgs e)
         {
-            var tab = new TabPage((tabControl1.TabCount + 1) + " page");
-            var bw = new MiniblinkBrowser
-            {
-                Dock = DockStyle.Fill
-            };
-            bw.RegisterNetFunc(this);
-            bw.LoadResourceHandlerList.Add(new LoadResourceByFile(dir, "loc.web"));
-            tab.Controls.Add(bw);
-            tabControl1.TabPages.Add(tab);
-            tabControl1.SelectedTab = tab;
-            bw.LoadUri(url);
+            e.Frame.InsertCss("<style>a:{color:red}</style>");
+        }
+
+        private void FrmTab_NavigateBefore(object sender, QQ2564874169.Miniblink.NavigateEventArgs e)
+        {
+            Console.WriteLine(e.Type);
         }
     }
 }

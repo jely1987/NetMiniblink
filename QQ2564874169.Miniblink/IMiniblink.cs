@@ -56,7 +56,6 @@ namespace QQ2564874169.Miniblink
 		void BindNetFunc(NetFunc func);
 		void SetHeadlessEnabled(bool enable);
 		void SetNpapiPluginsEnable(bool enable);
-		void SetNavigationToNewWindow(bool enable);
 		void SetCspCheckEnable(bool enable);
         void SetTouchEnabled(bool enable);
         void SetMouseEnabled(bool enable);
