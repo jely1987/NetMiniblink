@@ -34,12 +34,6 @@ namespace QQ2564874169.Miniblink
         /// </summary>
         public FormResizeWidth ResizeWidth { get; private set; }
 
-        public override ContextMenuStrip ContextMenuStrip
-		{
-			get { return _browser.ContextMenuStrip; }
-			set { _browser.ContextMenuStrip = value; }
-		}
-
 		private ResizeDirect _direct;
 		private bool _resizeing;
 		private Point _resizeStart;
@@ -69,10 +63,17 @@ namespace QQ2564874169.Miniblink
             {
                 if (IsTransparent)
                 {
-                    SetTransparent();
+                    NoneBorderResize = true;
+                    FormBorderStyle = FormBorderStyle.None;
+                    Shown += SetTransparentStartPos;
+                    Load += (s, e) => SetTransparent();
+                    _browser.PaintUpdated += Miniblink_Paint;
                 }
 
-                DropByClass = true;
+                if (FormBorderStyle == FormBorderStyle.None)
+                {
+                    DropByClass = true;
+                }
                 var tmp = Guid.NewGuid().ToString().Replace("-", "");
                 BindNetFunc(new NetFunc(_dragfunc = "drag" + tmp, DropStart));
                 BindNetFunc(new NetFunc(_maxfunc = "max" + tmp, MaxFunc));
@@ -86,15 +87,30 @@ namespace QQ2564874169.Miniblink
 
         private void SetTransparent()
         {
-            NoneBorderResize = true;
-            FormBorderStyle = FormBorderStyle.None;
             var style = WinApi.GetWindowLong(Handle, (int)WinConst.GWL_EXSTYLE);
             if ((style & (int)WinConst.WS_EX_LAYERED) != (int)WinConst.WS_EX_LAYERED)
             {
                 WinApi.SetWindowLong(Handle, (int)WinConst.GWL_EXSTYLE, style | (int)WinConst.WS_EX_LAYERED);
             }
             MBApi.wkeSetTransparent(_browser.MiniblinkHandle, true);
-            _browser.PaintUpdated += Miniblink_Paint;
+        }
+
+        private void SetTransparentStartPos(object sender, EventArgs e)
+        {
+            switch (StartPosition)
+            {
+                case FormStartPosition.CenterScreen:
+                    Left = Screen.PrimaryScreen.WorkingArea.Width / 2 - Width / 2;
+                    Top = Screen.PrimaryScreen.WorkingArea.Height / 2 - Height / 2;
+                    break;
+                case FormStartPosition.CenterParent:
+                    if (ParentForm != null)
+                    {
+                        Left = ParentForm.Left + ParentForm.Width / 2 - Width / 2;
+                        Top = ParentForm.Top + ParentForm.Height / 2 - Height / 2;
+                    }
+                    break;
+            }
         }
 
         private void DropEvent(bool isRemove)
@@ -535,10 +551,10 @@ namespace QQ2564874169.Miniblink
 			set
 			{
 				if (FormBorderStyle != FormBorderStyle.None)
-				{
-					base.WindowState = value;
-					return;
-				}
+                {
+                    base.WindowState = _windowState = value;
+                    return;
+                }
 				if (_stateRect.HasValue == false)
 				{
 					_stateRect = new Rectangle(Location, Size);
@@ -702,11 +718,6 @@ namespace QQ2564874169.Miniblink
 		public void SetNpapiPluginsEnable(bool enable)
 		{
 			_browser.SetNpapiPluginsEnable(enable);
-		}
-
-		public void SetNavigationToNewWindow(bool enable)
-		{
-			_browser.SetNavigationToNewWindow(enable);
 		}
 
 		public void SetCspCheckEnable(bool enable)

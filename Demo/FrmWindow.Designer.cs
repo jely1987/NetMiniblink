@@ -28,43 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.右键菜单ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.右键菜单ToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(125, 26);
-            // 
-            // 右键菜单ToolStripMenuItem
-            // 
-            this.右键菜单ToolStripMenuItem.Name = "右键菜单ToolStripMenuItem";
-            this.右键菜单ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.右键菜单ToolStripMenuItem.Text = "右键菜单";
-            // 
-            // FrmWindow
+            // FrmFormMode
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(657, 600);
-            this.ContextMenuStrip = this.contextMenuStrip1;
-            this.Name = "FrmWindow";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "FrmTest";
-            this.Load += new System.EventHandler(this.FrmTest_Load);
-            this.contextMenuStrip1.ResumeLayout(false);
+            this.ClientSize = new System.Drawing.Size(507, 493);
+            this.Name = "FrmFormMode";
+            this.Text = "窗体形式";
+            this.Load += new System.EventHandler(this.FrmFormMode_Load);
             this.ResumeLayout(false);
 
         }
 
-		#endregion
-
-		private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-		private System.Windows.Forms.ToolStripMenuItem 右键菜单ToolStripMenuItem;
+        #endregion
     }
 }

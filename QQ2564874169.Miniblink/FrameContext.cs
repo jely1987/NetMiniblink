@@ -22,8 +22,12 @@ namespace QQ2564874169.Miniblink
         public object RunJs(string script)
         {
             var es = MBApi.wkeGetGlobalExecByFrame(_mb, Id);
-            //return MBApi.wkeRunJsByFrame(_mb, Id, script, true).ToValue(es);
             return MBApi.jsEvalExW(es, script, true).ToValue(es);
+        }
+
+        public void InsertCss(string cssText)
+        {
+            MBApi.wkeInsertCSSByFrame(_mb, Id, cssText);
         }
     }
 }

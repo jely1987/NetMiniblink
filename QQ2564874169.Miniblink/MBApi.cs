@@ -1286,8 +1286,22 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeOnCreateView", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkeOnCreateView(IntPtr webView, wkeCreateViewCallback callback, IntPtr param);
+        [DllImport(DLL_x86, EntryPoint = "wkeOnCreateView", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void wkeOnCreateView_x86(IntPtr webView, wkeCreateViewCallback callback, IntPtr param);
+        [DllImport(DLL_x64, EntryPoint = "wkeOnCreateView", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void wkeOnCreateView_x64(IntPtr webView, wkeCreateViewCallback callback, IntPtr param);
+
+        public static void wkeOnCreateView(IntPtr webView, wkeCreateViewCallback callback, IntPtr param)
+        {
+            if (is64())
+            {
+                wkeOnCreateView_x64(webView, callback, param);
+            }
+            else
+            {
+                wkeOnCreateView_x86(webView, callback, param);
+            }
+        }
 
         //[DllImport(DLL_x86, EntryPoint = "wkeOnDocumentReady", CallingConvention = CallingConvention.Cdecl)]
         //public static extern void wkeOnDocumentReady(IntPtr webView, wkeDocumentReadyCallback callback, IntPtr param);
@@ -2219,6 +2233,42 @@ namespace QQ2564874169.Miniblink
             else
             {
                 wkeNetSetHTTPHeaderField_x86(job, key, value, false);
+            }
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeNetCancelRequest", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeNetCancelRequest_x86(IntPtr job);
+        [DllImport(DLL_x64, EntryPoint = "wkeNetCancelRequest", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeNetCancelRequest_x64(IntPtr job);
+
+        public static void wkeNetCancelRequest(IntPtr job)
+        {
+            if (is64())
+            {
+                wkeNetCancelRequest_x64(job);
+            }
+            else
+            {
+                wkeNetCancelRequest_x86(job);
+            }
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeInsertCSSByFrame", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Unicode)]
+        private static extern void wkeInsertCSSByFrame_x86(IntPtr webView, IntPtr frameId, string cssText);
+        [DllImport(DLL_x64, EntryPoint = "wkeInsertCSSByFrame", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Unicode)]
+        private static extern void wkeInsertCSSByFrame_x64(IntPtr webView, IntPtr frameId, string cssText);
+
+        public static void wkeInsertCSSByFrame(IntPtr webView, IntPtr frameId, string cssText)
+        {
+            if (is64())
+            {
+                wkeInsertCSSByFrame_x64(webView, frameId, cssText);
+            }
+            else
+            {
+                wkeInsertCSSByFrame_x86(webView, frameId, cssText);
             }
         }
     }
