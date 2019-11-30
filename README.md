@@ -4,12 +4,14 @@
 免费版miniblink的C#封装，miniblink官网：http://miniblink.net
 - 面向对象，符合.NET使用习惯。
 - 支持AnyCPU生成exe。
-- 支持b/s开发模式，给习惯web的人用，关键是使用ajax不会卡界面。
+- 支持b/s开发模式，给习惯web的人用，关键是使用ajax不会卡界面，并且分离界面和逻辑。
 - 本封装是面向UI的，不是浏览器！
 
 
-### 其他
-- x64的dll不是作者编译的，我也是从网上找的，版本肯定没有x86的那么新，所以x64下某些功能缺失报错是正常现象。
+### 2019-11-30
+- 换了个更好看的演示Demo。
+- NavigateBefore事件中新增2个类型：BlankLink和WindowOpen
+- 修复[NetFunc]方法如果参数是object类型会报错的问题。
 
 
 ### 2019-10-07
