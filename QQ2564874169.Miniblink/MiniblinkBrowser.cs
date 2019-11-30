@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -1037,6 +1038,7 @@ namespace QQ2564874169.Miniblink
                                     }
                                 }
 
+
                                 if (pt == typeof(DateTime) && !(v is DateTime))
                                 {
                                     long l_date;
@@ -1046,7 +1048,7 @@ namespace QQ2564874169.Miniblink
                                     }
                                 }
 
-                                if (v is JsFunc)
+                                if (v is JsFunc || pt == typeof(object) || pt == typeof(ExpandoObject))
                                 {
                                     mpvs[i] = v;
                                 }

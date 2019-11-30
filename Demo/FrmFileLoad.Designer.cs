@@ -1,6 +1,6 @@
 ﻿namespace Demo
 {
-    partial class FrmWindow
+    partial class FrmFileLoad
     {
         /// <summary>
         /// Required designer variable.
@@ -30,14 +30,14 @@
         {
             this.SuspendLayout();
             // 
-            // FrmFormMode
+            // FrmFileLoad
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(507, 493);
-            this.Name = "FrmFormMode";
-            this.Text = "窗体形式";
-            this.Load += new System.EventHandler(this.FrmFormMode_Load);
+            this.ClientSize = new System.Drawing.Size(508, 209);
+            this.Name = "FrmFileLoad";
+            this.Text = "从本地文件中加载资源";
+            this.Load += new System.EventHandler(this.FrmFileLoad_Load);
             this.ResumeLayout(false);
 
         }

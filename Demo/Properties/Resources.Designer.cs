@@ -59,51 +59,5 @@ namespace Demo.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
-        /// </summary>
-        internal static System.Drawing.Bitmap img {
-            get {
-                object obj = ResourceManager.GetObject("img", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 /*! jQuery v3.4.1 | (c) JS Foundation and other contributors | jquery.org/license */
-        ///!function (e, t) { &quot;use strict&quot;; &quot;object&quot; == typeof module &amp;&amp; &quot;object&quot; == typeof module.exports ? module.exports = e.document ? t(e, !0) : function (e) { if (!e.document) throw new Error(&quot;jQuery requires a window with a document&quot;); return t(e) } : t(e) }(&quot;undefined&quot; != typeof window ? window : this, function (C, e) { &quot;use strict&quot;; var t = [], E = C.document, r = Object.getPrototypeOf, s = t.slice, g = t.concat, u = t.push, [字符串的其余部分被截断]&quot;; 的本地化字符串。
-        /// </summary>
-        internal static string jquery {
-            get {
-                return ResourceManager.GetString("jquery", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 &lt;!DOCTYPE html&gt;
-        ///
-        ///&lt;html lang=&quot;en&quot; xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;
-        ///&lt;head&gt;
-        ///    &lt;meta charset=&quot;utf-8&quot; /&gt;
-        ///    &lt;script src=&quot;/js/jquery.js&quot;&gt;&lt;/script&gt;
-        ///    &lt;script&gt;
-        ///        $(function() {
-        ///            $(&quot;#btn&quot;).click(function() {
-        ///                $(&quot;#img&quot;).remove();
-        ///                $(&quot;&lt;img/&gt;&quot;).attr(&quot;id&quot;, &quot;img&quot;).attr(&quot;src&quot;, &quot;/images/img.png&quot;).css(&quot;display&quot;, &quot;block&quot;).appendTo(&quot;body&quot;);
-        ///            });
-        ///        });
-        ///    &lt;/script&gt;
-        ///&lt;/head&gt;
-        ///&lt;body&gt;
-        ///&lt;h2&gt;此页面使用的html以及图片和外部js都是打包在程序集内的&lt;/h2&gt;
-        ///&lt;input type=&quot;butto [字符串的其余部分被截断]&quot;; 的本地化字符串。
-        /// </summary>
-        internal static string pkg {
-            get {
-                return ResourceManager.GetString("pkg", resourceCulture);
-            }
-        }
     }
 }

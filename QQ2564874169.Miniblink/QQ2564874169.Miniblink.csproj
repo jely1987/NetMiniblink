@@ -71,8 +71,8 @@
     <Compile Include="ILoadResource.cs" />
     <Compile Include="IMiniblink.cs" />
     <Compile Include="JsFunc.cs" />
-    <Compile Include="LoadResourceImpl\LoadResourceByEmbed.cs" />
-    <Compile Include="LoadResourceImpl\LoadResourceByFile.cs" />
+    <Compile Include="LoadResourceImpl\EmbedLoader.cs" />
+    <Compile Include="LoadResourceImpl\FileLoader.cs" />
     <Compile Include="LocalHttp\ApiNameAttribute.cs" />
     <Compile Include="LocalHttp\NetApi.cs" />
     <Compile Include="LocalHttp\NetApiAfter.cs" />

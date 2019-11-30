@@ -1,6 +1,6 @@
 ﻿namespace Demo
 {
-    partial class FrmWindow
+    partial class FrmRunJs
     {
         /// <summary>
         /// Required designer variable.
@@ -28,20 +28,36 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.btnAdd = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // FrmFormMode
+            // btnAdd
+            // 
+            this.btnAdd.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btnAdd.Location = new System.Drawing.Point(0, 273);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(595, 23);
+            this.btnAdd.TabIndex = 1;
+            this.btnAdd.Text = "新增一个<li>";
+            this.btnAdd.UseVisualStyleBackColor = true;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            // 
+            // FrmRunJs
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(507, 493);
-            this.Name = "FrmFormMode";
-            this.Text = "窗体形式";
-            this.Load += new System.EventHandler(this.FrmFormMode_Load);
+            this.ClientSize = new System.Drawing.Size(595, 296);
+            this.Controls.Add(this.btnAdd);
+            this.Name = "FrmRunJs";
+            this.Text = "FrmRunJs";
+            this.Load += new System.EventHandler(this.FrmRunJs_Load);
+            this.Controls.SetChildIndex(this.btnAdd, 0);
             this.ResumeLayout(false);
 
         }
 
         #endregion
+
+        private System.Windows.Forms.Button btnAdd;
     }
 }

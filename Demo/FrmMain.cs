@@ -1,60 +1,98 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using QQ2564874169.Miniblink.LocalHttp;
 
 namespace Demo
 {
 	public partial class FrmMain : Form
 	{
-        public static NetApiEngine NetApi { get; private set; }
-
-		public FrmMain()
+        public FrmMain()
 		{
 			InitializeComponent();
-
-            if (NetApi == null)
-            {
-                //实例化时会扫描当前加载的程序集找出所有NetApi
-                NetApi = new NetApiEngine();
-            }
-        }
-
-		private void button1_Click(object sender, EventArgs e)
-		{
-			new FrmWindow().Show();
-		}
-
-		private void button2_Click(object sender, EventArgs e)
-		{
-			new FrmBrowser().Show();
-		}
-
-		private void button3_Click(object sender, EventArgs e)
-		{
-			new FrmTransparent().Show();
-		}
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            new FrmPrint().Show();
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            new FrmPkg().Show();
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
             Process.Start("https://gitee.com/aochulai/NetMiniblink");
+        }
+
+        private void FrmMain_Load(object sender, EventArgs e)
+        {
+            treeView1.ExpandAll();
+        }
+
+        private void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            if (e.Node.Tag == null)
+            {
+                return;
+            }
+
+            var form = e.Node.Tag as Form;
+            if (form != null)
+            {
+                if (form.WindowState == FormWindowState.Minimized)
+                {
+                    form.WindowState = FormWindowState.Normal;
+                }
+                form.Activate();
+                return;
+            }
+
+            var tag = e.Node.Tag.ToString();
+
+            switch (tag)
+            {
+                case "ctrl_mode":
+                    form = new FrmControl();
+                    break;
+                case "frm_mode":
+                    form = new FrmWindow();
+                    break;
+                case "tran_mode":
+                    form = new FrmTransparent();
+                    break;
+                case "embed_loader":
+                    form = new FrmEmbedLoad();
+                    break;
+                case "file_loader":
+                    form = new FrmFileLoad();
+                    break;
+                case "net_call_js":
+                    form = new FrmNetCallJs();
+                    break;
+                case "js_call_net":
+                    form = new FrmJsCallNet();
+                    break;
+                case "runjs":
+                    form = new FrmRunJs();
+                    break;
+                case "events":
+                    form = new FrmEvents();
+                    break;
+                case "image":
+                    form = new FrmImage();
+                    break;
+                case "web":
+                    form = new FrmWeb();
+                    break;
+                case "dev_tools":
+                    form = new FrmDevTools();
+                    break;
+            }
+
+            if (form != null)
+            {
+                e.Node.Tag = form;
+                form.Closed += (ss, ee) =>
+                {
+                    var self = (Form) ss;
+                    ((TreeNode) self.Tag).Tag = tag;
+                };
+                form.Tag = e.Node;
+                form.StartPosition = FormStartPosition.CenterScreen;
+                form.Show();
+            }
         }
     }
 }

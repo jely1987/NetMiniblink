@@ -12,18 +12,17 @@ using QQ2564874169.Miniblink.LoadResourceImpl;
 
 namespace Demo
 {
-    public partial class FrmWindow : MiniblinkForm
+    public partial class FrmEmbedLoad : MiniblinkForm
     {
-        public FrmWindow()
+        public FrmEmbedLoad()
         {
             InitializeComponent();
             LoadResourceHandlerList.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
-        private void FrmFormMode_Load(object sender, EventArgs e)
+        private void FrmEmbedLoad_Load(object sender, EventArgs e)
         {
-            DropByClass = true;
-            LoadUri("http://loc.res/window.html");
+            LoadUri("http://loc.res/embed_loader.html");
         }
     }
 }

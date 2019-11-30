@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,18 +13,18 @@ using QQ2564874169.Miniblink.LoadResourceImpl;
 
 namespace Demo
 {
-    public partial class FrmWindow : MiniblinkForm
+    public partial class FrmFileLoad : MiniblinkForm
     {
-        public FrmWindow()
+        public FrmFileLoad()
         {
             InitializeComponent();
-            LoadResourceHandlerList.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            var appDir = Application.StartupPath;
+            LoadResourceHandlerList.Add(new FileLoader(Path.Combine(appDir, "Webres"), "loc.res"));
         }
 
-        private void FrmFormMode_Load(object sender, EventArgs e)
+        private void FrmFileLoad_Load(object sender, EventArgs e)
         {
-            DropByClass = true;
-            LoadUri("http://loc.res/window.html");
+            LoadUri("http://loc.res/file_loader.html");
         }
     }
 }

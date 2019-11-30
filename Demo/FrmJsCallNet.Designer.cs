@@ -1,6 +1,6 @@
 ﻿namespace Demo
 {
-    partial class FrmWindow
+    partial class FrmJsCallNet
     {
         /// <summary>
         /// Required designer variable.
@@ -30,14 +30,14 @@
         {
             this.SuspendLayout();
             // 
-            // FrmFormMode
+            // FrmJsCallNet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(507, 493);
-            this.Name = "FrmFormMode";
-            this.Text = "窗体形式";
-            this.Load += new System.EventHandler(this.FrmFormMode_Load);
+            this.ClientSize = new System.Drawing.Size(644, 700);
+            this.Name = "FrmJsCallNet";
+            this.Text = "JS调用.NET";
+            this.Load += new System.EventHandler(this.FrmJsCallNet_Load);
             this.ResumeLayout(false);
 
         }

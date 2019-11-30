@@ -22,7 +22,7 @@ namespace Demo
             InitializeComponent();
             FormBorderStyle = FormBorderStyle.None;
             NoneBorderResize = true;
-            LoadResourceHandlerList.Add(new LoadResourceByFile(dir, "loc.web"));
+            LoadResourceHandlerList.Add(new FileLoader(dir, "loc.web"));
         }
 
         private void FrmTest_Load(object sender, EventArgs e)
