@@ -58,6 +58,9 @@ namespace Demo
                 case "file_loader":
                     form = new FrmFileLoad();
                     break;
+                case "zip_loader":
+                    form = new FrmZipLoad();
+                    break;
                 case "net_call_js":
                     form = new FrmNetCallJs();
                     break;

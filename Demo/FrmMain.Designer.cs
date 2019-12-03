@@ -37,28 +37,30 @@
             treeNode3});
             System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("从本地目录加载");
             System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("从嵌入资源加载");
-            System.Windows.Forms.TreeNode treeNode7 = new System.Windows.Forms.TreeNode("其他资源加载方式", new System.Windows.Forms.TreeNode[] {
+            System.Windows.Forms.TreeNode treeNode7 = new System.Windows.Forms.TreeNode("从ZIP文件中加载");
+            System.Windows.Forms.TreeNode treeNode8 = new System.Windows.Forms.TreeNode("其他资源加载方式", new System.Windows.Forms.TreeNode[] {
             treeNode5,
-            treeNode6});
-            System.Windows.Forms.TreeNode treeNode8 = new System.Windows.Forms.TreeNode("JS调用C#");
-            System.Windows.Forms.TreeNode treeNode9 = new System.Windows.Forms.TreeNode("C#调用JS");
-            System.Windows.Forms.TreeNode treeNode10 = new System.Windows.Forms.TreeNode("RunJs");
-            System.Windows.Forms.TreeNode treeNode11 = new System.Windows.Forms.TreeNode("JS交互", new System.Windows.Forms.TreeNode[] {
-            treeNode8,
+            treeNode6,
+            treeNode7});
+            System.Windows.Forms.TreeNode treeNode9 = new System.Windows.Forms.TreeNode("JS调用C#");
+            System.Windows.Forms.TreeNode treeNode10 = new System.Windows.Forms.TreeNode("C#调用JS");
+            System.Windows.Forms.TreeNode treeNode11 = new System.Windows.Forms.TreeNode("RunJs");
+            System.Windows.Forms.TreeNode treeNode12 = new System.Windows.Forms.TreeNode("JS交互", new System.Windows.Forms.TreeNode[] {
             treeNode9,
-            treeNode10});
-            System.Windows.Forms.TreeNode treeNode12 = new System.Windows.Forms.TreeNode("事件");
-            System.Windows.Forms.TreeNode treeNode13 = new System.Windows.Forms.TreeNode("打印与截图");
-            System.Windows.Forms.TreeNode treeNode14 = new System.Windows.Forms.TreeNode("自宿主web服务器");
-            System.Windows.Forms.TreeNode treeNode15 = new System.Windows.Forms.TreeNode("开发者工具");
-            System.Windows.Forms.TreeNode treeNode16 = new System.Windows.Forms.TreeNode("功能演示", new System.Windows.Forms.TreeNode[] {
+            treeNode10,
+            treeNode11});
+            System.Windows.Forms.TreeNode treeNode13 = new System.Windows.Forms.TreeNode("事件");
+            System.Windows.Forms.TreeNode treeNode14 = new System.Windows.Forms.TreeNode("打印与截图");
+            System.Windows.Forms.TreeNode treeNode15 = new System.Windows.Forms.TreeNode("自宿主web服务器");
+            System.Windows.Forms.TreeNode treeNode16 = new System.Windows.Forms.TreeNode("开发者工具");
+            System.Windows.Forms.TreeNode treeNode17 = new System.Windows.Forms.TreeNode("功能演示", new System.Windows.Forms.TreeNode[] {
             treeNode4,
-            treeNode7,
-            treeNode11,
+            treeNode8,
             treeNode12,
             treeNode13,
             treeNode14,
-            treeNode15});
+            treeNode15,
+            treeNode16});
             this.button6 = new System.Windows.Forms.Button();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.SuspendLayout();
@@ -103,34 +105,37 @@
             treeNode6.Tag = "embed_loader";
             treeNode6.Text = "从嵌入资源加载";
             treeNode7.Name = "节点0";
-            treeNode7.Text = "其他资源加载方式";
-            treeNode8.Name = "节点1";
-            treeNode8.Tag = "js_call_net";
-            treeNode8.Text = "JS调用C#";
-            treeNode9.Name = "节点2";
-            treeNode9.Tag = "net_call_js";
-            treeNode9.Text = "C#调用JS";
+            treeNode7.Tag = "zip_loader";
+            treeNode7.Text = "从ZIP文件中加载";
+            treeNode8.Name = "节点0";
+            treeNode8.Text = "其他资源加载方式";
+            treeNode9.Name = "节点1";
+            treeNode9.Tag = "js_call_net";
+            treeNode9.Text = "JS调用C#";
             treeNode10.Name = "节点2";
-            treeNode10.Tag = "runjs";
-            treeNode10.Text = "RunJs";
-            treeNode11.Name = "节点0";
-            treeNode11.Text = "JS交互";
+            treeNode10.Tag = "net_call_js";
+            treeNode10.Text = "C#调用JS";
+            treeNode11.Name = "节点2";
+            treeNode11.Tag = "runjs";
+            treeNode11.Text = "RunJs";
             treeNode12.Name = "节点0";
-            treeNode12.Tag = "events";
-            treeNode12.Text = "事件";
+            treeNode12.Text = "JS交互";
             treeNode13.Name = "节点0";
-            treeNode13.Tag = "image";
-            treeNode13.Text = "打印与截图";
-            treeNode14.Name = "节点1";
-            treeNode14.Tag = "web";
-            treeNode14.Text = "自宿主web服务器";
-            treeNode15.Name = "节点0";
-            treeNode15.Tag = "dev_tools";
-            treeNode15.Text = "开发者工具";
+            treeNode13.Tag = "events";
+            treeNode13.Text = "事件";
+            treeNode14.Name = "节点0";
+            treeNode14.Tag = "image";
+            treeNode14.Text = "打印与截图";
+            treeNode15.Name = "节点1";
+            treeNode15.Tag = "web";
+            treeNode15.Text = "自宿主web服务器";
             treeNode16.Name = "节点0";
-            treeNode16.Text = "功能演示";
+            treeNode16.Tag = "dev_tools";
+            treeNode16.Text = "开发者工具";
+            treeNode17.Name = "节点0";
+            treeNode17.Text = "功能演示";
             this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode16});
+            treeNode17});
             this.treeView1.Size = new System.Drawing.Size(279, 296);
             this.treeView1.TabIndex = 6;
             this.treeView1.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView1_NodeMouseClick);

@@ -8,6 +8,10 @@
 - 本封装是面向UI的，不是浏览器！
 
 
+### 2019-12-03
+- 新增一个资源加载类：ZipLoader，用于从ZIP文件中加载资源，支持密码，支持内嵌。
+
+
 ### 2019-11-30
 - 换了个更好看的演示Demo。
 - NavigateBefore事件中新增2个类型：BlankLink和WindowOpen

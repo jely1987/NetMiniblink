@@ -1114,7 +1114,7 @@ namespace QQ2564874169.Miniblink
 
         private void HookPop(object sender, DidCreateScriptContextEventArgs e)
         {
-            var js = string.Join(".", GetType().Namespace, "Js", "hook.js");
+            var js = string.Join(".", GetType().Namespace, "Files", "hook.js");
 
             using (var sm = GetType().Assembly.GetManifestResourceStream(js))
             {
@@ -1127,8 +1127,9 @@ namespace QQ2564874169.Miniblink
                 }
             }
 
-            js = "var popHookName='" + _popHookName + "';" + js;
-            js += "var openHookName='" + _openHookName + "';" + js;
+            js = $@"var popHookName='{_popHookName}';
+                    var openHookName='{_openHookName}';"
+                 + js;
 
             e.Frame.RunJs(js);
         }

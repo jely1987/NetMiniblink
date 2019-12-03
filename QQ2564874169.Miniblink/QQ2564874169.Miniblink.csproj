@@ -31,6 +31,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DotNetZip, Version=1.13.4.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Files\DotNetZip.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -73,6 +78,7 @@
     <Compile Include="JsFunc.cs" />
     <Compile Include="LoadResourceImpl\EmbedLoader.cs" />
     <Compile Include="LoadResourceImpl\FileLoader.cs" />
+    <Compile Include="LoadResourceImpl\ZipLoader.cs" />
     <Compile Include="LocalHttp\ApiNameAttribute.cs" />
     <Compile Include="LocalHttp\NetApi.cs" />
     <Compile Include="LocalHttp\NetApiAfter.cs" />
@@ -136,8 +142,12 @@
       <DependentUpon>MiniblinkBrowser.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <EmbeddedResource Include="Js\hook.js" />
+    <EmbeddedResource Include="Files\hook.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Files\DotNetZip.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
