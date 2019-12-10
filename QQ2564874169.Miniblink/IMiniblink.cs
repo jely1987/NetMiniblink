@@ -28,11 +28,16 @@ namespace QQ2564874169.Miniblink
 		bool CookieEnabled { get; set; }
 		string UserAgent { get; set; }
         DeviceParameter DeviceParameter { get; }
+        CookieCollection Cookies { get; }
         /// <summary>
         /// 是否在接收到拖放的文件时触发window的dropFile事件
         /// </summary>
         bool FireDropFile { get; set; }
-        CookieCollection Cookies { get; }
+        /// <summary>
+        /// 资源加载的Handler集合，一个请求发起前先从此集合中尝试加载资源，无法加载才发起真实请求。
+        /// </summary>
+        IList<ILoadResource> LoadResourceHandlerList { get; }
+        IResourceCache ResourceCache { get; set; }
 
         event EventHandler<UrlChangedEventArgs> UrlChanged;
 		event EventHandler<NavigateEventArgs> NavigateBefore;
@@ -68,5 +73,6 @@ namespace QQ2564874169.Miniblink
 		void Reload();
         void DrawToBitmap(Action<ScreenshotImage> callback);
         void Print(Action<PrintPreviewDialog> callback);
+        CookieCollection GetCookies(string domain);
     }
 }

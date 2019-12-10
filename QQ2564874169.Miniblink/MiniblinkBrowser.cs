@@ -884,6 +884,7 @@ namespace QQ2564874169.Miniblink
         private EventHandler<PaintUpdatedEventArgs> _browserPaintUpdated;
         private Hashtable _ref = new Hashtable();
         public IList<ILoadResource> LoadResourceHandlerList { get; private set; }
+        public IResourceCache ResourceCache { get; set; }
         public CookieCollection Cookies => GetCookies();
 
         public MiniblinkBrowser()
@@ -1335,6 +1336,11 @@ namespace QQ2564874169.Miniblink
         public void Print(Action<PrintPreviewDialog> callback)
         {
             new PrintUtil(this).Start(callback);
+        }
+
+        public CookieCollection GetCookies(string domain)
+        {
+            throw new NotImplementedException();
         }
 
         private void OnDropFiles(int x, int y, params string[] files)

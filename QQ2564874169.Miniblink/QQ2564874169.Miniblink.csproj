@@ -75,6 +75,7 @@
     </Compile>
     <Compile Include="ILoadResource.cs" />
     <Compile Include="IMiniblink.cs" />
+    <Compile Include="IResourceCache.cs" />
     <Compile Include="JsFunc.cs" />
     <Compile Include="LoadResourceImpl\EmbedLoader.cs" />
     <Compile Include="LoadResourceImpl\FileLoader.cs" />
@@ -142,7 +143,9 @@
       <DependentUpon>MiniblinkBrowser.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="ResourceCacheImpl\" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Files\hook.js" />
   </ItemGroup>
