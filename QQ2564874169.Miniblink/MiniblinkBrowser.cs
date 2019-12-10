@@ -1388,7 +1388,6 @@ namespace QQ2564874169.Miniblink
             {
                 return null;
             }
-
             MBApi.wkePerformCookieCommand(MiniblinkHandle, wkeCookieCommand.FlushCookiesToFile);
             var host = new Uri(Url).Host.ToLower();
             var cookies = new CookieCollection();

@@ -601,7 +601,13 @@ namespace QQ2564874169.Miniblink
 		public bool CanGoForward => _browser.CanGoForward;
         public DeviceParameter DeviceParameter => _browser.DeviceParameter;
         public IList<ILoadResource> LoadResourceHandlerList => _browser.LoadResourceHandlerList;
-        public IResourceCache ResourceCache { get; set; }
+
+        public IResourceCache ResourceCache
+        {
+            get { return _browser.ResourceCache; }
+            set { _browser.ResourceCache = value; }
+        }
+
         public CookieCollection Cookies => _browser.Cookies;
 
         public bool FireDropFile
@@ -823,7 +829,7 @@ namespace QQ2564874169.Miniblink
 
         public CookieCollection GetCookies(string domain)
         {
-            throw new NotImplementedException();
+            return _browser.GetCookies(domain);
         }
 
         #endregion

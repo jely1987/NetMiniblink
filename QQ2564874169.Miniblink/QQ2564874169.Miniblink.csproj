@@ -90,6 +90,7 @@
     <Compile Include="LocalHttp\RouteAttribute.cs" />
     <Compile Include="LocalHttp\RouteSetting.cs" />
     <Compile Include="DeviceParameter.cs" />
+    <Compile Include="MBCookieCollection.cs" />
     <Compile Include="MiniblinkForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -2271,5 +2271,26 @@ namespace QQ2564874169.Miniblink
                 wkeInsertCSSByFrame_x86(webView, frameId, cssText);
             }
         }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeSetCookie", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Unicode)]
+        private static extern void wkeSetCookie_x86(IntPtr webView, string url, string cookie);
+        [DllImport(DLL_x64, EntryPoint = "wkeSetCookie", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Unicode)]
+        private static extern void wkeSetCookie_x64(IntPtr webView, string url, string cookie);
+
+        public static void wkeSetCookie(IntPtr webView, string url, string cookie)
+        {
+            if (is64())
+            {
+                wkeSetCookie_x64(webView, url, cookie);
+            }
+            else
+            {
+                wkeSetCookie_x86(webView, url, cookie);
+            }
+        }
+
+
     }
 }
