@@ -6,7 +6,6 @@ using System.Drawing;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -885,7 +884,7 @@ namespace QQ2564874169.Miniblink
         private Hashtable _ref = new Hashtable();
         public IList<ILoadResource> LoadResourceHandlerList { get; private set; }
         public IResourceCache ResourceCache { get; set; }
-        public CookieCollection Cookies => GetCookies();
+        public CookieCollection Cookies { get; }
 
         public MiniblinkBrowser()
         {
@@ -920,8 +919,8 @@ namespace QQ2564874169.Miniblink
                 LoadUrlBegin += LoadResource;
                 DidCreateScriptContext += HookPop;
                 DeviceParameter = new DeviceParameter(this);
+                Cookies = new CookieCollection(this, "cookies.dat");
                 RegisterJsFunc();
-                
             }
         }
 
@@ -946,16 +945,19 @@ namespace QQ2564874169.Miniblink
 
         private void DestroyCallback()
         {
-            MBApi.wkeOnPaintUpdated(MiniblinkHandle, null, IntPtr.Zero);
-            MBApi.wkeOnURLChanged2(MiniblinkHandle, null, IntPtr.Zero);
-            MBApi.wkeOnNavigation(MiniblinkHandle, null, IntPtr.Zero);
-            MBApi.wkeOnDocumentReady2(MiniblinkHandle, null, IntPtr.Zero);
-            MBApi.wkeOnConsole(MiniblinkHandle, null, IntPtr.Zero);
-            MBApi.wkeNetOnResponse(MiniblinkHandle, null, IntPtr.Zero);
-            MBApi.wkeOnLoadUrlBegin(MiniblinkHandle, null, IntPtr.Zero);
-            MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, null, IntPtr.Zero);
-            MBApi.wkeOnDownload(MiniblinkHandle, null, IntPtr.Zero);
-            MBApi.wkeOnCreateView(MiniblinkHandle, null, IntPtr.Zero);
+            if (!DesignMode)
+            {
+                MBApi.wkeOnPaintUpdated(MiniblinkHandle, null, IntPtr.Zero);
+                MBApi.wkeOnURLChanged2(MiniblinkHandle, null, IntPtr.Zero);
+                MBApi.wkeOnNavigation(MiniblinkHandle, null, IntPtr.Zero);
+                MBApi.wkeOnDocumentReady2(MiniblinkHandle, null, IntPtr.Zero);
+                MBApi.wkeOnConsole(MiniblinkHandle, null, IntPtr.Zero);
+                MBApi.wkeNetOnResponse(MiniblinkHandle, null, IntPtr.Zero);
+                MBApi.wkeOnLoadUrlBegin(MiniblinkHandle, null, IntPtr.Zero);
+                MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, null, IntPtr.Zero);
+                MBApi.wkeOnDownload(MiniblinkHandle, null, IntPtr.Zero);
+                MBApi.wkeOnCreateView(MiniblinkHandle, null, IntPtr.Zero);
+            }
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
@@ -1378,62 +1380,6 @@ namespace QQ2564874169.Miniblink
             var files = items.Cast<string>().ToArray();
             var p = PointToClient(new Point(e.X, e.Y));
             OnDropFiles(p.X, p.Y, files);
-        }
-
-        private CookieCollection GetCookies()
-        {
-            var file = "cookies.dat";
-
-            if (File.Exists(file) == false)
-            {
-                return null;
-            }
-            MBApi.wkePerformCookieCommand(MiniblinkHandle, wkeCookieCommand.FlushCookiesToFile);
-            var host = new Uri(Url).Host.ToLower();
-            var cookies = new CookieCollection();
-            var rows = File.ReadAllLines(file, Encoding.UTF8);
-
-            foreach (var row in rows)
-            {
-                if (row.StartsWith("# ")) continue;
-                var items = row.Split('\t');
-                if (items.Length != 7) continue;
-                var domain = items[0];
-                var httpOnly = domain.StartsWith("#HttpOnly_");
-                if (httpOnly)
-                {
-                    domain = domain.Substring(domain.IndexOf("_", StringComparison.Ordinal) + 1).ToLower();
-                }
-
-                if ("true".Equals(items[1], StringComparison.OrdinalIgnoreCase))
-                {
-                    if (host.EndsWith(domain) == false)
-                    {
-                        if (("." + host).Equals(domain) == false)
-                        {
-                            continue;
-                        }
-                    }
-                }
-                else if (host.Equals(domain) == false)
-                {
-                    continue;
-                }
-
-                var cookie = new Cookie
-                {
-                    HttpOnly = httpOnly,
-                    Domain = domain.TrimStart('.'),
-                    Path = items[2],
-                    Secure = "true".Equals(items[3], StringComparison.OrdinalIgnoreCase),
-                    Expires = new DateTime(1970, 1, 1).AddSeconds(long.Parse(items[4])),
-                    Name = items[5],
-                    Value = items[6]
-                };
-                cookies.Add(cookie);
-            }
-
-            return cookies;
         }
 
         #region 消息处理

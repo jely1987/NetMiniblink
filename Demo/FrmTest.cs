@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,28 +16,35 @@ namespace Demo
 {
     public partial class FrmTest : MiniblinkForm
     {
-        private string dir = Path.Combine(Application.StartupPath, "webres");
-
         public FrmTest()
         {
             InitializeComponent();
-            FormBorderStyle = FormBorderStyle.None;
-            NoneBorderResize = true;
-            LoadResourceHandlerList.Add(new FileLoader(dir, "loc.web"));
         }
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            LoadUri("http://loc.web/test.html");
-            var pnl = new Panel
+            LoadUri("https://gitee.com");
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var cookies = "";
+            foreach (var item in Cookies)
             {
-                Width = Width / 2,
-                Height = 30,
-                Left = 30,
-                Top = 30
-            };
-            Controls.Add(pnl);
-            pnl.BringToFront();
+                cookies += $"{item.Domain}={item.Name}={item.Value}\r\n\r\n";
+            }
+
+            MessageBox.Show(cookies);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Cookies.Add(new Cookie("ckname","ckvalue")
+            {
+                HttpOnly = true,
+                Secure = true,
+                Expires = DateTime.Now.AddDays(1)
+            });
         }
     }
 }
