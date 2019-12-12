@@ -27,10 +27,18 @@ namespace QQ2564874169.Miniblink
             get { return _enable; }
             set
             {
-                if (_enable != value && value == false)
+                if (_enable != value)
                 {
-                    _hosts.Clear();
-                    _container = new CookieContainer();
+                    if (value)
+                    {
+                        _miniblink.LoadUrlBegin -= ClearCookie;
+                    }
+                    else
+                    {
+                        _hosts.Clear();
+                        _container = new CookieContainer();
+                        _miniblink.LoadUrlBegin += ClearCookie;
+                    }
                 }
 
                 _enable = value;
@@ -55,6 +63,14 @@ namespace QQ2564874169.Miniblink
             Enable = true;
         }
 
+        private void ClearCookie(object sender, LoadUrlBeginEventArgs e)
+        {
+            MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.FlushCookiesToFile);
+            MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ClearAllCookies);
+            MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ClearSessionCookies);
+            MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ReloadCookiesFromFile);
+        }
+
         private void _miniblink_NavigateBefore(object sender, NavigateEventArgs e)
         {
             if (Enable == false) return;
@@ -77,7 +93,8 @@ namespace QQ2564874169.Miniblink
 
         private void Reload()
         {
-            MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle,wkeCookieCommand.FlushCookiesToFile);
+            MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.FlushCookiesToFile);
+            _container = new CookieContainer();
             var rows = File.ReadAllLines(_file, Encoding.UTF8);
             foreach (var row in rows)
             {
@@ -103,24 +120,42 @@ namespace QQ2564874169.Miniblink
                     continue;
                 }
 
-                foreach (var v in items[6].Split(','))
+                var cookie = new Cookie
                 {
-                    var cookie = new Cookie
-                    {
-                        HttpOnly = httpOnly,
-                        Domain = domain.TrimStart('.'),
-                        Path = items[2],
-                        Secure = "true".Equals(items[3], StringComparison.OrdinalIgnoreCase),
-                        Expires = new DateTime(1970, 1, 1).AddSeconds(long.Parse(items[4])),
-                        Name = items[5],
-                        Value = v
-                    };
-                    _container.Add(cookie);
-                }
+                    HttpOnly = httpOnly,
+                    Domain = domain.TrimStart('.'),
+                    Path = items[2],
+                    Secure = "true".Equals(items[3], StringComparison.OrdinalIgnoreCase),
+                    Expires = new DateTime(1970, 1, 1).AddSeconds(long.Parse(items[4])),
+                    Name = items[5],
+                    Value = Utils.UrlEncode(items[6])
+                };
+                _container.Add(cookie);
             }
         }
 
-        private List<Cookie> GetCookies()
+        public IList<Cookie> GetCookies(string url)
+        {
+            if (!url.StartsWith("http:", StringComparison.OrdinalIgnoreCase) &&
+                !url.StartsWith("https:", StringComparison.OrdinalIgnoreCase))
+            {
+                url = "http://" + url;
+            }
+
+            Reload();
+            var list = new List<Cookie>();
+            foreach (Cookie item in _container.GetCookies(new Uri(url)))
+            {
+                if (list.Contains(item) == false)
+                {
+                    list.Add(item);
+                }
+            }
+
+            return list.AsReadOnly();
+        }
+
+        private IList<Cookie> GetCookies()
         {
             Reload();
             var list = new List<Cookie>();
@@ -128,11 +163,14 @@ namespace QQ2564874169.Miniblink
             {
                 foreach (Cookie item in _container.GetCookies(new Uri("http://" + host)))
                 {
-                    list.Add(item);
+                    if (list.Contains(item) == false)
+                    {
+                        list.Add(item);
+                    }
                 }
             }
 
-            return list;
+            return list.AsReadOnly();
         }
 
         private static string GetCurlCookie(Cookie cookie)
@@ -189,12 +227,21 @@ namespace QQ2564874169.Miniblink
             _container = new CookieContainer();
         }
 
-        public bool Contains(Cookie item)
+        public bool Contains(Cookie cookie)
         {
-            if (item == null) return false;
+            if (cookie == null) return false;
+            
+            if (string.IsNullOrEmpty(cookie.Path))
+            {
+                cookie.Path = "/";
+            }
 
-            var list = _container.GetCookies(new Uri("http://" + item.Domain + item.Path));
-            foreach (Cookie cookie in list)
+            if (string.IsNullOrEmpty(cookie.Domain))
+            {
+                cookie.Domain = new Uri(_miniblink.Url).Host;
+            }
+            var list = _container.GetCookies(new Uri("http://" + cookie.Domain + cookie.Path));
+            foreach (Cookie item in list)
             {
                 if (cookie.Name == item.Name && cookie.Value == item.Value && cookie.Path == item.Path)
                 {
@@ -208,9 +255,20 @@ namespace QQ2564874169.Miniblink
         public bool Remove(Cookie cookie)
         {
             if (cookie == null) return false;
+
+            if (string.IsNullOrEmpty(cookie.Path))
+            {
+                cookie.Path = "/";
+            }
+
+            if (string.IsNullOrEmpty(cookie.Domain))
+            {
+                cookie.Domain = new Uri(_miniblink.Url).Host;
+            }
+
             if (Contains(cookie))
             {
-                cookie.Expires = DateTime.Now;
+                cookie.Expires = DateTime.MinValue;
                 var ck = GetCurlCookie(cookie);
                 MBApi.wkeSetCookie(_miniblink.MiniblinkHandle, "http://" + cookie.Domain + cookie.Path, ck);
                 return true;

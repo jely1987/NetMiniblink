@@ -39,12 +39,15 @@ namespace Demo
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Cookies.Add(new Cookie("ckname","ckvalue")
+            Cookies.Add(new Cookie("ckname", "ckvalue")
             {
-                HttpOnly = true,
-                Secure = true,
                 Expires = DateTime.Now.AddDays(1)
             });
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Cookies.Remove(new Cookie("ckname", "ckvalue"));
         }
     }
 }

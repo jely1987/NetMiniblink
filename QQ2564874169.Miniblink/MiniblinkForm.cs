@@ -456,7 +456,7 @@ namespace QQ2564874169.Miniblink
 		private void RegisterJsEvent(object sender, DocumentReadyEventArgs e)
 		{
 		    if (DropByClass == false) return;
-
+            //todo 移动到内嵌文件中
 			e.Frame.RunJs(@"
                 document.getElementsByTagName('body')[0].addEventListener('mousedown',
                     function(e) {
@@ -509,14 +509,6 @@ namespace QQ2564874169.Miniblink
 		{
 			get { return _browser.Zoom; }
 			set { _browser.Zoom = value; }
-		}
-
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public bool CookieEnabled
-		{
-			get { return _browser.CookieEnabled; }
-			set { _browser.CookieEnabled = value; }
 		}
 
 		[Browsable(false)]

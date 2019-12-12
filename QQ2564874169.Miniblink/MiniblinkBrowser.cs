@@ -110,40 +110,6 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private bool _cookieEnabled = true;
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool CookieEnabled
-        {
-            get { return _cookieEnabled; }
-            set
-            {
-                _cookieEnabled = value;
-
-                if (!DesignMode)
-                {
-                    MBApi.wkeSetCookieEnabled(MiniblinkHandle, _cookieEnabled);
-
-                    if (_cookieEnabled)
-                    {
-                        LoadUrlBegin -= ClearCookie;
-                    }
-                    else
-                    {
-                        LoadUrlBegin += ClearCookie;
-                    }
-                }
-            }
-        }
-
-        private void ClearCookie(object sender, LoadUrlBeginEventArgs e)
-        {
-            if (_cookieEnabled) return;
-            MBApi.wkePerformCookieCommand(MiniblinkHandle, wkeCookieCommand.ClearAllCookies);
-            MBApi.wkePerformCookieCommand(MiniblinkHandle, wkeCookieCommand.ClearSessionCookies);
-        }
-
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string UserAgent

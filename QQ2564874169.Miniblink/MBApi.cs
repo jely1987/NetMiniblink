@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Net;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
+using System.Text;
 
 namespace QQ2564874169.Miniblink
 {
@@ -7,6 +10,7 @@ namespace QQ2564874169.Miniblink
     {
         private const string DLL_x86 = "node_x86.dll";
         private const string DLL_x64 = "node_x64.dll";
+
         private static bool is64()
         {
             return IntPtr.Size == 8;
@@ -14,6 +18,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeIsInitialize", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeIsInitialize_x86();
+
         [DllImport(DLL_x64, EntryPoint = "wkeIsInitialize", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeIsInitialize_x64();
 
@@ -29,6 +34,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeInitialize", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeInitialize_x86();
+
         [DllImport(DLL_x64, EntryPoint = "wkeInitialize", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeInitialize_x64();
 
@@ -73,10 +79,11 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetTouchEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetTouchEnabled_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool enable);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetTouchEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetTouchEnabled_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool enable);
 
-        public static void wkeSetTouchEnabled(IntPtr webView,  bool enable)
+        public static void wkeSetTouchEnabled(IntPtr webView, bool enable)
         {
             if (is64())
             {
@@ -90,6 +97,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetMouseEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetMouseEnabled_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool enable);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetMouseEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetMouseEnabled_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool enable);
 
@@ -108,6 +116,7 @@ namespace QQ2564874169.Miniblink
         [DllImport(DLL_x86, EntryPoint = "wkeSetDeviceParameter", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Ansi)]
         private static extern void wkeSetDeviceParameter_x86(IntPtr webView, string device, string s, int i, float f);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetDeviceParameter", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Ansi)]
         private static extern void wkeSetDeviceParameter_x64(IntPtr webView, string device, string s, int i, float f);
@@ -132,6 +141,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeCreateWebView", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeCreateWebView_x86();
+
         [DllImport(DLL_x64, EntryPoint = "wkeCreateWebView", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeCreateWebView_x64();
 
@@ -155,11 +165,13 @@ namespace QQ2564874169.Miniblink
         //[DllImport(DLL_x86, EntryPoint = "wkeSetMemoryCacheEnable", CallingConvention = CallingConvention.Cdecl)]
         //public static extern void wkeSetMemoryCacheEnable(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
 
-        [DllImport(DLL_x86, EntryPoint = "wkeSetNavigationToNewWindowEnable", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DLL_x86, EntryPoint = "wkeSetNavigationToNewWindowEnable",
+            CallingConvention = CallingConvention.Cdecl)]
         public static extern void wkeSetNavigationToNewWindowEnable_x86(IntPtr webView,
             [MarshalAs(UnmanagedType.I1)] bool b);
 
-        [DllImport(DLL_x64, EntryPoint = "wkeSetNavigationToNewWindowEnable", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DLL_x64, EntryPoint = "wkeSetNavigationToNewWindowEnable",
+            CallingConvention = CallingConvention.Cdecl)]
         public static extern void wkeSetNavigationToNewWindowEnable_x64(IntPtr webView,
             [MarshalAs(UnmanagedType.I1)] bool b);
 
@@ -177,6 +189,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetNpapiPluginsEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetNpapiPluginsEnabled_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetNpapiPluginsEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetNpapiPluginsEnabled_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
 
@@ -194,6 +207,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetHeadlessEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetHeadlessEnabled_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetHeadlessEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetHeadlessEnabled_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
 
@@ -211,6 +225,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetCspCheckEnable", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetCspCheckEnable_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetCspCheckEnable", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetCspCheckEnable_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
 
@@ -245,6 +260,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetViewProxy", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetViewProxy_x86(IntPtr webView, ref WKEProxy proxy);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetViewProxy", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetViewProxy_x64(IntPtr webView, ref WKEProxy proxy);
 
@@ -262,6 +278,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetHandle", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetHandle_x86(IntPtr webView, IntPtr handle);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetHandle", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetHandle_x64(IntPtr webView, IntPtr handle);
 
@@ -285,6 +302,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetTransparent", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetTransparent_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetTransparent", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetTransparent_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
 
@@ -302,6 +320,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetDragEnable", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetDragEnable_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetDragEnable", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetDragEnable_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
 
@@ -319,6 +338,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetDragDropEnable", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetDragDropEnable_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetDragDropEnable", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetDragDropEnable_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
 
@@ -449,6 +469,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetURL", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetURL_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetURL", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetURL_x64(IntPtr webView);
 
@@ -463,7 +484,8 @@ namespace QQ2564874169.Miniblink
         }
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetFrameUrl", CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr wkeGetFrameUrl_x86(IntPtr webView,IntPtr frameId);
+        private static extern IntPtr wkeGetFrameUrl_x86(IntPtr webView, IntPtr frameId);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetFrameUrl", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetFrameUrl_x64(IntPtr webView, IntPtr frameId);
 
@@ -477,28 +499,9 @@ namespace QQ2564874169.Miniblink
             return wkeGetFrameUrl_x86(webView, frameId);
         }
 
-        [DllImport(DLL_x86, EntryPoint = "wkeRunJsByFrame", CallingConvention = CallingConvention.Cdecl,
-            CharSet = CharSet.Unicode)]
-        private static extern long wkeRunJsByFrame_x86(IntPtr webView, IntPtr frameId, string str,
-            [MarshalAs(UnmanagedType.I1)] bool isInClosure);
-
-        [DllImport(DLL_x64, EntryPoint = "wkeRunJsByFrame", CallingConvention = CallingConvention.Cdecl,
-            CharSet = CharSet.Unicode)]
-        private static extern long wkeRunJsByFrame_x64(IntPtr webView, IntPtr frameId, string str,
-            [MarshalAs(UnmanagedType.I1)] bool isInClosure);
-
-        public static long wkeRunJsByFrame(IntPtr webView, IntPtr frameId, string str, bool isInClosure)
-        {
-            return is64() ? 
-                wkeRunJsByFrame_x64(webView, frameId, str, isInClosure) : 
-                wkeRunJsByFrame_x86(webView, frameId, str, isInClosure);
-        }
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeIsLoading", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern byte wkeIsLoading(IntPtr webView);
-
         [DllImport(DLL_x86, EntryPoint = "wkeIsDocumentReady", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeIsDocumentReady_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeIsDocumentReady", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeIsDocumentReady_x64(IntPtr webView);
 
@@ -509,6 +512,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeStopLoading", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeStopLoading_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeStopLoading", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeStopLoading_x64(IntPtr webView);
 
@@ -526,6 +530,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeReload", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeReload_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeReload", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeReload_x64(IntPtr webView);
 
@@ -543,6 +548,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetTitle", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetTitle_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetTitle", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetTitle_x64(IntPtr webView);
 
@@ -558,6 +564,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeResize", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeResize_x86(IntPtr webView, int w, int h);
+
         [DllImport(DLL_x64, EntryPoint = "wkeResize", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeResize_x64(IntPtr webView, int w, int h);
 
@@ -575,6 +582,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetWidth", CallingConvention = CallingConvention.Cdecl)]
         private static extern int wkeGetWidth_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetWidth", CallingConvention = CallingConvention.Cdecl)]
         private static extern int wkeGetWidth_x64(IntPtr webView);
 
@@ -590,6 +598,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetHeight", CallingConvention = CallingConvention.Cdecl)]
         private static extern int wkeGetHeight_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetHeight", CallingConvention = CallingConvention.Cdecl)]
         private static extern int wkeGetHeight_x64(IntPtr webView);
 
@@ -605,6 +614,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetContentWidth", CallingConvention = CallingConvention.Cdecl)]
         private static extern int wkeGetContentWidth_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetContentWidth", CallingConvention = CallingConvention.Cdecl)]
         private static extern int wkeGetContentWidth_x64(IntPtr webView);
 
@@ -620,6 +630,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetContentHeight", CallingConvention = CallingConvention.Cdecl)]
         private static extern int wkeGetContentHeight_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetContentHeight", CallingConvention = CallingConvention.Cdecl)]
         private static extern int wkeGetContentHeight_x64(IntPtr webView);
 
@@ -642,6 +653,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetViewDC", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetViewDC_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetViewDC", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetViewDC_x64(IntPtr webView);
 
@@ -660,6 +672,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeCanGoBack", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeCanGoBack_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeCanGoBack", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeCanGoBack_x64(IntPtr webView);
 
@@ -675,6 +688,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGoBack", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeGoBack_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGoBack", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeGoBack_x64(IntPtr webView);
 
@@ -692,6 +706,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeCanGoForward", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeCanGoForward_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeCanGoForward", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeCanGoForward_x64(IntPtr webView);
 
@@ -707,6 +722,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGoForward", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeGoForward_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGoForward", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeGoForward_x64(IntPtr webView);
 
@@ -722,6 +738,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeEditorSelectAll", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeEditorSelectAll_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeEditorSelectAll", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeEditorSelectAll_x64(IntPtr webView);
 
@@ -739,6 +756,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeEditorUnSelect", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeEditorUnSelect_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeEditorUnSelect", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeEditorUnSelect_x64(IntPtr webView);
 
@@ -756,6 +774,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeEditorCopy", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorCopy_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeEditorCopy", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorCopy_x64(IntPtr webView);
 
@@ -773,6 +792,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeEditorCut", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorCut_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeEditorCut", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorCut_x64(IntPtr webView);
 
@@ -790,6 +810,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeEditorPaste", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorPaste_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeEditorPaste", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorPaste_x64(IntPtr webView);
 
@@ -807,6 +828,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeEditorDelete", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorDelete_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeEditorDelete", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorDelete_x64(IntPtr webView);
 
@@ -824,6 +846,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeEditorUndo", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorUndo_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeEditorUndo", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorUndo_x64(IntPtr webView);
 
@@ -841,6 +864,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeEditorRedo", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorRedo_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeEditorRedo", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeEditorRedo_x64(IntPtr webView);
 
@@ -858,6 +882,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetCookieW", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetCookie_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetCookieW", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetCookie_x64(IntPtr webView);
 
@@ -869,6 +894,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkePerformCookieCommand", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkePerformCookieCommand_x86(IntPtr webView, wkeCookieCommand command);
+
         [DllImport(DLL_x64, EntryPoint = "wkePerformCookieCommand", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkePerformCookieCommand_x64(IntPtr webView, wkeCookieCommand command);
 
@@ -887,6 +913,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetCookieEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetCookieEnabled_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetCookieEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetCookieEnabled_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
 
@@ -904,6 +931,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeIsCookieEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeIsCookieEnabled_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeIsCookieEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeIsCookieEnabled_x64(IntPtr webView);
 
@@ -933,6 +961,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeFireMouseEvent", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeFireMouseEvent_x86(IntPtr webView, int message, int x, int y, int flags);
+
         [DllImport(DLL_x64, EntryPoint = "wkeFireMouseEvent", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeFireMouseEvent_x64(IntPtr webView, int message, int x, int y, int flags);
 
@@ -942,11 +971,13 @@ namespace QQ2564874169.Miniblink
             {
                 return wkeFireMouseEvent_x64(webView, message, x, y, flags) != 0;
             }
+
             return wkeFireMouseEvent_x86(webView, message, x, y, flags) != 0;
         }
 
         [DllImport(DLL_x86, EntryPoint = "wkeFireContextMenuEvent", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeFireContextMenuEvent_x86(IntPtr webView, int x, int y, uint flags);
+
         [DllImport(DLL_x64, EntryPoint = "wkeFireContextMenuEvent", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeFireContextMenuEvent_x64(IntPtr webView, int x, int y, uint flags);
 
@@ -956,11 +987,13 @@ namespace QQ2564874169.Miniblink
             {
                 return wkeFireContextMenuEvent_x64(webView, x, y, flags) != 0;
             }
+
             return wkeFireContextMenuEvent_x86(webView, x, y, flags) != 0;
         }
 
         [DllImport(DLL_x86, EntryPoint = "wkeFireMouseWheelEvent", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeFireMouseWheelEvent_x86(IntPtr webView, int x, int y, int delta, uint flags);
+
         [DllImport(DLL_x64, EntryPoint = "wkeFireMouseWheelEvent", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeFireMouseWheelEvent_x64(IntPtr webView, int x, int y, int delta, uint flags);
 
@@ -970,6 +1003,7 @@ namespace QQ2564874169.Miniblink
             {
                 return wkeFireMouseWheelEvent_x64(webView, x, y, delta, flags) != 0;
             }
+
             return wkeFireMouseWheelEvent_x86(webView, x, y, delta, flags) != 0;
         }
 
@@ -1012,6 +1046,7 @@ namespace QQ2564874169.Miniblink
         [DllImport(DLL_x86, EntryPoint = "wkeFireKeyPressEvent", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeFireKeyPressEvent_x86(IntPtr webView, int charCode, uint flags,
             [MarshalAs(UnmanagedType.I1)] bool systemKey);
+
         [DllImport(DLL_x64, EntryPoint = "wkeFireKeyPressEvent", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeFireKeyPressEvent_x64(IntPtr webView, int charCode, uint flags,
             [MarshalAs(UnmanagedType.I1)] bool systemKey);
@@ -1029,6 +1064,7 @@ namespace QQ2564874169.Miniblink
         [DllImport(DLL_x86, EntryPoint = "wkeFireWindowsMessage", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeFireWindowsMessage_x86(IntPtr webView, IntPtr hWnd, uint message, IntPtr wParam,
             IntPtr lParam, IntPtr result);
+
         [DllImport(DLL_x64, EntryPoint = "wkeFireWindowsMessage", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeFireWindowsMessage_x64(IntPtr webView, IntPtr hWnd, uint message, IntPtr wParam,
             IntPtr lParam, IntPtr result);
@@ -1046,6 +1082,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetFocus", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeSetFocus_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetFocus", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeSetFocus_x64(IntPtr webView);
 
@@ -1061,6 +1098,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeKillFocus", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeKillFocus_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeKillFocus", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeKillFocus_x64(IntPtr webView);
 
@@ -1070,11 +1108,13 @@ namespace QQ2564874169.Miniblink
             {
                 return wkeKillFocus_x64(webView) != 0;
             }
+
             return wkeKillFocus_x86(webView) != 0;
         }
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetCaretRect", CallingConvention = CallingConvention.Cdecl)]
         private static extern wkeRect wkeGetCaretRect_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetCaretRect", CallingConvention = CallingConvention.Cdecl)]
         private static extern wkeRect wkeGetCaretRect_x64(IntPtr webView);
 
@@ -1094,6 +1134,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGlobalExec", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGlobalExec_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGlobalExec", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGlobalExec_x64(IntPtr webView);
 
@@ -1109,6 +1150,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetZoomFactor", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetZoomFactor_x86(IntPtr webView, float factor);
+
         [DllImport(DLL_x64, EntryPoint = "wkeSetZoomFactor", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetZoomFactor_x64(IntPtr webView, float factor);
 
@@ -1126,6 +1168,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetZoomFactor", CallingConvention = CallingConvention.Cdecl)]
         private static extern float wkeGetZoomFactor_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetZoomFactor", CallingConvention = CallingConvention.Cdecl)]
         private static extern float wkeGetZoomFactor_x64(IntPtr webView);
 
@@ -1143,6 +1186,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetString", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetString_x86(IntPtr wkeString);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetString", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetString_x64(IntPtr wkeString);
 
@@ -1180,6 +1224,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetCursorInfoType", CallingConvention = CallingConvention.Cdecl)]
         private static extern wkeCursorInfo wkeGetCursorInfoType_x86(IntPtr webView);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetCursorInfoType", CallingConvention = CallingConvention.Cdecl)]
         private static extern wkeCursorInfo wkeGetCursorInfoType_x64(IntPtr webView);
 
@@ -1200,6 +1245,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeOnURLChanged2", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnURLChanged2_x86(IntPtr webView, wkeURLChangedCallback2 callback, IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeOnURLChanged2", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnURLChanged2_x64(IntPtr webView, wkeURLChangedCallback2 callback, IntPtr param);
 
@@ -1216,9 +1262,12 @@ namespace QQ2564874169.Miniblink
         }
 
         [DllImport(DLL_x86, EntryPoint = "wkeOnPaintUpdated", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void wkeOnPaintUpdated_x86(IntPtr webView, wkePaintUpdatedCallback callback, IntPtr param);
+        private static extern void
+            wkeOnPaintUpdated_x86(IntPtr webView, wkePaintUpdatedCallback callback, IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeOnPaintUpdated", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void wkeOnPaintUpdated_x64(IntPtr webView, wkePaintUpdatedCallback callback, IntPtr param);
+        private static extern void
+            wkeOnPaintUpdated_x64(IntPtr webView, wkePaintUpdatedCallback callback, IntPtr param);
 
         public static void wkeOnPaintUpdated(IntPtr webView, wkePaintUpdatedCallback callback, IntPtr param)
         {
@@ -1271,6 +1320,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeOnNavigation", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnNavigation_x86(IntPtr webView, wkeNavigationCallback callback, IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeOnNavigation", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnNavigation_x64(IntPtr webView, wkeNavigationCallback callback, IntPtr param);
 
@@ -1288,6 +1338,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeOnCreateView", CallingConvention = CallingConvention.Cdecl)]
         public static extern void wkeOnCreateView_x86(IntPtr webView, wkeCreateViewCallback callback, IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeOnCreateView", CallingConvention = CallingConvention.Cdecl)]
         public static extern void wkeOnCreateView_x64(IntPtr webView, wkeCreateViewCallback callback, IntPtr param);
 
@@ -1307,9 +1358,12 @@ namespace QQ2564874169.Miniblink
         //public static extern void wkeOnDocumentReady(IntPtr webView, wkeDocumentReadyCallback callback, IntPtr param);
 
         [DllImport(DLL_x86, EntryPoint = "wkeOnDocumentReady2", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void wkeOnDocumentReady2_x86(IntPtr webView, wkeDocumentReady2Callback callback, IntPtr param);
+        private static extern void wkeOnDocumentReady2_x86(IntPtr webView, wkeDocumentReady2Callback callback,
+            IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeOnDocumentReady2", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void wkeOnDocumentReady2_x64(IntPtr webView, wkeDocumentReady2Callback callback, IntPtr param);
+        private static extern void wkeOnDocumentReady2_x64(IntPtr webView, wkeDocumentReady2Callback callback,
+            IntPtr param);
 
         public static void wkeOnDocumentReady2(IntPtr webView, wkeDocumentReady2Callback callback, IntPtr param)
         {
@@ -1328,6 +1382,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeOnDownload", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnDownload_x86(IntPtr webView, wkeDownloadCallback callback, IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeOnDownload", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnDownload_x64(IntPtr webView, wkeDownloadCallback callback, IntPtr param);
 
@@ -1345,6 +1400,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeOnConsole", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnConsole_x86(IntPtr webView, wkeConsoleCallback callback, IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeOnConsole", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnConsole_x64(IntPtr webView, wkeConsoleCallback callback, IntPtr param);
 
@@ -1362,6 +1418,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeNetOnResponse", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeNetOnResponse_x86(IntPtr webView, wkeNetResponseCallback callback, IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeNetOnResponse", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeNetOnResponse_x64(IntPtr webView, wkeNetResponseCallback callback, IntPtr param);
 
@@ -1378,9 +1435,12 @@ namespace QQ2564874169.Miniblink
         }
 
         [DllImport(DLL_x86, EntryPoint = "wkeOnLoadUrlBegin", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void wkeOnLoadUrlBegin_x86(IntPtr webView, wkeLoadUrlBeginCallback callback, IntPtr param);
+        private static extern void
+            wkeOnLoadUrlBegin_x86(IntPtr webView, wkeLoadUrlBeginCallback callback, IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeOnLoadUrlBegin", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void wkeOnLoadUrlBegin_x64(IntPtr webView, wkeLoadUrlBeginCallback callback, IntPtr param);
+        private static extern void
+            wkeOnLoadUrlBegin_x64(IntPtr webView, wkeLoadUrlBeginCallback callback, IntPtr param);
 
         public static void wkeOnLoadUrlBegin(IntPtr webView, wkeLoadUrlBeginCallback callback, IntPtr param)
         {
@@ -1396,6 +1456,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeOnLoadUrlEnd", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnLoadUrlEnd_x86(IntPtr webView, wkeLoadUrlEndCallback callback, IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeOnLoadUrlEnd", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnLoadUrlEnd_x64(IntPtr webView, wkeLoadUrlEndCallback callback, IntPtr param);
 
@@ -1414,6 +1475,7 @@ namespace QQ2564874169.Miniblink
         [DllImport(DLL_x86, EntryPoint = "wkeOnDidCreateScriptContext", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnDidCreateScriptContext_x86(IntPtr webView,
             wkeDidCreateScriptContextCallback callback, IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeOnDidCreateScriptContext", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnDidCreateScriptContext_x64(IntPtr webView,
             wkeDidCreateScriptContextCallback callback, IntPtr param);
@@ -1434,6 +1496,7 @@ namespace QQ2564874169.Miniblink
         [DllImport(DLL_x86, EntryPoint = "wkeOnWillReleaseScriptContext", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnWillReleaseScriptContext_x86(IntPtr webView,
             wkeWillReleaseScriptContextCallback callback, IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeOnWillReleaseScriptContext", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnWillReleaseScriptContext_x64(IntPtr webView,
             wkeWillReleaseScriptContextCallback callback, IntPtr param);
@@ -1478,11 +1541,13 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeNetSetData", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Ansi)]
-        private static extern void wkeNetSetData_x86(IntPtr job, [MarshalAs(UnmanagedType.LPArray)] byte[] buf, int len);
+        private static extern void
+            wkeNetSetData_x86(IntPtr job, [MarshalAs(UnmanagedType.LPArray)] byte[] buf, int len);
 
         [DllImport(DLL_x64, EntryPoint = "wkeNetSetData", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Ansi)]
-        private static extern void wkeNetSetData_x64(IntPtr job, [MarshalAs(UnmanagedType.LPArray)] byte[] buf, int len);
+        private static extern void
+            wkeNetSetData_x64(IntPtr job, [MarshalAs(UnmanagedType.LPArray)] byte[] buf, int len);
 
         public static void wkeNetSetData(IntPtr job, byte[] buf, int len)
         {
@@ -1498,6 +1563,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeNetHookRequest", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeNetHookRequest_x86(IntPtr job);
+
         [DllImport(DLL_x64, EntryPoint = "wkeNetHookRequest", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeNetHookRequest_x64(IntPtr job);
 
@@ -1515,6 +1581,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeNetHoldJobToAsynCommit", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeNetHoldJobToAsynCommit_x86(IntPtr job);
+
         [DllImport(DLL_x64, EntryPoint = "wkeNetHoldJobToAsynCommit", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeNetHoldJobToAsynCommit_x64(IntPtr job);
 
@@ -1532,6 +1599,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeNetGetPostBody", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeNetGetPostBody_x86(IntPtr job);
+
         [DllImport(DLL_x64, EntryPoint = "wkeNetGetPostBody", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeNetGetPostBody_x64(IntPtr job);
 
@@ -1541,6 +1609,7 @@ namespace QQ2564874169.Miniblink
             {
                 return wkeNetGetPostBody_x64(job);
             }
+
             return wkeNetGetPostBody_x86(job);
         }
 
@@ -1578,11 +1647,13 @@ namespace QQ2564874169.Miniblink
             {
                 return wkeNetGetRequestMethod_x64(job);
             }
+
             return wkeNetGetRequestMethod_x86(job);
         }
 
         [DllImport(DLL_x86, EntryPoint = "wkeIsMainFrame", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeIsMainFrame_x86(IntPtr webview, IntPtr webFrame);
+
         [DllImport(DLL_x64, EntryPoint = "wkeIsMainFrame", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeIsMainFrame_x64(IntPtr webview, IntPtr webFrame);
 
@@ -1598,6 +1669,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetGlobalExecByFrame", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetGlobalExecByFrame_x86(IntPtr webView, IntPtr frameId);
+
         [DllImport(DLL_x64, EntryPoint = "wkeGetGlobalExecByFrame", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeGetGlobalExecByFrame_x64(IntPtr webView, IntPtr frameId);
 
@@ -1607,11 +1679,13 @@ namespace QQ2564874169.Miniblink
             {
                 return wkeGetGlobalExecByFrame_x64(webView, frameId);
             }
+
             return wkeGetGlobalExecByFrame_x86(webView, frameId);
         }
 
         [DllImport(DLL_x86, EntryPoint = "wkeIsWebRemoteFrame", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeIsWebRemoteFrame_x86(IntPtr webView, IntPtr frameId);
+
         [DllImport(DLL_x64, EntryPoint = "wkeIsWebRemoteFrame", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeIsWebRemoteFrame_x64(IntPtr webView, IntPtr frameId);
 
@@ -1621,6 +1695,7 @@ namespace QQ2564874169.Miniblink
             {
                 return wkeIsWebRemoteFrame_x64(webView, frameId) != 0;
             }
+
             return wkeIsWebRemoteFrame_x86(webView, frameId) != 0;
         }
 
@@ -1636,11 +1711,13 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeJsBindFunction", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Ansi)]
-        private static extern void wkeJsBindFunction_x86(string name, wkeJsNativeFunction fn, IntPtr param, uint argCount);
+        private static extern void wkeJsBindFunction_x86(string name, wkeJsNativeFunction fn, IntPtr param,
+            uint argCount);
 
         [DllImport(DLL_x64, EntryPoint = "wkeJsBindFunction", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Ansi)]
-        private static extern void wkeJsBindFunction_x64(string name, wkeJsNativeFunction fn, IntPtr param, uint argCount);
+        private static extern void wkeJsBindFunction_x64(string name, wkeJsNativeFunction fn, IntPtr param,
+            uint argCount);
 
         public static void wkeJsBindFunction(string name, wkeJsNativeFunction fn, IntPtr param, uint argCount)
         {
@@ -1664,6 +1741,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsArgCount", CallingConvention = CallingConvention.Cdecl)]
         private static extern int jsArgCount_x86(IntPtr es);
+
         [DllImport(DLL_x64, EntryPoint = "jsArgCount", CallingConvention = CallingConvention.Cdecl)]
         private static extern int jsArgCount_x64(IntPtr es);
 
@@ -1693,6 +1771,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsArg", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsArg_x86(IntPtr es, int argIdx);
+
         [DllImport(DLL_x64, EntryPoint = "jsArg", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsArg_x64(IntPtr es, int argIdx);
 
@@ -1706,9 +1785,12 @@ namespace QQ2564874169.Miniblink
             return jsArg_x86(es, argIdx);
         }
 
-        [DllImport(DLL_x86, EntryPoint = "jsGetKeys", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        [DllImport(DLL_x86, EntryPoint = "jsGetKeys", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Ansi)]
         private static extern IntPtr jsGetKeys_x86(IntPtr es, long value);
-        [DllImport(DLL_x64, EntryPoint = "jsGetKeys", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+
+        [DllImport(DLL_x64, EntryPoint = "jsGetKeys", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Ansi)]
         private static extern IntPtr jsGetKeys_x64(IntPtr es, long value);
 
         public static IntPtr jsGetKeys(IntPtr es, long value)
@@ -1723,6 +1805,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsTypeOf", CallingConvention = CallingConvention.Cdecl)]
         private static extern jsType jsTypeOf_x86(long v);
+
         [DllImport(DLL_x64, EntryPoint = "jsTypeOf", CallingConvention = CallingConvention.Cdecl)]
         private static extern jsType jsTypeOf_x64(long v);
 
@@ -1785,6 +1868,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsToDouble", CallingConvention = CallingConvention.Cdecl)]
         private static extern double jsToDouble_x86(IntPtr es, long v);
+
         [DllImport(DLL_x64, EntryPoint = "jsToDouble", CallingConvention = CallingConvention.Cdecl)]
         private static extern double jsToDouble_x64(IntPtr es, long v);
 
@@ -1800,6 +1884,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsToBoolean", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte jsToBoolean_x86(IntPtr es, long v);
+
         [DllImport(DLL_x64, EntryPoint = "jsToBoolean", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte jsToBoolean_x64(IntPtr es, long v);
 
@@ -1815,6 +1900,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsToTempStringW", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr jsToTempStringW_x86(IntPtr es, long v);
+
         [DllImport(DLL_x64, EntryPoint = "jsToTempStringW", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr jsToTempStringW_x64(IntPtr es, long v);
 
@@ -1830,6 +1916,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsInt", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsInt_x86(int n);
+
         [DllImport(DLL_x64, EntryPoint = "jsInt", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsInt_x64(int n);
 
@@ -1845,6 +1932,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsFloat", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsFloat_x86(float f);
+
         [DllImport(DLL_x64, EntryPoint = "jsFloat", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsFloat_x64(float f);
 
@@ -1860,6 +1948,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsDouble", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsDouble_x86(double d);
+
         [DllImport(DLL_x64, EntryPoint = "jsDouble", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsDouble_x64(double d);
 
@@ -1875,6 +1964,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsBoolean", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsBoolean_x86(bool b);
+
         [DllImport(DLL_x64, EntryPoint = "jsBoolean", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsBoolean_x64(bool b);
 
@@ -1890,6 +1980,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsUndefined", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsUndefined_x86();
+
         [DllImport(DLL_x64, EntryPoint = "jsUndefined", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsUndefined_x64();
 
@@ -1927,6 +2018,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsEmptyObject", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsEmptyObject_x86(IntPtr es);
+
         [DllImport(DLL_x64, EntryPoint = "jsEmptyObject", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsEmptyObject_x64(IntPtr es);
 
@@ -1942,6 +2034,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsEmptyArray", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsEmptyArray_x86(IntPtr es);
+
         [DllImport(DLL_x64, EntryPoint = "jsEmptyArray", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsEmptyArray_x64(IntPtr es);
 
@@ -1960,6 +2053,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsFunction", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsFunction_x86(IntPtr es, IntPtr obj);
+
         [DllImport(DLL_x64, EntryPoint = "jsFunction", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsFunction_x64(IntPtr es, IntPtr obj);
 
@@ -1978,6 +2072,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsGet", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern long jsGet_x86(IntPtr es, long jsValue, string prop);
+
         [DllImport(DLL_x64, EntryPoint = "jsGet", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern long jsGet_x64(IntPtr es, long jsValue, string prop);
 
@@ -1993,6 +2088,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsSet", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern void jsSet_x86(IntPtr es, long jsValue, string prop, long v);
+
         [DllImport(DLL_x64, EntryPoint = "jsSet", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern void jsSet_x64(IntPtr es, long jsValue, string prop, long v);
 
@@ -2010,6 +2106,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsGetAt", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsGetAt_x86(IntPtr es, long jsValue, int index);
+
         [DllImport(DLL_x64, EntryPoint = "jsGetAt", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsGetAt_x64(IntPtr es, long jsValue, int index);
 
@@ -2025,6 +2122,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsSetAt", CallingConvention = CallingConvention.Cdecl)]
         private static extern void jsSetAt_x86(IntPtr es, long jsValue, int index, long v);
+
         [DllImport(DLL_x64, EntryPoint = "jsSetAt", CallingConvention = CallingConvention.Cdecl)]
         private static extern void jsSetAt_x64(IntPtr es, long jsValue, int index, long v);
 
@@ -2042,6 +2140,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsGetLength", CallingConvention = CallingConvention.Cdecl)]
         private static extern int jsGetLength_x86(IntPtr es, long jsValue);
+
         [DllImport(DLL_x64, EntryPoint = "jsGetLength", CallingConvention = CallingConvention.Cdecl)]
         private static extern int jsGetLength_x64(IntPtr es, long jsValue);
 
@@ -2052,6 +2151,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsSetLength", CallingConvention = CallingConvention.Cdecl)]
         private static extern void jsSetLength_x86(IntPtr es, long jsValue, int length);
+
         [DllImport(DLL_x64, EntryPoint = "jsSetLength", CallingConvention = CallingConvention.Cdecl)]
         private static extern void jsSetLength_x64(IntPtr es, long jsValue, int length);
 
@@ -2059,7 +2159,7 @@ namespace QQ2564874169.Miniblink
         {
             if (is64())
             {
-                jsSetLength_x64(es,jsValue,length);
+                jsSetLength_x64(es, jsValue, length);
             }
             else
             {
@@ -2072,6 +2172,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "jsGetWebView", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr jsGetWebView_x86(IntPtr es);
+
         [DllImport(DLL_x64, EntryPoint = "jsGetWebView", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr jsGetWebView_x64(IntPtr es);
 
@@ -2155,11 +2256,12 @@ namespace QQ2564874169.Miniblink
             CharSet = CharSet.Unicode)]
         private static extern void wkeShowDevtools_x86(IntPtr webView, string path, wkeOnShowDevtoolsCallback callback,
             IntPtr param);
+
         [DllImport(DLL_x64, EntryPoint = "wkeShowDevtools", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Unicode)]
         private static extern void wkeShowDevtools_x64(IntPtr webView, string path, wkeOnShowDevtoolsCallback callback,
             IntPtr param);
-        
+
         public static void wkeShowDevtools(IntPtr webView, string path, wkeOnShowDevtoolsCallback callback,
             IntPtr param)
         {
@@ -2218,11 +2320,13 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeNetSetHTTPHeaderField", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Unicode)]
-        private static extern void wkeNetSetHTTPHeaderField_x86(IntPtr job, string key, string value, [MarshalAs(UnmanagedType.I1)]bool response);
+        private static extern void wkeNetSetHTTPHeaderField_x86(IntPtr job, string key, string value,
+            [MarshalAs(UnmanagedType.I1)] bool response);
 
         [DllImport(DLL_x64, EntryPoint = "wkeNetSetHTTPHeaderField", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Unicode)]
-        private static extern void wkeNetSetHTTPHeaderField_x64(IntPtr job, string key, string value, [MarshalAs(UnmanagedType.I1)]bool response);
+        private static extern void wkeNetSetHTTPHeaderField_x64(IntPtr job, string key, string value,
+            [MarshalAs(UnmanagedType.I1)] bool response);
 
         public static void wkeNetSetHTTPHeaderField(IntPtr job, string key, string value)
         {
@@ -2238,6 +2342,7 @@ namespace QQ2564874169.Miniblink
 
         [DllImport(DLL_x86, EntryPoint = "wkeNetCancelRequest", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeNetCancelRequest_x86(IntPtr job);
+
         [DllImport(DLL_x64, EntryPoint = "wkeNetCancelRequest", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeNetCancelRequest_x64(IntPtr job);
 
@@ -2253,41 +2358,25 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        [DllImport(DLL_x86, EntryPoint = "wkeInsertCSSByFrame", CallingConvention = CallingConvention.Cdecl,
-            CharSet = CharSet.Unicode)]
-        private static extern void wkeInsertCSSByFrame_x86(IntPtr webView, IntPtr frameId, string cssText);
-        [DllImport(DLL_x64, EntryPoint = "wkeInsertCSSByFrame", CallingConvention = CallingConvention.Cdecl,
-            CharSet = CharSet.Unicode)]
-        private static extern void wkeInsertCSSByFrame_x64(IntPtr webView, IntPtr frameId, string cssText);
+        [DllImport(DLL_x86, EntryPoint = "wkeSetCookie", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetCookie_x86(IntPtr webView, [MarshalAs(UnmanagedType.LPArray)] byte[] url,
+            [MarshalAs(UnmanagedType.LPArray)] byte[] cookie);
 
-        public static void wkeInsertCSSByFrame(IntPtr webView, IntPtr frameId, string cssText)
-        {
-            if (is64())
-            {
-                wkeInsertCSSByFrame_x64(webView, frameId, cssText);
-            }
-            else
-            {
-                wkeInsertCSSByFrame_x86(webView, frameId, cssText);
-            }
-        }
-
-        [DllImport(DLL_x86, EntryPoint = "wkeSetCookie", CallingConvention = CallingConvention.Cdecl,
-            CharSet = CharSet.Unicode)]
-        private static extern void wkeSetCookie_x86(IntPtr webView, string url, string cookie);
-        [DllImport(DLL_x64, EntryPoint = "wkeSetCookie", CallingConvention = CallingConvention.Cdecl,
-            CharSet = CharSet.Unicode)]
-        private static extern void wkeSetCookie_x64(IntPtr webView, string url, string cookie);
+        [DllImport(DLL_x64, EntryPoint = "wkeSetCookie", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetCookie_x64(IntPtr webView, [MarshalAs(UnmanagedType.LPArray)] byte[] url,
+            [MarshalAs(UnmanagedType.LPArray)] byte[] cookie);
 
         public static void wkeSetCookie(IntPtr webView, string url, string cookie)
         {
+            var u = Encoding.UTF8.GetBytes(url);
+            var c = Encoding.UTF8.GetBytes(cookie);
             if (is64())
             {
-                wkeSetCookie_x64(webView, url, cookie);
+                wkeSetCookie_x64(webView, u, c);
             }
             else
             {
-                wkeSetCookie_x86(webView, url, cookie);
+                wkeSetCookie_x86(webView, u, c);
             }
         }
 

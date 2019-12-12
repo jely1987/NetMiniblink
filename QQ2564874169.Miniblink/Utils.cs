@@ -7,7 +7,9 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
@@ -208,6 +210,11 @@ namespace QQ2564874169.Miniblink
                 default:
                     return false;
             }
+        }
+
+        public static string UrlEncode(string str)
+        {
+            return HttpUtility.UrlEncode(str);
         }
     }
 }
