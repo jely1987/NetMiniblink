@@ -41,6 +41,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -117,6 +118,7 @@
     <Compile Include="PrintUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FormShadowWidth.cs" />
+    <Compile Include="ResourceCacheImpl\MemoryResourceCache.cs" />
     <Compile Include="ScreenshotImage.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="WinApi.cs" />
@@ -145,9 +147,7 @@
       <DependentUpon>MiniblinkBrowser.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ResourceCacheImpl\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Files\hook.js" />
   </ItemGroup>

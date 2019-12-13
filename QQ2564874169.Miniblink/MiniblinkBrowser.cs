@@ -445,12 +445,8 @@ namespace QQ2564874169.Miniblink
             if (_netResponse == null)
                 return true;
 
-            var e = new NetResponseEventArgs
-            {
-                Job = job,
-                Url = url,
-                ContentType = MBApi.wkeNetGetMIMEType(job).ToUTF8String()
-            };
+            var e = new NetResponseEventArgs(url, job);
+
             _netResponse(this, e);
 
             if (e.Data != null)
@@ -883,10 +879,31 @@ namespace QQ2564874169.Miniblink
                 MBApi.wkeOnPaintUpdated(MiniblinkHandle, wkePaintUpdated, Handle);
 
                 LoadUrlBegin += LoadResource;
+                LoadUrlBegin += LoadCache;
+                NetResponse += SaveCache;
                 DidCreateScriptContext += HookPop;
                 DeviceParameter = new DeviceParameter(this);
                 Cookies = new CookieCollection(this, "cookies.dat");
                 RegisterJsFunc();
+            }
+        }
+
+        private void SaveCache(object sender, NetResponseEventArgs e)
+        {
+            if (ResourceCache == null || e.Method != wkeRequestType.Get) return;
+
+            if (ResourceCache.Matchs(e.ContentType, e.Url))
+            {
+                ResourceCache.Save(e.Url, e.Data);
+            }
+        }
+
+        private void LoadCache(object sender, LoadUrlBeginEventArgs e)
+        {
+            var data = ResourceCache?.Get(e.Url);
+            if (data != null)
+            {
+                e.Data = data;
             }
         }
 

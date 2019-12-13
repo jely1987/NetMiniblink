@@ -2048,9 +2048,6 @@ namespace QQ2564874169.Miniblink
             return jsEmptyArray_x86(es);
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "jsObject", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern long jsObject(IntPtr es, IntPtr obj);
-
         [DllImport(DLL_x86, EntryPoint = "jsFunction", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsFunction_x86(IntPtr es, IntPtr obj);
 
@@ -2066,9 +2063,6 @@ namespace QQ2564874169.Miniblink
 
             return jsFunction_x86(es, obj);
         }
-
-        //[DllImport(DLL_x86, EntryPoint = "jsGetData", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern IntPtr jsGetData(IntPtr es, long jsValue);
 
         [DllImport(DLL_x86, EntryPoint = "jsGet", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern long jsGet_x86(IntPtr es, long jsValue, string prop);
@@ -2290,19 +2284,6 @@ namespace QQ2564874169.Miniblink
             return is64()
                 ? wkeNetGetHTTPHeaderFieldFromResponse_x64(job, key)
                 : wkeNetGetHTTPHeaderFieldFromResponse_x86(job, key);
-        }
-
-        [DllImport(DLL_x86, EntryPoint = "wkeNetGetUrlByJob", CallingConvention = CallingConvention.Cdecl,
-            CharSet = CharSet.Unicode)]
-        private static extern IntPtr wkeNetGetUrlByJob_x86(IntPtr job);
-
-        [DllImport(DLL_x64, EntryPoint = "wkeNetGetUrlByJob", CallingConvention = CallingConvention.Cdecl,
-            CharSet = CharSet.Unicode)]
-        private static extern IntPtr wkeNetGetUrlByJob_x64(IntPtr job);
-
-        public static IntPtr wkeNetGetUrlByJob(IntPtr job)
-        {
-            return is64() ? wkeNetGetUrlByJob_x64(job) : wkeNetGetUrlByJob_x86(job);
         }
 
         [DllImport(DLL_x86, EntryPoint = "wkeNetGetMIMEType", CallingConvention = CallingConvention.Cdecl,

@@ -56,14 +56,19 @@ namespace QQ2564874169.Miniblink
 
     public class NetResponseEventArgs : MiniblinkEventArgs
     {
-        public string Url { get; internal set; }
-        public IntPtr Job { get; internal set; }
+        public string Url { get; }
+        public wkeRequestType Method { get; }
+        public IntPtr Job { get; }
         public bool Cancel { get; set; }
         public byte[] Data { get; set; }
-        public string ContentType { get; internal set; }
+        public string ContentType { get; }
 
-        internal NetResponseEventArgs()
+        internal NetResponseEventArgs(string url, IntPtr job)
         {
+            Url = url;
+            Job = job;
+            Method = MBApi.wkeNetGetRequestMethod(job);
+            ContentType = MBApi.wkeNetGetMIMEType(job).ToUTF8String();
         }
 
         public string GetHeader(string name)
