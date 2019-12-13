@@ -2366,20 +2366,17 @@ namespace QQ2564874169.Miniblink
         private static extern void wkeSetCookie_x64(IntPtr webView, [MarshalAs(UnmanagedType.LPArray)] byte[] url,
             [MarshalAs(UnmanagedType.LPArray)] byte[] cookie);
 
-        public static void wkeSetCookie(IntPtr webView, string url, string cookie)
+        public static void wkeSetCookie(IntPtr webView, string cookie)
         {
-            var u = Encoding.UTF8.GetBytes(url);
             var c = Encoding.UTF8.GetBytes(cookie);
             if (is64())
             {
-                wkeSetCookie_x64(webView, u, c);
+                wkeSetCookie_x64(webView, null, c);
             }
             else
             {
-                wkeSetCookie_x86(webView, u, c);
+                wkeSetCookie_x86(webView, null, c);
             }
         }
-
-
     }
 }

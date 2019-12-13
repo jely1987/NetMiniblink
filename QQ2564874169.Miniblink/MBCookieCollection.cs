@@ -12,7 +12,7 @@ namespace QQ2564874169.Miniblink
     {
         public int Count
         {
-            get { return GetCookies().Count; }
+            get { return _container.Count; }
         }
 
         public bool IsReadOnly
@@ -38,6 +38,8 @@ namespace QQ2564874169.Miniblink
                         _hosts.Clear();
                         _container = new CookieContainer();
                         _miniblink.LoadUrlBegin += ClearCookie;
+                        MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, 
+                            wkeCookieCommand.FlushCookiesToFile);
                     }
                 }
 
@@ -65,7 +67,6 @@ namespace QQ2564874169.Miniblink
 
         private void ClearCookie(object sender, LoadUrlBeginEventArgs e)
         {
-            MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.FlushCookiesToFile);
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ClearAllCookies);
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ClearSessionCookies);
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ReloadCookiesFromFile);
@@ -211,18 +212,20 @@ namespace QQ2564874169.Miniblink
             {
                 cookie.Domain = new Uri(_miniblink.Url).Host;
             }
-            MBApi.wkeSetCookie(_miniblink.MiniblinkHandle, "http://" + cookie.Domain + cookie.Path, GetCurlCookie(cookie));
+            MBApi.wkeSetCookie(_miniblink.MiniblinkHandle, GetCurlCookie(cookie));
             _container.Add(cookie);
         }
 
         public void Clear()
         {
+            var ck = "";
             foreach (var cookie in GetCookies())
             {
-                var ck = GetCurlCookie(cookie);
-                MBApi.wkeSetCookie(_miniblink.MiniblinkHandle, "http://" + cookie.Domain + cookie.Path, ck);
+                cookie.Expires = DateTime.MinValue;
+                ck+= GetCurlCookie(cookie);
             }
 
+            MBApi.wkeSetCookie(_miniblink.MiniblinkHandle, ck);
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.FlushCookiesToFile);
             _container = new CookieContainer();
         }
@@ -270,7 +273,7 @@ namespace QQ2564874169.Miniblink
             {
                 cookie.Expires = DateTime.MinValue;
                 var ck = GetCurlCookie(cookie);
-                MBApi.wkeSetCookie(_miniblink.MiniblinkHandle, "http://" + cookie.Domain + cookie.Path, ck);
+                MBApi.wkeSetCookie(_miniblink.MiniblinkHandle, ck);
                 return true;
             }
 
