@@ -23,7 +23,13 @@ namespace Demo
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            LoadUri("https://gitee.com");
+            ConsoleMessage += FrmTest_ConsoleMessage;
+            LoadUri("https://codepen.io/pen/?&editable=true");
+        }
+
+        private void FrmTest_ConsoleMessage(object sender, ConsoleMessageEventArgs e)
+        {
+            Console.WriteLine(e.Message);
         }
 
         private void button1_Click(object sender, EventArgs e)
