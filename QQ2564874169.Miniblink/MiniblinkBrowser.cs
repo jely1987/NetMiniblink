@@ -843,6 +843,8 @@ namespace QQ2564874169.Miniblink
         private static string _popHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private static string _openHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private EventHandler<PaintUpdatedEventArgs> _browserPaintUpdated;
+        private wkePaintUpdatedCallback _paintUpdated;
+        private wkeCreateViewCallback _createView;
         private Hashtable _ref = new Hashtable();
         public IList<ILoadResource> LoadResourceHandlerList { get; private set; }
         public IResourceCache ResourceCache { get; set; }
@@ -868,20 +870,22 @@ namespace QQ2564874169.Miniblink
                 {
                     throw new WKECreateException();
                 }
-                MBApi.wkeSetDragEnable(MiniblinkHandle, false);
-                MBApi.wkeSetDragDropEnable(MiniblinkHandle, false);
-                MBApi.wkeSetHandle(MiniblinkHandle, Handle);
-                MBApi.wkeSetNavigationToNewWindowEnable(MiniblinkHandle, true);
-                MBApi.wkeOnCreateView(MiniblinkHandle, OnCreateView, IntPtr.Zero);
                 _browserPaintUpdated += BrowserPaintUpdated;
-                var wkePaintUpdated = new wkePaintUpdatedCallback(OnPaintUpdated);
-                _ref.Add(Guid.NewGuid(), wkePaintUpdated);
-                MBApi.wkeOnPaintUpdated(MiniblinkHandle, wkePaintUpdated, Handle);
-
+                _paintUpdated = OnPaintUpdated;
+                _createView = OnCreateView;
                 LoadUrlBegin += LoadResource;
                 LoadUrlBegin += LoadCache;
                 NetResponse += SaveCache;
                 DidCreateScriptContext += HookPop;
+
+                MBApi.wkeSetDragEnable(MiniblinkHandle, false);
+                MBApi.wkeSetDragDropEnable(MiniblinkHandle, false);
+                MBApi.wkeSetHandle(MiniblinkHandle, Handle);
+                MBApi.wkeSetNavigationToNewWindowEnable(MiniblinkHandle, true);
+                MBApi.wkeOnCreateView(MiniblinkHandle, _createView, IntPtr.Zero);
+                //todo DC渲染改成像素渲染
+                MBApi.wkeOnPaintUpdated(MiniblinkHandle, _paintUpdated, Handle);
+
                 DeviceParameter = new DeviceParameter(this);
                 Cookies = new CookieCollection(this, "cookies.dat");
                 RegisterJsFunc();
