@@ -7,7 +7,7 @@ namespace QQ2564874169.Miniblink
 {
     public interface IResourceCache
     {
-        bool Matchs(string url, string mime);
+        bool Matchs(string mime, string url);
 
         byte[] Get(string url);
 

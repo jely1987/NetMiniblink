@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -7,6 +8,7 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Caching;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -242,8 +244,7 @@ namespace QQ2564874169.Miniblink
         }
 
         protected virtual void onWkeDidCreateScriptContextCallback(IntPtr webView, IntPtr param, IntPtr frame,
-            IntPtr context,
-            int extensionGroup, int worldId)
+            IntPtr context, int extensionGroup, int worldId)
         {
             var e = new DidCreateScriptContextEventArgs
             {
@@ -254,6 +255,102 @@ namespace QQ2564874169.Miniblink
 
         private wkeURLChangedCallback2 _wkeUrlChanged;
         private EventHandler<UrlChangedEventArgs> _urlChanged;
+
+        private bool _memoryCacheEnable = true;
+
+        public bool MemoryCacheEnable
+        {
+            get { return _memoryCacheEnable; }
+            set
+            {
+                _memoryCacheEnable = value;
+
+                if (!DesignMode)
+                {
+                    MBApi.wkeSetMemoryCacheEnable(MiniblinkHandle, _memoryCacheEnable);
+                }
+            }
+        }
+
+        private bool _headlessEnabled = true;
+
+        public bool HeadlessEnabled
+        {
+            get { return _headlessEnabled; }
+            set
+            {
+                _headlessEnabled = value;
+
+                if (!DesignMode)
+                {
+                    MBApi.wkeSetHeadlessEnabled(MiniblinkHandle, _headlessEnabled);
+                }
+            }
+        }
+
+        private bool _npapiPluginsEnable = true;
+
+        public bool NpapiPluginsEnable
+        {
+            get { return _npapiPluginsEnable; }
+            set
+            {
+                _npapiPluginsEnable = value;
+
+                if (!DesignMode)
+                {
+                    MBApi.wkeSetNpapiPluginsEnabled(MiniblinkHandle, _npapiPluginsEnable);
+                }
+            }
+        }
+
+        private bool _cspCheckEnable;
+
+        public bool CspCheckEnable
+        {
+            get { return _cspCheckEnable; }
+            set
+            {
+                _cspCheckEnable = value;
+
+                if (!DesignMode)
+                {
+                    MBApi.wkeSetCspCheckEnable(MiniblinkHandle, _cspCheckEnable);
+                }
+            }
+        }
+
+        private bool _touchEnabled;
+
+        public bool TouchEnabled
+        {
+            get { return _touchEnabled; }
+            set
+            {
+                _touchEnabled = value;
+
+                if (!DesignMode)
+                {
+                    MBApi.wkeSetTouchEnabled(MiniblinkHandle, _touchEnabled);
+                }
+            }
+        }
+
+        private bool _mouseEnabled = true;
+
+        public bool MouseEnabled
+        {
+            get { return _mouseEnabled; }
+            set
+            {
+                _mouseEnabled = value;
+
+                if (!DesignMode)
+                {
+                    MBApi.wkeSetMouseEnabled(MiniblinkHandle, _mouseEnabled);
+                }
+            }
+        }
 
         public event EventHandler<UrlChangedEventArgs> UrlChanged
         {
@@ -440,12 +537,20 @@ namespace QQ2564874169.Miniblink
             }
         }
 
+        private ConcurrentDictionary<long, wkeRequestType> _jobToMethod =
+            new ConcurrentDictionary<long, wkeRequestType>();
+
         protected virtual bool OnNetResponse(IntPtr mb, IntPtr param, string url, IntPtr job)
         {
             if (_netResponse == null)
                 return true;
 
-            var e = new NetResponseEventArgs(url, job);
+            wkeRequestType type;
+            _jobToMethod.TryGetValue(job.ToInt64(), out type);
+            var e = new NetResponseEventArgs(url, job)
+            {
+                RequestMethod = type
+            };
 
             _netResponse(this, e);
 
@@ -480,6 +585,7 @@ namespace QQ2564874169.Miniblink
             remove { _loadUrlBegin -= value; }
         }
 
+        //todo 提供默认实现
         private wkeDownloadCallback _wkeDownload;
         private EventHandler<DownloadEventArgs> _download;
 
@@ -599,6 +705,7 @@ namespace QQ2564874169.Miniblink
                 RequestMethod = MBApi.wkeNetGetRequestMethod(job)
             };
             e.Job.BeginArgs = e;
+            _jobToMethod.AddOrUpdate(job.ToInt64(), e.RequestMethod, (i, m) => e.RequestMethod);
             _loadUrlBegin(this, e);
 
             if (e.Job.IsAsync)
@@ -642,6 +749,7 @@ namespace QQ2564874169.Miniblink
             var data = new byte[length];
             if (buf != IntPtr.Zero)
                 Marshal.Copy(buf, data, 0, length);
+            //Console.WriteLine($"xxxxx save:({length}){url.ToUTF8String()}");
             OnLoadUrlEnd(mb, job, data);
         }
 
@@ -718,31 +826,6 @@ namespace QQ2564874169.Miniblink
             var ptr = GCHandle.ToIntPtr(GCHandle.Alloc(func));
 
             MBApi.wkeJsBindFunction(func.Name, funcvalue, ptr, 0);
-        }
-
-        public void SetHeadlessEnabled(bool enable)
-        {
-            MBApi.wkeSetHeadlessEnabled(MiniblinkHandle, enable);
-        }
-
-        public void SetNpapiPluginsEnable(bool enable)
-        {
-            MBApi.wkeSetNpapiPluginsEnabled(MiniblinkHandle, enable);
-        }
-
-        public void SetCspCheckEnable(bool enable)
-        {
-            MBApi.wkeSetCspCheckEnable(MiniblinkHandle, enable);
-        }
-
-        public void SetTouchEnabled(bool enable)
-        {
-            MBApi.wkeSetTouchEnabled(MiniblinkHandle, enable);
-        }
-
-        public void SetMouseEnabled(bool enable)
-        {
-            MBApi.wkeSetMouseEnabled(MiniblinkHandle, enable);
         }
 
         public bool GoForward()
@@ -846,10 +929,24 @@ namespace QQ2564874169.Miniblink
         private wkePaintUpdatedCallback _paintUpdated;
         private wkeCreateViewCallback _createView;
         private Hashtable _ref = new Hashtable();
-        public IList<ILoadResource> LoadResourceHandlerList { get; private set; }
-        public IResourceCache ResourceCache { get; set; }
-        public CookieCollection Cookies { get; }
+        private MemoryCache _cache = new MemoryCache(Guid.NewGuid().ToString());
+        public IList<ILoadResource> LoadResourceHandlerList { get; }
+        private IResourceCache _resourceCache;
+        public IResourceCache ResourceCache
+        {
+            get { return _resourceCache; }
+            set
+            {
+                _resourceCache = value;
 
+                if (_resourceCache == null)
+                {
+                    _cache.Trim(100);
+                }
+            }
+        }
+        public CookieCollection Cookies { get; }
+        
         public MiniblinkBrowser()
         {
             InitializeComponent();
@@ -857,7 +954,7 @@ namespace QQ2564874169.Miniblink
             InvokeBro = InvokeBro ?? this;
             LoadResourceHandlerList = new List<ILoadResource>();
 
-            if (!Utils.IsDesignMode())
+            if (!DesignMode)
             {
                 if (MBApi.wkeIsInitialize() == false)
                 {
@@ -875,14 +972,15 @@ namespace QQ2564874169.Miniblink
                 _createView = OnCreateView;
                 LoadUrlBegin += LoadResource;
                 LoadUrlBegin += LoadCache;
-                NetResponse += SaveCache;
+                NavigateBefore += NavBefore;
                 DidCreateScriptContext += HookPop;
 
+                MBApi.wkeSetContextMenuEnabled(MiniblinkHandle, false);
                 MBApi.wkeSetDragEnable(MiniblinkHandle, false);
                 MBApi.wkeSetDragDropEnable(MiniblinkHandle, false);
-                MBApi.wkeSetHandle(MiniblinkHandle, Handle);
                 MBApi.wkeSetNavigationToNewWindowEnable(MiniblinkHandle, true);
                 MBApi.wkeOnCreateView(MiniblinkHandle, _createView, IntPtr.Zero);
+                MBApi.wkeSetHandle(MiniblinkHandle, Handle);
                 //todo DC渲染改成像素渲染
                 MBApi.wkeOnPaintUpdated(MiniblinkHandle, _paintUpdated, Handle);
 
@@ -892,22 +990,43 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private void SaveCache(object sender, NetResponseEventArgs e)
-        {
-            if (ResourceCache == null || e.Method != wkeRequestType.Get) return;
-
-            if (ResourceCache.Matchs(e.ContentType, e.Url))
-            {
-                ResourceCache.Save(e.Url, e.Data);
-            }
-        }
-
         private void LoadCache(object sender, LoadUrlBeginEventArgs e)
         {
-            var data = ResourceCache?.Get(e.Url);
+            if (ResourceCache == null || e.RequestMethod != wkeRequestType.Get)
+                return;
+
+            var data = ResourceCache.Get(e.Url);
             if (data != null)
             {
                 e.Data = data;
+                return;
+            }
+
+            var key = e.Url.GetHashCode() + "_cache";
+            var pass = _cache.Get(key);
+            if (pass != null) return;
+
+            e.WatchLoadUrlEnd(p =>
+            {
+                if (ResourceCache != null && ResourceCache.Matchs(p.Mime, p.Url) && p.Data.Length > 0)
+                {
+                    ResourceCache.Save(p.Url, p.Data);
+                }
+                else
+                {
+                    _cache.Add(new CacheItem(key, true), new CacheItemPolicy
+                    {
+                        SlidingExpiration = TimeSpan.FromHours(1)
+                    });
+                }
+            });
+        }
+
+        private void NavBefore(object sender, NavigateEventArgs e)
+        {
+            if (e.Type != NavigateType.BlankLink && e.Type != NavigateType.WindowOpen)
+            {
+                _jobToMethod.Clear();
             }
         }
 

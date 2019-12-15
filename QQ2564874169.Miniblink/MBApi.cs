@@ -241,22 +241,41 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeSetProxy", CallingConvention = CallingConvention.Cdecl)]
-        //private static extern void wkeSetProxy_x86(WKEProxy proxy);
-        //[DllImport(DLL_x64, EntryPoint = "wkeSetProxy", CallingConvention = CallingConvention.Cdecl)]
-        //private static extern void wkeSetProxy_x64(WKEProxy proxy);
+        [DllImport(DLL_x86, EntryPoint = "wkeSetMemoryCacheEnable", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetMemoryCacheEnable_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
 
-        //public static void wkeSetProxy(WKEProxy proxy)
-        //{
-        //    if (is64())
-        //    {
-        //        wkeSetProxy_x64(proxy);
-        //    }
-        //    else
-        //    {
-        //        wkeSetProxy_x86(proxy);
-        //    }
-        //}
+        [DllImport(DLL_x64, EntryPoint = "wkeSetMemoryCacheEnable", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetMemoryCacheEnable_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
+        public static void wkeSetMemoryCacheEnable(IntPtr webView, bool enable)
+        {
+            if (is64())
+            {
+                wkeSetMemoryCacheEnable_x64(webView, enable);
+            }
+            else
+            {
+                wkeSetMemoryCacheEnable_x86(webView, enable);
+            }
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeSetContextMenuEnabled", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetContextMenuEnabled_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
+        [DllImport(DLL_x64, EntryPoint = "wkeSetContextMenuEnabled", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetContextMenuEnabled_x64(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
+
+        public static void wkeSetContextMenuEnabled(IntPtr webView, bool enable)
+        {
+            if (is64())
+            {
+                wkeSetContextMenuEnabled_x64(webView, enable);
+            }
+            else
+            {
+                wkeSetContextMenuEnabled_x86(webView, enable);
+            }
+        }
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetViewProxy", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetViewProxy_x86(IntPtr webView, ref WKEProxy proxy);
@@ -1534,11 +1553,6 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeNetSetHTTPHeaderField", CallingConvention = CallingConvention.Cdecl,
-        //    CharSet = CharSet.Unicode)]
-        //public static extern void wkeNetSetHTTPHeaderField(IntPtr job, string key, string value,
-        //    [MarshalAs(UnmanagedType.I1)] bool response);
-
         [DllImport(DLL_x86, EntryPoint = "wkeNetSetData", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Ansi)]
         private static extern void
@@ -2319,6 +2333,19 @@ namespace QQ2564874169.Miniblink
             {
                 wkeNetSetHTTPHeaderField_x86(job, key, value, false);
             }
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeNetGetHTTPHeaderField", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Ansi)]
+        private static extern IntPtr wkeNetGetHTTPHeaderField_x86(IntPtr job, string key);
+
+        [DllImport(DLL_x64, EntryPoint = "wkeNetGetHTTPHeaderField", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Ansi)]
+        private static extern IntPtr wkeNetGetHTTPHeaderField_x64(IntPtr job, string key);
+
+        public static IntPtr wkeNetGetHTTPHeaderField(IntPtr job, string key)
+        {
+            return is64() ? wkeNetGetHTTPHeaderField_x64(job, key) : wkeNetGetHTTPHeaderField_x86(job, key);
         }
 
         [DllImport(DLL_x86, EntryPoint = "wkeNetCancelRequest", CallingConvention = CallingConvention.Cdecl)]

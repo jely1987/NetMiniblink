@@ -57,23 +57,28 @@ namespace QQ2564874169.Miniblink
     public class NetResponseEventArgs : MiniblinkEventArgs
     {
         public string Url { get; }
-        public wkeRequestType Method { get; }
+        public wkeRequestType RequestMethod { get; internal set; }
         public IntPtr Job { get; }
         public bool Cancel { get; set; }
-        public byte[] Data { get; set; }
         public string ContentType { get; }
+        internal byte[] Data {  get; private set; }
 
         internal NetResponseEventArgs(string url, IntPtr job)
         {
             Url = url;
             Job = job;
-            Method = MBApi.wkeNetGetRequestMethod(job);
+            //RequestMethod = MBApi.wkeNetGetRequestMethod(job);
             ContentType = MBApi.wkeNetGetMIMEType(job).ToUTF8String();
         }
 
         public string GetHeader(string name)
         {
             return MBApi.wkeNetGetHTTPHeaderFieldFromResponse(Job, name).ToUTF8String();
+        }
+
+        public void SetData(byte[] data)
+        {
+            Data = data;
         }
     }
 
@@ -132,10 +137,9 @@ namespace QQ2564874169.Miniblink
             if (HookRequest == false)
                 return null;
 
-            var e = new LoadUrlEndArgs
+            var e = new LoadUrlEndArgs(Job.Handle)
             {
                 Data = data,
-                Job = Job.Handle,
                 RequestMethod = RequestMethod,
                 Url = Url
             };
@@ -150,8 +154,6 @@ namespace QQ2564874169.Miniblink
 
         internal static LoadUrlBeginEventArgs GetByJob(IntPtr job)
         {
-            if (_args.ContainsKey(job.ToInt64()) == false)
-                return null;
             LoadUrlBeginEventArgs e;
             return _args.TryRemove(job.ToInt64(), out e) ? e : null;
         }
@@ -161,13 +163,16 @@ namespace QQ2564874169.Miniblink
     {
         public wkeRequestType RequestMethod { get; internal set; }
         public string Url { get; internal set; }
-        public IntPtr Job { get; internal set; }
+        public IntPtr Job { get; }
         public byte[] Data { get; internal set; }
         public object State { get; internal set; }
+        public string Mime { get; }
         internal bool Modify;
 
-        internal LoadUrlEndArgs()
+        internal LoadUrlEndArgs(IntPtr job)
         {
+            Job = job;
+            Mime = MBApi.wkeNetGetMIMEType(job).ToUTF8String();
         }
 
         public void ReplaceData(byte[] data)

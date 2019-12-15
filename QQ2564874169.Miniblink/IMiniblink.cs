@@ -36,7 +36,34 @@ namespace QQ2564874169.Miniblink
         /// 资源加载的Handler集合，一个请求发起前先从此集合中尝试加载资源，无法加载才发起真实请求。
         /// </summary>
         IList<ILoadResource> LoadResourceHandlerList { get; }
+        /// <summary>
+        /// 资源缓存
+        /// </summary>
         IResourceCache ResourceCache { get; set; }
+        /// <summary>
+        /// 是否启用内存缓存
+        /// </summary>
+        bool MemoryCacheEnable { get; set; }
+        /// <summary>
+        /// 是否启用渲染
+        /// </summary>
+        bool HeadlessEnabled { get; set; }
+        /// <summary>
+        /// 是否启用npapi
+        /// </summary>
+        bool NpapiPluginsEnable { get; set; }
+        /// <summary>
+        /// 是否启用跨域检查
+        /// </summary>
+        bool CspCheckEnable { get; set; }
+        /// <summary>
+        /// 是否启用触摸事件
+        /// </summary>
+        bool TouchEnabled { get; set; }
+        /// <summary>
+        /// 是否启用鼠标事件
+        /// </summary>
+        bool MouseEnabled { get; set; }
 
         event EventHandler<UrlChangedEventArgs> UrlChanged;
 		event EventHandler<NavigateEventArgs> NavigateBefore;
@@ -58,11 +85,6 @@ namespace QQ2564874169.Miniblink
 		object RunJs(string script);
 		object CallJsFunc(string funcName, params object[] param);
 		void BindNetFunc(NetFunc func);
-		void SetHeadlessEnabled(bool enable);
-		void SetNpapiPluginsEnable(bool enable);
-		void SetCspCheckEnable(bool enable);
-        void SetTouchEnabled(bool enable);
-        void SetMouseEnabled(bool enable);
         bool GoForward();
         bool GoBack();
 		void SetProxy(WKEProxy proxy);

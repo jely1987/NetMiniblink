@@ -593,6 +593,7 @@ namespace QQ2564874169.Miniblink
 		public bool CanGoForward => _browser.CanGoForward;
         public DeviceParameter DeviceParameter => _browser.DeviceParameter;
         public IList<ILoadResource> LoadResourceHandlerList => _browser.LoadResourceHandlerList;
+        public CookieCollection Cookies => _browser.Cookies;
 
         public IResourceCache ResourceCache
         {
@@ -600,7 +601,53 @@ namespace QQ2564874169.Miniblink
             set { _browser.ResourceCache = value; }
         }
 
-        public CookieCollection Cookies => _browser.Cookies;
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool MemoryCacheEnable
+        {
+            get { return _browser.MemoryCacheEnable; }
+            set { _browser.MemoryCacheEnable = value; }
+        }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool HeadlessEnabled
+        {
+            get { return _browser.HeadlessEnabled; }
+            set { _browser.HeadlessEnabled = value; }
+        }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool NpapiPluginsEnable
+        {
+            get { return _browser.NpapiPluginsEnable; }
+            set { _browser.NpapiPluginsEnable = value; }
+        }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool CspCheckEnable
+        {
+            get { return _browser.CspCheckEnable; }
+            set { _browser.CspCheckEnable = value; }
+        }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool TouchEnabled
+        {
+            get { return _browser.TouchEnabled; }
+            set { _browser.TouchEnabled = value; }
+        }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool MouseEnabled
+        {
+            get { return _browser.MouseEnabled; }
+            set { _browser.MouseEnabled = value; }
+        }
 
         public bool FireDropFile
         {
@@ -708,31 +755,6 @@ namespace QQ2564874169.Miniblink
 		{
 			_browser.BindNetFunc(func);
 		}
-
-		public void SetHeadlessEnabled(bool enable)
-		{
-			_browser.SetHeadlessEnabled(enable);
-		}
-
-		public void SetNpapiPluginsEnable(bool enable)
-		{
-			_browser.SetNpapiPluginsEnable(enable);
-		}
-
-		public void SetCspCheckEnable(bool enable)
-		{
-			_browser.SetCspCheckEnable(enable);
-		}
-
-        public void SetTouchEnabled(bool enable)
-        {
-            _browser.SetTouchEnabled(enable);
-        }
-
-        public void SetMouseEnabled(bool enable)
-        {
-            _browser.SetMouseEnabled(enable);
-        }
 
         public bool GoForward()
 		{
