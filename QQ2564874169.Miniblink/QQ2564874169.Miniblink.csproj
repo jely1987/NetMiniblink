@@ -147,9 +147,11 @@
       <DependentUpon>MiniblinkBrowser.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <EmbeddedResource Include="Files\hook.js" />
+    <EmbeddedResource Include="Files\form.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Files\browser.js" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Files\DotNetZip.dll" />

@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -34,7 +37,57 @@ namespace QQ2564874169.Miniblink
         /// </summary>
         public FormResizeWidth ResizeWidth { get; private set; }
 
-		private ResizeDirect _direct;
+        private FormWindowState _windowState = FormWindowState.Normal;
+        private Rectangle? _stateRect;
+        public new FormWindowState WindowState
+        {
+            get
+            {
+                return FormBorderStyle != FormBorderStyle.None ? base.WindowState : _windowState;
+            }
+            set
+            {
+                if (FormBorderStyle != FormBorderStyle.None)
+                {
+                    base.WindowState = value;
+                    return;
+                }
+                if (_stateRect.HasValue == false)
+                {
+                    _stateRect = new Rectangle(Location, Size);
+                }
+                var rect = _stateRect.Value;
+
+                if (value == FormWindowState.Maximized)
+                {
+                    if (_windowState != FormWindowState.Maximized)
+                    {
+                        _stateRect = new Rectangle(Location, Size);
+                        Location = new Point(0, 0);
+                        Size = Screen.PrimaryScreen.WorkingArea.Size;
+                        base.WindowState = FormWindowState.Normal;
+                    }
+                }
+                else if(value == FormWindowState.Minimized)
+                {
+                    if (base.WindowState == FormWindowState.Normal)
+                    {
+                        _stateRect = new Rectangle(Location, Size);
+                    }
+
+                    base.WindowState = value;
+                }
+                else if (value == FormWindowState.Normal)
+                {
+                    Location = rect.Location;
+                    Size = rect.Size;
+                    base.WindowState = value;
+                }
+                _windowState = value;
+            }
+        }
+
+        private ResizeDirect _direct;
 		private bool _resizeing;
 		private Point _resizeStart;
 		private Point _resizePos;
@@ -59,7 +112,7 @@ namespace QQ2564874169.Miniblink
 			IsTransparent = isTransparent;
             ResizeWidth = new FormResizeWidth(5);
 
-            if (!Utils.IsDesignMode())
+            if (!DesignMode)
             {
                 if (IsTransparent)
                 {
@@ -153,20 +206,23 @@ namespace QQ2564874169.Miniblink
 
 		private object DropStart(NetFuncContext context)
 		{
-			if (_isdrop == false && WindowState != FormWindowState.Maximized && MouseButtons == MouseButtons.Left)
-			{
-				_isdrop = true;
-				_dropstart = MousePosition;
-				_dropWinstart = Location;
+            if (DropByClass && _isdrop == false && 
+                WindowState != FormWindowState.Maximized &&
+                MouseButtons == MouseButtons.Left)
+            {
+                _isdrop = true;
+                _dropstart = MousePosition;
+                _dropWinstart = Location;
                 Cursor = Cursors.SizeAll;
                 DropEvent(false);
-			}
-			return null;
+            }
+
+            return null;
 		}
 
         private void MiniblinkForm_Load(object sender, EventArgs e)
         {
-            if (!Utils.IsDesignMode() && IsTransparent)
+            if (!DesignMode && IsTransparent)
             {
                 TransparentPaint(MBApi.wkeGetViewDC(MiniblinkHandle));
             }
@@ -454,51 +510,29 @@ namespace QQ2564874169.Miniblink
 		}
 
 		private void RegisterJsEvent(object sender, DocumentReadyEventArgs e)
-		{
-		    if (DropByClass == false) return;
-            //todo 移动到内嵌文件中
-			e.Frame.RunJs(@"
-                document.getElementsByTagName('body')[0].addEventListener('mousedown',
-                    function(e) {
-                        var obj = e.target || e.srcElement;
-                        if ({ 'INPUT': 1, 'SELECT': 1 }[obj.tagName.toUpperCase()])
-                        return;
+        {
+            var map = new Dictionary<string, string>
+            {
+                {"maxName", _maxfunc},
+                {"minName", _minfunc},
+                {"closeName", _closefunc},
+                {"dragName", _dragfunc}
+            };
+            var vars = string.Join(";", map.Keys.Select(k => $"var {k}='{map[k]}';")) + ";";
+            var js = string.Join(".", typeof(MiniblinkForm).Namespace, "Files", "form.js");
 
-                        while (obj) {
-                            for (var i = 0; i<obj.classList.length; i++) {
-                                if (obj.classList[i] === 'mbform-nodrag')
-                                    return;
-                                if (obj.classList[i] === 'mbform-drag') {
-                                    " + _dragfunc + @"();
-                                    return;
-                                }
-                            }
-                            obj = obj.parentElement;
-                        }
-                    });
-
-
-                var els = document.getElementsByClassName('mbform-max');
-                for (var i=0;i<els.length;i++)
+            using (var sm = typeof(MiniblinkForm).Assembly.GetManifestResourceStream(js))
+            {
+                if (sm != null)
                 {
-                    els[i].addEventListener('click',
-                        function() {" + _maxfunc + @"(); });
+                    using (var reader = new StreamReader(sm, Encoding.UTF8))
+                    {
+                        js = vars + reader.ReadToEnd();
+                    }
                 }
+            }
 
-                els = document.getElementsByClassName('mbform-min');
-                for (var i=0;i<els.length;i++)
-                {
-                    els[i].addEventListener('click',
-                        function() {" + _minfunc + @"(); });
-                }
-
-                els = document.getElementsByClassName('mbform-close');
-                for (var i=0;i<els.length;i++)
-                {
-                    els[i].addEventListener('click',
-                        function() {" + _closefunc + @"(); });
-                }
-            ");
+            e.Frame.RunJs(js);
 		}
 
         #region IMiniblink成员
@@ -534,48 +568,6 @@ namespace QQ2564874169.Miniblink
             get { return _browser.ScrollLeft; }
             set { _browser.ScrollLeft = value; }
         }
-
-        private FormWindowState _windowState = FormWindowState.Normal;
-		private Rectangle? _stateRect;
-		public new FormWindowState WindowState
-		{
-			get { return _windowState; }
-			set
-			{
-				if (FormBorderStyle != FormBorderStyle.None)
-                {
-                    base.WindowState = _windowState = value;
-                    return;
-                }
-				if (_stateRect.HasValue == false)
-				{
-					_stateRect = new Rectangle(Location, Size);
-				}
-				var rect = _stateRect.Value;
-
-				if (value == FormWindowState.Maximized)
-				{
-					if (_windowState != FormWindowState.Maximized)
-					{
-						_stateRect = new Rectangle(Location, Size);
-						Location = new Point(0, 0);
-						Size = Screen.PrimaryScreen.WorkingArea.Size;
-						base.WindowState = FormWindowState.Normal;
-					}
-				}
-				else if (value == FormWindowState.Normal)
-				{
-					Location = rect.Location;
-					Size = rect.Size;
-					base.WindowState = value;
-				}
-				else
-				{
-					base.WindowState = value;
-				}
-				_windowState = value;
-			}
-		}
 
         public IntPtr MiniblinkHandle => _browser.MiniblinkHandle;
         public int ScrollHeight => _browser.ScrollHeight;

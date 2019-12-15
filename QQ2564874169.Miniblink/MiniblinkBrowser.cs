@@ -973,7 +973,7 @@ namespace QQ2564874169.Miniblink
                 LoadUrlBegin += LoadResource;
                 LoadUrlBegin += LoadCache;
                 NavigateBefore += NavBefore;
-                DidCreateScriptContext += HookPop;
+                DidCreateScriptContext += HookJs;
 
                 MBApi.wkeSetContextMenuEnabled(MiniblinkHandle, false);
                 MBApi.wkeSetDragEnable(MiniblinkHandle, false);
@@ -1221,24 +1221,26 @@ namespace QQ2564874169.Miniblink
             BindNetFunc(new NetFunc(_openHookName, OnHookWindowOpen));
         }
 
-        private void HookPop(object sender, DidCreateScriptContextEventArgs e)
+        private void HookJs(object sender, DidCreateScriptContextEventArgs e)
         {
-            var js = string.Join(".", GetType().Namespace, "Files", "hook.js");
+            var map = new Dictionary<string,string>
+            {
+                {"popHookName", _popHookName},
+                {"openHookName", _openHookName}
+            };
+            var vars = string.Join(";", map.Keys.Select(k => $"var {k}='{map[k]}';")) + ";";
+            var js = string.Join(".", typeof(MiniblinkBrowser).Namespace, "Files", "browser.js");
 
-            using (var sm = GetType().Assembly.GetManifestResourceStream(js))
+            using (var sm = typeof(MiniblinkBrowser).Assembly.GetManifestResourceStream(js))
             {
                 if (sm != null)
                 {
                     using (var reader = new StreamReader(sm, Encoding.UTF8))
                     {
-                        js = reader.ReadToEnd();
+                        js = vars + reader.ReadToEnd();
                     }
                 }
             }
-
-            js = $@"var popHookName='{_popHookName}';
-                    var openHookName='{_openHookName}';"
-                 + js;
 
             e.Frame.RunJs(js);
         }
