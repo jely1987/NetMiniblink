@@ -36,7 +36,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.Name = "MiniblinkBrowser";
-            this.Size = new System.Drawing.Size(405, 288);
+            this.Size = new System.Drawing.Size(378, 287);
             this.ResumeLayout(false);
 
 		}

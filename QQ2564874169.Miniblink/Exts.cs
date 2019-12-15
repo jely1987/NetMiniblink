@@ -73,7 +73,7 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        public static object ToValue(this long value, IntPtr es)
+        public static object ToValue(this long value, Control control, IntPtr es)
         {
             if (value == 0) return null;
 
@@ -90,13 +90,13 @@ namespace QQ2564874169.Miniblink
                 case jsType.STRING:
                     return MBApi.jsToTempStringW(es, value).ToStringW();
                 case jsType.FUNCTION:
-                    return new JsFunc(new JsFuncWapper(value, es).Call);
+                    return new JsFunc(new JsFuncWapper(control, value, es).Call);
                 case jsType.ARRAY:
                     var len = MBApi.jsGetLength(es, value);
                     var array = new object[len];
                     for (var i = 0; i < array.Length; i++)
                     {
-                        array[i] = MBApi.jsGetAt(es, value, i).ToValue(es);
+                        array[i] = MBApi.jsGetAt(es, value, i).ToValue(control, es);
                     }
 
                     return array;
@@ -108,7 +108,7 @@ namespace QQ2564874169.Miniblink
                     var map = (IDictionary<string, object>) exp;
                     foreach (var k in keys)
                     {
-                        map.Add(k, MBApi.jsGet(es, value, k).ToValue(es));
+                        map.Add(k, MBApi.jsGet(es, value, k).ToValue(control, es));
                     }
 
                     return exp;
@@ -117,7 +117,7 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        public static long ToJsValue(this object obj, IntPtr es)
+        public static long ToJsValue(this object obj, Control control, IntPtr es)
         {
             if (obj == null)
                 return MBApi.jsUndefined();
@@ -142,10 +142,12 @@ namespace QQ2564874169.Miniblink
                 MBApi.jsSetLength(es, array, list.Count);
                 for (var i = 0; i < list.Count; i++)
                 {
-                    MBApi.jsSetAt(es, array, i, list[i].ToJsValue(es));
+                    MBApi.jsSetAt(es, array, i, list[i].ToJsValue(control, es));
                 }
+
                 return array;
             }
+
             if (obj is TempNetFunc)
             {
                 var func = (TempNetFunc) obj;
@@ -156,9 +158,10 @@ namespace QQ2564874169.Miniblink
                         var fps = new List<object>();
                         for (var i = 0; i < fcount; i++)
                         {
-                            fps.Add(MBApi.jsArg(fes, i).ToValue(fes));
+                            fps.Add(MBApi.jsArg(fes, i).ToValue(control, fes));
                         }
-                        return func(fps.ToArray()).ToJsValue(fes);
+
+                        return func(fps.ToArray()).ToJsValue(control, fes);
                     });
                 _keepref.Add(funcptr.ToInt64(), jsfunc);
                 var funcdata = new jsData
@@ -170,6 +173,7 @@ namespace QQ2564874169.Miniblink
                 Marshal.StructureToPtr(funcdata, funcptr, false);
                 return MBApi.jsFunction(es, funcptr);
             }
+
             if (obj is Delegate)
                 return MBApi.jsUndefined();
 
@@ -179,8 +183,9 @@ namespace QQ2564874169.Miniblink
             {
                 var v = p.GetValue(obj, null);
                 if (v == null) continue;
-                MBApi.jsSet(es, jsobj, p.Name, v.ToJsValue(es));
+                MBApi.jsSet(es, jsobj, p.Name, v.ToJsValue(control, es));
             }
+
             return jsobj;
         }
 

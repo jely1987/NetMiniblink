@@ -212,8 +212,7 @@ namespace QQ2564874169.Miniblink
         public IntPtr WebView { get; internal set; }
         public IntPtr Param { get; internal set; }
         public Bitmap Image { get; internal set; }
-        public int X { get; internal set; }
-        public int Y { get; internal set; }
+        public Rectangle Rect { get; internal set; }
         public int Width { get; internal set; }
         public int Height { get; internal set; }
         public bool Cancel { get; set; }

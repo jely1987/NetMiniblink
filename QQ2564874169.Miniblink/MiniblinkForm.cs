@@ -111,7 +111,7 @@ namespace QQ2564874169.Miniblink
 			IsTransparent = isTransparent;
             ResizeWidth = new FormResizeWidth(5);
 
-            if (!DesignMode)
+            if (!Utils.IsDesignMode())
             {
                 if (IsTransparent)
                 {
@@ -216,7 +216,7 @@ namespace QQ2564874169.Miniblink
 
         private void MiniblinkForm_Load(object sender, EventArgs e)
         {
-            if (!DesignMode && IsTransparent)
+            if (!Utils.IsDesignMode() && IsTransparent)
             {
                 Shown += SetTransparentStartPos;
                 SetTransparent();
@@ -275,7 +275,7 @@ namespace QQ2564874169.Miniblink
 
         private void Miniblink_Paint(object sender, PaintUpdatedEventArgs e)
 	    {
-	        if (!IsDisposed && !DesignMode && IsTransparent)
+	        if (!IsDisposed && !Utils.IsDesignMode() && IsTransparent)
             {
                 TransparentPaint(e.Image, e.Image.Width, e.Image.Height);
 

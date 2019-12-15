@@ -8,21 +8,21 @@ namespace QQ2564874169.Miniblink
         public bool IsMain { get; }
         public string Url { get; }
         public bool IsRemote { get; }
-        private IntPtr _mb;
+        private MiniblinkBrowser _mb;
 
-        internal FrameContext(IMiniblink miniblink, IntPtr frameId)
+        internal FrameContext(MiniblinkBrowser miniblink, IntPtr frameId)
         {
-            _mb = miniblink.MiniblinkHandle;
+            _mb = miniblink;
             Id = frameId;
-            IsMain = MBApi.wkeIsMainFrame(_mb, frameId);
-            Url = MBApi.wkeGetFrameUrl(_mb, frameId).ToUTF8String();
-            IsRemote = MBApi.wkeIsWebRemoteFrame(_mb, frameId);
+            IsMain = MBApi.wkeIsMainFrame(_mb.MiniblinkHandle, frameId);
+            Url = MBApi.wkeGetFrameUrl(_mb.MiniblinkHandle, frameId).ToUTF8String();
+            IsRemote = MBApi.wkeIsWebRemoteFrame(_mb.MiniblinkHandle, frameId);
         }
 
         public object RunJs(string script)
         {
-            var es = MBApi.wkeGetGlobalExecByFrame(_mb, Id);
-            return MBApi.jsEvalExW(es, script, true).ToValue(es);
+            var es = MBApi.wkeGetGlobalExecByFrame(_mb.MiniblinkHandle, Id);
+            return MBApi.jsEvalExW(es, script, true).ToValue(_mb, es);
         }
     }
 }
