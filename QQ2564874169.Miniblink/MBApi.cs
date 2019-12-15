@@ -663,9 +663,9 @@ namespace QQ2564874169.Miniblink
             return wkeGetContentHeight_x86(webView);
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkePaint2", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkePaint2(IntPtr webView, IntPtr bits, int bufWid, int bufHei, int xDst, int yDst,
-        //    int w, int h, int xSrc, int ySrc, [MarshalAs(UnmanagedType.I1)] bool bCopyAlpha);
+        [DllImport(DLL_x86, EntryPoint = "wkePaint2", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void wkePaint2(IntPtr webView, IntPtr bits, int bufWid, int bufHei, int xDst, int yDst,
+            int w, int h, int xSrc, int ySrc, [MarshalAs(UnmanagedType.I1)] bool bCopyAlpha);
 
         [DllImport(DLL_x86, EntryPoint = "wkePaint", CallingConvention = CallingConvention.Cdecl)]
         public static extern void wkePaint(IntPtr webView, IntPtr bits, byte pitch);
@@ -685,9 +685,6 @@ namespace QQ2564874169.Miniblink
 
             return wkeGetViewDC_x86(webView);
         }
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeGetHostHWND", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern IntPtr wkeGetHostHWND(IntPtr webView);
 
         [DllImport(DLL_x86, EntryPoint = "wkeCanGoBack", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeCanGoBack_x86(IntPtr webView);
@@ -2384,6 +2381,28 @@ namespace QQ2564874169.Miniblink
             else
             {
                 wkeSetCookie_x86(webView, null, c);
+            }
+        }
+
+
+        [DllImport(DLL_x86, EntryPoint = "wkeOnPaintBitUpdated", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeOnPaintBitUpdated_x86(IntPtr webView, wkePaintBitUpdatedCallback callback,
+            IntPtr param);
+
+        [DllImport(DLL_x64, EntryPoint = "wkeOnPaintBitUpdated", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeOnPaintBitUpdated_x64(IntPtr webView, wkePaintBitUpdatedCallback callback,
+            IntPtr param);
+
+        public static void wkeOnPaintBitUpdated(IntPtr webView, wkePaintBitUpdatedCallback callback,
+            IntPtr param)
+        {
+            if (is64())
+            {
+                wkeOnPaintBitUpdated_x64(webView, callback, param);
+            }
+            else
+            {
+                wkeOnPaintBitUpdated_x86(webView, callback, param);
             }
         }
     }

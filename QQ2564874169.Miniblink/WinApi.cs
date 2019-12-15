@@ -112,8 +112,12 @@ namespace QQ2564874169.Miniblink
         [DllImport("user32.dll", EntryPoint = "GetDC")]
         public static extern IntPtr GetDC(IntPtr hwnd);
 
+        //[DllImport("user32.dll", EntryPoint = "UpdateLayeredWindow")]
+        //public static extern int UpdateLayeredWindow(IntPtr hWnd, IntPtr hdcDst, IntPtr pptDst, ref WinSize psize,
+        //    IntPtr hdcSrc, ref WinPoint pptSrc, int crKey, ref BlendFunction pblend, int dwFlags);
+
         [DllImport("user32.dll", EntryPoint = "UpdateLayeredWindow")]
-        public static extern int UpdateLayeredWindow(IntPtr hWnd, IntPtr hdcDst, IntPtr pptDst, ref WinSize psize,
+        public static extern int UpdateLayeredWindow(IntPtr hWnd, IntPtr hdcDst, ref WinPoint pptDst, ref WinSize psize,
             IntPtr hdcSrc, ref WinPoint pptSrc, int crKey, ref BlendFunction pblend, int dwFlags);
 
         [DllImport("gdi32.dll", EntryPoint = "CreateCompatibleDC")]

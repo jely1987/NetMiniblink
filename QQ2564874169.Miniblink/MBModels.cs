@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QQ2564874169.Miniblink
 {
@@ -64,7 +60,7 @@ namespace QQ2564874169.Miniblink
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct WKEWindowFeatures
+    internal struct WKEWindowFeatures
     {
         public int X;
         public int Y;

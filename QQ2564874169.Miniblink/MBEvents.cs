@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace QQ2564874169.Miniblink
 {
@@ -210,7 +211,7 @@ namespace QQ2564874169.Miniblink
     {
         public IntPtr WebView { get; internal set; }
         public IntPtr Param { get; internal set; }
-        public IntPtr Hdc { get; internal set; }
+        public Bitmap Image { get; internal set; }
         public int X { get; internal set; }
         public int Y { get; internal set; }
         public int Width { get; internal set; }

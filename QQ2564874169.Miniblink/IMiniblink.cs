@@ -94,6 +94,5 @@ namespace QQ2564874169.Miniblink
 		void Reload();
         void DrawToBitmap(Action<ScreenshotImage> callback);
         void Print(Action<PrintPreviewDialog> callback);
-        CookieCollection GetCookies(string domain);
     }
 }

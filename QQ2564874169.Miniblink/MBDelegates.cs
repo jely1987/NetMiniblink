@@ -4,27 +4,11 @@ using System.Runtime.InteropServices;
 namespace QQ2564874169.Miniblink
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void wkeTitleChangedCallback(IntPtr webView, IntPtr param, IntPtr title);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void wkeURLChangedCallback(IntPtr webView, IntPtr param, IntPtr url);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void wkeURLChangedCallback2(IntPtr webView, IntPtr param, IntPtr frame, IntPtr url);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void wkePaintUpdatedCallback(IntPtr webView, IntPtr param, IntPtr hdc, 
         int x, int y, int cx, int cy);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void wkeAlertBoxCallback(IntPtr webView, IntPtr param, IntPtr msg);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate byte wkeConfirmBoxCallback(IntPtr webView, IntPtr param, IntPtr msg);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate byte wkePromptBoxCallback(IntPtr webView, IntPtr param, IntPtr msg, IntPtr defaultResult,
-        IntPtr result);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate byte wkeNavigationCallback(IntPtr webView, IntPtr param, wkeNavigationType navigationType,
@@ -35,14 +19,7 @@ namespace QQ2564874169.Miniblink
         IntPtr url, IntPtr windowFeatures);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void wkeDocumentReadyCallback(IntPtr webView, IntPtr param);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void wkeDocumentReady2Callback(IntPtr webView, IntPtr param, IntPtr frame);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    internal delegate void wkeLoadingFinishCallback(IntPtr webView, IntPtr param, IntPtr url, wkeLoadingResult result,
-        IntPtr failedReason);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate byte wkeDownloadCallback(IntPtr webView, IntPtr param, IntPtr url);
@@ -85,5 +62,9 @@ namespace QQ2564874169.Miniblink
     internal delegate void jsFinalizeCallback(IntPtr data);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Auto)]
-    public delegate void wkeOnShowDevtoolsCallback(IntPtr webView, IntPtr param);
+    internal delegate void wkeOnShowDevtoolsCallback(IntPtr webView, IntPtr param);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate void wkePaintBitUpdatedCallback(IntPtr webView, IntPtr param, IntPtr buffer, IntPtr rect,
+        int width, int height);
 }

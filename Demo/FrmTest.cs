@@ -23,18 +23,11 @@ namespace Demo
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            LoadUrlBegin += FrmTest_LoadUrlBegin;
-            LoadUri("https://www.acfun.cn");
-        }
-
-        private void FrmTest_LoadUrlBegin(object sender, LoadUrlBeginEventArgs e)
-        {
-            e.WatchLoadUrlEnd(p => { Console.WriteLine(p.RequestMethod + " = " + p.Url); });
+            LoadUri("https://www.acfun.cn")...;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-
         }
 
         private void button2_Click(object sender, EventArgs e)

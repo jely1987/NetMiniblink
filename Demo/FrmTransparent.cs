@@ -23,6 +23,7 @@ namespace Demo
 
         private void FrmTransparent_Load(object sender, EventArgs e)
         {
+            DropByClass = true;
             Width = 300;
             Height = 300;
             LoadUri("http://loc.res/transparent.html");

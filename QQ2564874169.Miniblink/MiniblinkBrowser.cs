@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
@@ -635,28 +636,6 @@ namespace QQ2564874169.Miniblink
             return 0;
         }
 
-        public event EventHandler<PaintUpdatedEventArgs> PaintUpdated;
-
-        protected virtual void OnPaintUpdated(IntPtr mb, IntPtr param, IntPtr hdc, int x, int y, int w, int h)
-        {
-            var e = new PaintUpdatedEventArgs
-            {
-                WebView = mb,
-                Param = param,
-                Hdc = hdc,
-                X = x,
-                Y = y,
-                Width = w,
-                Height = h
-            };
-            PaintUpdated?.Invoke(this, e);
-
-            if (!e.Cancel)
-            {
-                _browserPaintUpdated(this, e);
-            }
-        }
-
         private void JobCompleted(NetJob job)
         {
             if (job.Data != null)
@@ -749,7 +728,6 @@ namespace QQ2564874169.Miniblink
             var data = new byte[length];
             if (buf != IntPtr.Zero)
                 Marshal.Copy(buf, data, 0, length);
-            //Console.WriteLine($"xxxxx save:({length}){url.ToUTF8String()}");
             OnLoadUrlEnd(mb, job, data);
         }
 
@@ -926,10 +904,12 @@ namespace QQ2564874169.Miniblink
         private static string _popHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private static string _openHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private EventHandler<PaintUpdatedEventArgs> _browserPaintUpdated;
-        private wkePaintUpdatedCallback _paintUpdated;
+        private wkePaintBitUpdatedCallback _paintBitUpdated;
         private wkeCreateViewCallback _createView;
         private Hashtable _ref = new Hashtable();
         private MemoryCache _cache = new MemoryCache(Guid.NewGuid().ToString());
+
+        public event EventHandler<PaintUpdatedEventArgs> PaintUpdated;
         public IList<ILoadResource> LoadResourceHandlerList { get; }
         private IResourceCache _resourceCache;
         public IResourceCache ResourceCache
@@ -968,7 +948,7 @@ namespace QQ2564874169.Miniblink
                     throw new WKECreateException();
                 }
                 _browserPaintUpdated += BrowserPaintUpdated;
-                _paintUpdated = OnPaintUpdated;
+                _paintBitUpdated = OnWkeOnPaintBitUpdated;
                 _createView = OnCreateView;
                 LoadUrlBegin += LoadResource;
                 LoadUrlBegin += LoadCache;
@@ -981,8 +961,7 @@ namespace QQ2564874169.Miniblink
                 MBApi.wkeSetNavigationToNewWindowEnable(MiniblinkHandle, true);
                 MBApi.wkeOnCreateView(MiniblinkHandle, _createView, IntPtr.Zero);
                 MBApi.wkeSetHandle(MiniblinkHandle, Handle);
-                //todo DC渲染改成像素渲染
-                MBApi.wkeOnPaintUpdated(MiniblinkHandle, _paintUpdated, Handle);
+                MBApi.wkeOnPaintBitUpdated(MiniblinkHandle, _paintBitUpdated, IntPtr.Zero);
 
                 DeviceParameter = new DeviceParameter(this);
                 Cookies = new CookieCollection(this, "cookies.dat");
@@ -1090,14 +1069,42 @@ namespace QQ2564874169.Miniblink
             }
         }
 
+        private void OnWkeOnPaintBitUpdated(IntPtr webView, IntPtr param, IntPtr buf, IntPtr rectPtr,
+            int width, int height)
+        {
+            if (buf == IntPtr.Zero) return;
+            var data = new byte[width * height];
+            Marshal.Copy(buf, data, 0, data.Length);
+            var stride = width * 4 + width * 4 % 4;
+            using (var image = new Bitmap(width, height, stride, PixelFormat.Format32bppPArgb, buf))
+            {
+                var rect = (wkeRect)Marshal.PtrToStructure(rectPtr, typeof(wkeRect));
+                var e = new PaintUpdatedEventArgs
+                {
+                    WebView = webView,
+                    Param = param,
+                    Image = image,
+                    X = rect.x,
+                    Y = rect.y,
+                    Width = width,
+                    Height = height
+                };
+                PaintUpdated?.Invoke(this, e);
+
+                if (!e.Cancel)
+                {
+                    _browserPaintUpdated(this, e);
+                }
+            }
+        }
+
         private void BrowserPaintUpdated(object sender, PaintUpdatedEventArgs e)
         {
-            if (!IsDisposed)
+            if (!IsDisposed && !DesignMode)
             {
                 using (var gdi = CreateGraphics())
                 {
-                    WinApi.BitBlt(gdi.GetHdc(), e.X, e.Y, e.Width, e.Height, e.Hdc,
-                        e.X, e.Y, (int) WinConst.SRCCOPY);
+                    gdi.DrawImage(e.Image, 0, 0, e.Width, e.Height);
                 }
             }
         }
@@ -1213,6 +1220,16 @@ namespace QQ2564874169.Miniblink
         public void DrawToBitmap(Action<ScreenshotImage> callback)
         {
             new DrawToBitmapUtil(this).ToImage(callback);
+        }
+
+        public Bitmap DrawToBitmap()
+        {
+            var image = new Bitmap(Width, Height);
+            var bitmap = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.WriteOnly,
+                PixelFormat.Format32bppArgb);
+            MBApi.wkePaint(MiniblinkHandle,bitmap.Scan0 , 0);
+            image.UnlockBits(bitmap);
+            return image;
         }
 
         private void RegisterJsFunc()
@@ -1448,11 +1465,6 @@ namespace QQ2564874169.Miniblink
             new PrintUtil(this).Start(callback);
         }
 
-        public CookieCollection GetCookies(string domain)
-        {
-            throw new NotImplementedException();
-        }
-
         private void OnDropFiles(int x, int y, params string[] files)
         {
             for (var i = 0; i < files.Length; i++)
@@ -1491,6 +1503,7 @@ namespace QQ2564874169.Miniblink
         }
 
         #region 消息处理
+
         protected override void OnResize(EventArgs e)
         {
             if (!Utils.IsDesignMode() && MiniblinkHandle != IntPtr.Zero)

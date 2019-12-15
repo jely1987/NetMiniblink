@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -118,15 +117,10 @@ namespace QQ2564874169.Miniblink
                 {
                     NoneBorderResize = true;
                     FormBorderStyle = FormBorderStyle.None;
-                    Shown += SetTransparentStartPos;
-                    Load += (s, e) => SetTransparent();
                     _browser.PaintUpdated += Miniblink_Paint;
                 }
 
-                if (FormBorderStyle == FormBorderStyle.None)
-                {
-                    DropByClass = true;
-                }
+                DropByClass = FormBorderStyle == FormBorderStyle.None;
                 var tmp = Guid.NewGuid().ToString().Replace("-", "");
                 BindNetFunc(new NetFunc(_dragfunc = "drag" + tmp, DropStart));
                 BindNetFunc(new NetFunc(_maxfunc = "max" + tmp, MaxFunc));
@@ -224,7 +218,12 @@ namespace QQ2564874169.Miniblink
         {
             if (!DesignMode && IsTransparent)
             {
-                TransparentPaint(MBApi.wkeGetViewDC(MiniblinkHandle));
+                Shown += SetTransparentStartPos;
+                SetTransparent();
+                using (var image = _browser.DrawToBitmap())
+                {
+                    TransparentPaint(image, image.Width, image.Height);
+                }
             }
         }
 
@@ -237,7 +236,10 @@ namespace QQ2564874169.Miniblink
                 //窗口还原消息
                 if (Utils.Dword(m.WParam).ToInt32() == 61728)
                 {
-                    TransparentPaint(MBApi.wkeGetViewDC(MiniblinkHandle));
+                    using (var image = _browser.DrawToBitmap())
+                    {
+                        TransparentPaint(image, image.Width, image.Height);
+                    }
                 }
             }
 
@@ -273,25 +275,48 @@ namespace QQ2564874169.Miniblink
 
         private void Miniblink_Paint(object sender, PaintUpdatedEventArgs e)
 	    {
-	        if (!IsDisposed && IsTransparent)
-	        {
-	            TransparentPaint(e.Hdc);
-	            e.Cancel = true;
+	        if (!IsDisposed && !DesignMode && IsTransparent)
+            {
+                TransparentPaint(e.Image, e.Image.Width, e.Image.Height);
+
+                e.Cancel = true;
 	        }
 	    }
 
-	    private void TransparentPaint(IntPtr mbHdc)
-	    {
-	        var point = new WinPoint();
-	        var size = new WinSize(Width, Height);
-	        var blend = new BlendFunction
-	        {
-	            BlendOp = (byte)WinConst.AC_SRC_OVER,
-	            SourceConstantAlpha = 255,
-	            AlphaFormat = (byte)WinConst.AC_SRC_ALPHA
-	        };
-	        WinApi.UpdateLayeredWindow(Handle, IntPtr.Zero, IntPtr.Zero, ref size, mbHdc, ref point, 0, ref blend, (int)WinConst.ULW_ALPHA);
-	    }
+        private void TransparentPaint(Bitmap bitmap, int width, int height)
+        {
+            var oldBits = IntPtr.Zero;
+            var hBitmap = IntPtr.Zero;
+            var memDc = WinApi.CreateCompatibleDC(IntPtr.Zero);
+
+            try
+            {
+                var dst = new WinPoint { x = Left, y = Top };
+                var src = new WinPoint();
+                var size = new WinSize(width, height);
+
+                hBitmap = bitmap.GetHbitmap(Color.FromArgb(0));
+                oldBits = WinApi.SelectObject(memDc, hBitmap);
+
+                var blend = new BlendFunction
+                {
+                    BlendOp = (byte)WinConst.AC_SRC_OVER,
+                    SourceConstantAlpha = 255,
+                    AlphaFormat = (byte)WinConst.AC_SRC_ALPHA
+                };
+
+                WinApi.UpdateLayeredWindow(Handle, IntPtr.Zero, ref dst, ref size, memDc, ref src, 0, ref blend, (int)WinConst.ULW_ALPHA);
+            }
+            finally
+            {
+                if (hBitmap != IntPtr.Zero)
+                {
+                    WinApi.SelectObject(memDc, oldBits);
+                    WinApi.DeleteObject(hBitmap);
+                }
+                WinApi.DeleteDC(memDc);
+            }
+        }
 
         protected override CreateParams CreateParams
 		{
@@ -831,11 +856,6 @@ namespace QQ2564874169.Miniblink
         public void Print(Action<PrintPreviewDialog> callback)
         {
             _browser.Print(callback);
-        }
-
-        public CookieCollection GetCookies(string domain)
-        {
-            return _browser.GetCookies(domain);
         }
 
         #endregion
