@@ -118,6 +118,11 @@ namespace QQ2564874169.Miniblink
             MBApi.wkeNetSetHTTPHeaderField(Job.Handle, name, value);
         }
 
+        public string GetHeader(string name)
+        {
+            return MBApi.wkeNetGetHTTPHeaderField(Job.Handle, name).ToUTF8String();
+        }
+
         public void WatchLoadUrlEnd(Action<LoadUrlEndArgs> callback, object state = null)
         {
             _loadUrlEnd.Add(new Tuple<Action<LoadUrlEndArgs>, object>(callback, state));
@@ -143,6 +148,7 @@ namespace QQ2564874169.Miniblink
                 RequestMethod = RequestMethod,
                 Url = Url
             };
+
             _loadUrlEnd.ForEach(item =>
             {
                 e.State = item.Item2;

@@ -23,37 +23,28 @@ namespace Demo
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            ConsoleMessage += FrmTest_ConsoleMessage;
-            LoadUri("https://codepen.io/pen/?&editable=true");
+            LoadUrlBegin += FrmTest_LoadUrlBegin;
+            LoadUri("https://www.acfun.cn");
         }
 
-        private void FrmTest_ConsoleMessage(object sender, ConsoleMessageEventArgs e)
+        private void FrmTest_LoadUrlBegin(object sender, LoadUrlBeginEventArgs e)
         {
-            Console.WriteLine(e.Message);
+            e.WatchLoadUrlEnd(p => { Console.WriteLine(p.RequestMethod + " = " + p.Url); });
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var cookies = "";
-            foreach (var item in Cookies)
-            {
-                cookies += $"{item.Domain}={item.Name}={item.Value}\r\n\r\n";
-            }
 
-            MessageBox.Show(cookies);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Cookies.Add(new Cookie("ckname", "ckvalue")
-            {
-                Expires = DateTime.Now.AddDays(1)
-            });
+
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            Cookies.Remove(new Cookie("ckname", "ckvalue"));
+            Reload();
         }
     }
 }
