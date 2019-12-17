@@ -105,11 +105,11 @@ namespace QQ2564874169.Miniblink
         {
             if (is64())
             {
-                wkeSetMouseEnabled_x86(webView, enable);
+                wkeSetMouseEnabled_x64(webView, enable);
             }
             else
             {
-                wkeSetMouseEnabled_x64(webView, enable);
+                wkeSetMouseEnabled_x86(webView, enable);
             }
         }
 
@@ -133,12 +133,6 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeGetVersion", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern uint wkeGetVersion();
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeGetVersionString", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern IntPtr wkeGetVersionString();
-
         [DllImport(DLL_x86, EntryPoint = "wkeCreateWebView", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr wkeCreateWebView_x86();
 
@@ -154,16 +148,6 @@ namespace QQ2564874169.Miniblink
 
             return wkeCreateWebView_x86();
         }
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeGetWebView", CallingConvention = CallingConvention.Cdecl,
-        //    CharSet = CharSet.Ansi)]
-        //public static extern IntPtr wkeGetWebView(string name);
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeDestroyWebView", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkeDestroyWebView(IntPtr webView);
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeSetMemoryCacheEnable", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkeSetMemoryCacheEnable(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool b);
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetNavigationToNewWindowEnable",
             CallingConvention = CallingConvention.Cdecl)]

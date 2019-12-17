@@ -273,7 +273,7 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private bool _headlessEnabled = true;
+        private bool _headlessEnabled;
 
         public bool HeadlessEnabled
         {
@@ -1030,6 +1030,7 @@ namespace QQ2564874169.Miniblink
         {
             if (!Utils.IsDesignMode())
             {
+                MBApi.wkeOnPaintBitUpdated(MiniblinkHandle, null, IntPtr.Zero);
                 MBApi.wkeOnPaintUpdated(MiniblinkHandle, null, IntPtr.Zero);
                 MBApi.wkeOnURLChanged2(MiniblinkHandle, null, IntPtr.Zero);
                 MBApi.wkeOnNavigation(MiniblinkHandle, null, IntPtr.Zero);

@@ -36,19 +36,11 @@ namespace QQ2564874169.Miniblink
             // _browser
             // 
             this._browser.BackColor = System.Drawing.Color.White;
-            this._browser.CspCheckEnable = false;
             this._browser.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._browser.FireDropFile = false;
-            this._browser.HeadlessEnabled = true;
             this._browser.Location = new System.Drawing.Point(0, 0);
-            this._browser.MemoryCacheEnable = true;
-            this._browser.MouseEnabled = true;
             this._browser.Name = "_browser";
-            this._browser.NpapiPluginsEnable = true;
-            this._browser.ResourceCache = null;
             this._browser.Size = new System.Drawing.Size(429, 335);
             this._browser.TabIndex = 0;
-            this._browser.TouchEnabled = false;
             // 
             // MiniblinkForm
             // 
