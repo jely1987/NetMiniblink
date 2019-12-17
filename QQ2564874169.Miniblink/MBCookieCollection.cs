@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 
@@ -35,7 +34,6 @@ namespace QQ2564874169.Miniblink
                     }
                     else
                     {
-                        _hosts.Clear();
                         _container = new CookieContainer();
                         _miniblink.LoadUrlBegin += ClearCookie;
                         MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, 
@@ -47,7 +45,6 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private List<string> _hosts = new List<string>();
         private CookieContainer _container = new CookieContainer();
         private IMiniblink _miniblink;
         private string _file;
@@ -60,7 +57,6 @@ namespace QQ2564874169.Miniblink
             }
             _file = path;
             _miniblink = miniblink;
-            _miniblink.LoadUrlBegin += _miniblink_LoadUrlBegin;
             _miniblink.NavigateBefore += _miniblink_NavigateBefore;
             Enable = true;
         }
@@ -78,17 +74,6 @@ namespace QQ2564874169.Miniblink
             if (_miniblink.Url == e.Url)
             {
                 _container = new CookieContainer();
-                _hosts.Clear();
-            }
-        }
-
-        private void _miniblink_LoadUrlBegin(object sender, LoadUrlBeginEventArgs e)
-        {
-            if (Enable == false) return;
-            var host = new Uri(e.Url).Host.ToLower();
-            if (_hosts.Contains(host) == false)
-            {
-                _hosts.Add(host);
             }
         }
 
@@ -96,6 +81,7 @@ namespace QQ2564874169.Miniblink
         {
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.FlushCookiesToFile);
             _container = new CookieContainer();
+            var host = new Uri(_miniblink.Url).Host;
             var rows = File.ReadAllLines(_file, Encoding.UTF8);
             foreach (var row in rows)
             {
@@ -111,12 +97,12 @@ namespace QQ2564874169.Miniblink
 
                 if (domain.StartsWith("."))
                 {
-                    if (_hosts.Any(i => i.EndsWith(domain) || ("." + i).Equals(domain)) == false)
+                    if (host.EndsWith(domain) || ("." + host).Equals(domain) == false)
                     {
                         continue;
                     }
                 }
-                else if (_hosts.Contains(domain) == false)
+                else if (host.Equals(domain) == false)
                 {
                     continue;
                 }
@@ -135,39 +121,15 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        public IList<Cookie> GetCookies(string url)
-        {
-            if (!url.StartsWith("http:", StringComparison.OrdinalIgnoreCase) &&
-                !url.StartsWith("https:", StringComparison.OrdinalIgnoreCase))
-            {
-                url = "http://" + url;
-            }
-
-            Reload();
-            var list = new List<Cookie>();
-            foreach (Cookie item in _container.GetCookies(new Uri(url)))
-            {
-                if (list.Contains(item) == false)
-                {
-                    list.Add(item);
-                }
-            }
-
-            return list.AsReadOnly();
-        }
-
         private IList<Cookie> GetCookies()
         {
             Reload();
             var list = new List<Cookie>();
-            foreach (var host in _hosts)
+            foreach (Cookie item in _container.GetCookies(new Uri(_miniblink.Url)))
             {
-                foreach (Cookie item in _container.GetCookies(new Uri("http://" + host)))
+                if (list.Contains(item) == false)
                 {
-                    if (list.Contains(item) == false)
-                    {
-                        list.Add(item);
-                    }
+                    list.Add(item);
                 }
             }
 
