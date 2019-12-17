@@ -1468,26 +1468,10 @@ namespace QQ2564874169.Miniblink
 
         private void OnDropFiles(int x, int y, params string[] files)
         {
-            for (var i = 0; i < files.Length; i++)
-            {
-                files[i] = files[i].Replace("\"", "\\\"").Replace("\\", "\\\\");
-                files[i] = "\"" + files[i] + "\"";
-            }
-
             var data = string.Join(",", files);
             x += ScrollLeft;
             y += ScrollTop;
-            RunJs($@"
-                var e = new CustomEvent(""dropFile"",
-                {{
-                    detail:{{
-                        files:[{data}],
-                        x:{x},
-                        y:{y}
-                    }}
-                }});
-                (window.dispatchEvent || window.fireEvent)(e);
-            ");
+            CallJsFunc("fireDropFileEvent", data, x, y);
         }
 
         private void DragFileEnter(object sender, DragEventArgs e)
