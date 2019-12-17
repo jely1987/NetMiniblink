@@ -23,7 +23,7 @@ namespace Demo
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            LoadUri("https://www.acfun.cn");
+            LoadUri("https://www.layui.com/demo/table.html");
         }
 
         private void button1_Click(object sender, EventArgs e)

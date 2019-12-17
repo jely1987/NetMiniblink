@@ -438,7 +438,7 @@ namespace QQ2564874169.Miniblink
             }
             OnNavigateBefore(e);
 
-            return (byte) (e.Cancel ? 0 : 1);
+            return (byte)(e.Cancel ? 0 : 1);
         }
 
         protected virtual void OnNavigateBefore(NavigateEventArgs args)
@@ -506,7 +506,7 @@ namespace QQ2564874169.Miniblink
             {
                 Level = level,
                 Message = message.WKEToUTF8String(),
-                SourceLine = (int) sourceLine,
+                SourceLine = (int)sourceLine,
                 SourceName = sourceName.WKEToUTF8String(),
                 StackTrace = stackTrace.WKEToUTF8String()
             });
@@ -679,7 +679,7 @@ namespace QQ2564874169.Miniblink
             var rawurl = url.ToUTF8String();
             var e = new LoadUrlBeginEventArgs
             {
-                Job = new NetJob(mb, job, JobCompleted) {Url = rawurl},
+                Job = new NetJob(mb, job, JobCompleted) { Url = rawurl },
                 Url = rawurl,
                 RequestMethod = MBApi.wkeNetGetRequestMethod(job)
             };
@@ -710,7 +710,7 @@ namespace QQ2564874169.Miniblink
                     MBApi.wkeNetCancelRequest(job);
                     return true;
                 }
-                
+
                 MBApi.wkeNetHookRequest(job);
                 return false;
             }
@@ -754,7 +754,7 @@ namespace QQ2564874169.Miniblink
             }
             else
             {
-                MBApi.wkeNetSetData(job, new byte[] {0}, 1);
+                MBApi.wkeNetSetData(job, new byte[] { 0 }, 1);
             }
         }
 
@@ -789,7 +789,7 @@ namespace QQ2564874169.Miniblink
             var funcvalue = new wkeJsNativeFunction((es, state) =>
             {
                 var handle = GCHandle.FromIntPtr(state);
-                var nfunc = (NetFunc) handle.Target;
+                var nfunc = (NetFunc)handle.Target;
                 var arglen = MBApi.jsArgCount(es);
                 var args = new List<object>();
                 for (var i = 0; i < arglen; i++)
@@ -925,7 +925,7 @@ namespace QQ2564874169.Miniblink
             }
         }
         public CookieCollection Cookies { get; }
-        
+
         public MiniblinkBrowser()
         {
             InitializeComponent();
@@ -1074,17 +1074,15 @@ namespace QQ2564874169.Miniblink
             int width, int height)
         {
             if (buf == IntPtr.Zero) return;
-            var data = new byte[width * height];
-            Marshal.Copy(buf, data, 0, data.Length);
-            var rect = (wkeRect) Marshal.PtrToStructure(rectPtr, typeof(wkeRect));
             var stride = width * 4 + width * 4 % 4;
-            using (var image = new Bitmap(width, height, stride, PixelFormat.Format32bppPArgb, buf))
+            var rect = (wkeRect) Marshal.PtrToStructure(rectPtr, typeof(wkeRect));
+            using (var view = new Bitmap(width, height, stride, PixelFormat.Format32bppPArgb, buf))
             {
                 var e = new PaintUpdatedEventArgs
                 {
                     WebView = webView,
                     Param = param,
-                    Image = image,
+                    Image = view,
                     Rect = new Rectangle(rect.x, rect.y, rect.w, rect.h),
                     Width = width,
                     Height = height
@@ -1100,14 +1098,20 @@ namespace QQ2564874169.Miniblink
 
         private void BrowserPaintUpdated(object sender, PaintUpdatedEventArgs e)
         {
-            if (!IsDisposed && !Utils.IsDesignMode())
+            var st = DateTime.Now.Ticks;
+            if (!IsDisposed)
             {
-                using (var gdi = CreateGraphics())
+                using (var g = CreateGraphics())
                 {
-                    var rect = new RectangleF(e.Rect.X, e.Rect.Y, e.Rect.Width, e.Rect.Height);
-                    gdi.DrawImage(e.Image, rect, rect, GraphicsUnit.Pixel);
+                    g.DrawImage(e.Image,
+                        new RectangleF(e.Rect.X, e.Rect.Y, e.Rect.Width, e.Rect.Height),
+                        new RectangleF(e.Rect.X, e.Rect.Y, e.Rect.Width, e.Rect.Height),
+                        GraphicsUnit.Pixel);
                 }
             }
+            var sec = new TimeSpan(DateTime.Now.Ticks - st);
+            //Console.WriteLine(sec.TotalMilliseconds);
+
         }
 
         public void ScrollTo(int x, int y)
@@ -1225,10 +1229,16 @@ namespace QQ2564874169.Miniblink
 
         public Bitmap DrawToBitmap()
         {
-            var image = new Bitmap(Width, Height);
-            var bitmap = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.WriteOnly,
+            return DrawToBitmap(new Rectangle(0, 0, ViewWidth, ViewHeight));
+        }
+
+        public Bitmap DrawToBitmap(Rectangle rect)
+        {
+            //todo 为实现
+            var image = new Bitmap(rect.Width, rect.Height);
+            var bitmap = image.LockBits(new Rectangle(rect.X, rect.Y, image.Width, image.Height), ImageLockMode.WriteOnly,
                 PixelFormat.Format32bppArgb);
-            MBApi.wkePaint(MiniblinkHandle,bitmap.Scan0 , 0);
+            MBApi.wkePaint(MiniblinkHandle, bitmap.Scan0, 0);
             image.UnlockBits(bitmap);
             return image;
         }
@@ -1669,19 +1679,40 @@ namespace QQ2564874169.Miniblink
                         Cursor = Cursors.Hand;
 
                     }
+
                     break;
                 case wkeCursorInfo.IBeam:
                     if (Cursor != Cursors.IBeam)
                     {
                         Cursor = Cursors.IBeam;
                     }
+
                     break;
                 case wkeCursorInfo.Pointer:
                     if (Cursor != Cursors.Default)
                     {
                         Cursor = Cursors.Default;
                     }
+
                     break;
+                case wkeCursorInfo.ColumnResize:
+                    if (Cursor != Cursors.VSplit)
+                    {
+                        Cursor = Cursors.VSplit;
+                    }
+
+                    break;
+                case wkeCursorInfo.RowResize:
+                    if (Cursor != Cursors.HSplit)
+                    {
+                        Cursor = Cursors.HSplit;
+                    }
+
+                    break;
+                default:
+                    Console.WriteLine("未实现的指针类型：" + type);
+                    break;
+
             }
         }
 
@@ -1707,7 +1738,7 @@ namespace QQ2564874169.Miniblink
             switch ((WinConst) m.Msg)
             {
                 case WinConst.WM_INPUTLANGCHANGE:
-                    {
+                {
                     DefWndProc(ref m);
                     break;
                 }
