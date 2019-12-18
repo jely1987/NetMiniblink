@@ -82,6 +82,9 @@ namespace Demo
                 case "dev_tools":
                     form = new FrmDevTools();
                     break;
+                case "download":
+                    form = new FrmDownload();
+                    break;
             }
 
             if (form != null)

@@ -368,7 +368,7 @@ namespace QQ2564874169.Miniblink
 					if (MouseButtons != MouseButtons.Left)
                     {
                         _resizeing = false;
-                        this.UIInvoke(() => { Cursor = DefaultCursor; });
+                        SafeInvoke(s => { Cursor = DefaultCursor; });
                         break;
                     }
                     
@@ -416,7 +416,7 @@ namespace QQ2564874169.Miniblink
 								nh = _resizeSize.Height + xy;
                                 break;
 						}
-						this.UIInvoke(() =>
+                        SafeInvoke(s =>
 						{
 							Size = new Size(nw, nh);
 							Location = new Point(nx, ny);
@@ -869,6 +869,11 @@ namespace QQ2564874169.Miniblink
         public void Print(Action<PrintPreviewDialog> callback)
         {
             _browser.Print(callback);
+        }
+
+        public void SafeInvoke(Action<object> callback, object state = null)
+        {
+            _browser.SafeInvoke(callback, state);
         }
 
         #endregion

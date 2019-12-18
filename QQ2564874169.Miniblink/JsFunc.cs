@@ -9,27 +9,25 @@ namespace QQ2564874169.Miniblink
     public class JsFuncWapper
     {
         private string _name;
-        private IntPtr _mb;
-        private Control _ctrl;
+        private IMiniblink _miniblink;
 
-        internal JsFuncWapper(Control control, long jsvalue, IntPtr es)
+        internal JsFuncWapper(IMiniblink control, long jsvalue, IntPtr es)
         {
+            _miniblink = control;
             _name = "func" + Guid.NewGuid().ToString().Replace("-", "");
-            _mb = MBApi.jsGetWebView(es);
             MBApi.jsSetGlobal(es, _name, jsvalue);
-            _ctrl = control;
         }
 
         public object Call(params object[] param)
         {
             object result = null;
 
-            _ctrl.UIInvoke(() =>
+            _miniblink.SafeInvoke(s =>
 			{
-				var es = MBApi.wkeGlobalExec(_mb);
+				var es = MBApi.wkeGlobalExec(_miniblink.MiniblinkHandle);
 				var value = MBApi.jsGetGlobal(es, _name);
-                var jsps = param.Select(i => i.ToJsValue(_ctrl, es)).ToArray();
-                result = MBApi.jsCall(es, value, MBApi.jsUndefined(), jsps, jsps.Length).ToValue(_ctrl, es);
+                var jsps = param.Select(i => i.ToJsValue(_miniblink, es)).ToArray();
+                result = MBApi.jsCall(es, value, MBApi.jsUndefined(), jsps, jsps.Length).ToValue(_miniblink, es);
 				MBApi.jsSetGlobal(es, _name, MBApi.jsUndefined());
 			});
 			

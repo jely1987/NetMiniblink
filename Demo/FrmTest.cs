@@ -10,7 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using QQ2564874169.Miniblink;
-using QQ2564874169.Miniblink.LoadResourceImpl;
 
 namespace Demo
 {
@@ -23,7 +22,19 @@ namespace Demo
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            LoadUri("https://www.layui.com/demo/table.html");
+            Download += FrmTest_Download;
+            LoadUri("https://im.qq.com/pcqq/");
+        }
+
+        private void FrmTest_Download(object sender, DownloadEventArgs e)
+        {
+            e.Progress += E_Progress;
+            e.SaveToFile("111.exe");
+        }
+
+        private void E_Progress(object sender, DownloadProgressEventArgs e)
+        {
+            Console.WriteLine(e.Total + "\t" + e.Received);
         }
 
         private void button1_Click(object sender, EventArgs e)

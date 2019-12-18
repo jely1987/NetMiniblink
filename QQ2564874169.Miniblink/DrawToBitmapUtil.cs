@@ -73,15 +73,16 @@ namespace QQ2564874169.Miniblink
                 srcY = _imageHeight - height;
                 isLast = true;
             }
-            //todo 换成基于DrawToBitmap实现
             var bmp = new Bitmap(_contentWidth, height);
 
             using (var g = Graphics.FromImage(bmp))
             {
-                WinApi.BitBlt(g.GetHdc(), 0, 0, bmp.Width, bmp.Height,
-                    MBApi.wkeGetViewDC(_miniblink.MiniblinkHandle), 0, srcY,
-                    (int)WinConst.SRCCOPY);
+                g.DrawImage(e.Image,
+                    new Rectangle(0, 0, bmp.Width, bmp.Height),
+                    new Rectangle(0, srcY, bmp.Width, bmp.Height),
+                    GraphicsUnit.Pixel);
             }
+
             _images[_miniblink.ScrollTop] = bmp;
 
             if (isLast)

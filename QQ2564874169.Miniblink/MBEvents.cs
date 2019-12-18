@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
 {
@@ -224,7 +226,64 @@ namespace QQ2564874169.Miniblink
 
     public class DownloadEventArgs : MiniblinkEventArgs
     {
-        public string Url { get; internal set; }
+        public string Url { get; }
+        public event EventHandler<DownloadProgressEventArgs> Progress;
+        public event EventHandler<DownloadFinshEventArgs> Finish;
+        public bool Cancel { get; set; }
+        private string _file;
+
+        internal DownloadEventArgs(string url)
+        {
+            Url = url;
+        }
+
+        public void SaveToFile(string path)
+        {
+            if (_file == null)
+            {
+                var tmpPath = Path.Combine(Environment.GetEnvironmentVariable("TEMP") ?? "", Guid.NewGuid().ToString());
+                var tmpFile = File.Create(tmpPath);
+                Progress += (s, e) => { tmpFile.Write(e.Data, 0, e.Data.Length); };
+                Finish += (s, e) =>
+                {
+                    tmpFile.Close();
+
+                    if (e.Error == null)
+                    {
+                        File.Move(tmpPath, _file);
+                    }
+                    else
+                    {
+                        File.Delete(tmpPath);
+                    }
+                };
+            }
+
+            _file = path;
+        }
+
+        internal void OnProgress(DownloadProgressEventArgs e)
+        {
+            Progress?.Invoke(this, e);
+        }
+
+        internal void OnFinish(DownloadFinshEventArgs e)
+        {
+            Finish?.Invoke(this, e);
+        }
+    }
+
+    public class DownloadFinshEventArgs : EventArgs
+    {
+        public Exception Error { get; internal set; }
+    }
+
+    public class DownloadProgressEventArgs : EventArgs
+    {
+        public long Total { get; internal set; }
+        public long Received { get; internal set; }
+        public byte[] Data { get; internal set; }
+        public bool Cancel { get; set; }
     }
 
     public class AlertEventArgs : EventArgs

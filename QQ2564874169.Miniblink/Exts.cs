@@ -61,31 +61,7 @@ namespace QQ2564874169.Miniblink
             return ptr == IntPtr.Zero ? null : Marshal.PtrToStringUni(ptr);
         }
 
-        public static void UIInvoke(this Control control, Action callback)
-        {
-            if (control.InvokeRequired)
-            {
-                control.Invoke(callback);
-            }
-            else
-            {
-                callback();
-            }
-        }
-
-        public static void UIInvoke(this Control control, Action<object> callback, object state)
-        {
-            if (control.InvokeRequired)
-            {
-                control.Invoke(callback, state);
-            }
-            else
-            {
-                callback(state);
-            }
-        }
-
-        public static object ToValue(this long value, Control control, IntPtr es)
+        public static object ToValue(this long value, IMiniblink miniblink, IntPtr es)
         {
             if (value == 0) return null;
 
@@ -102,13 +78,13 @@ namespace QQ2564874169.Miniblink
                 case jsType.STRING:
                     return MBApi.jsToTempStringW(es, value).ToStringW();
                 case jsType.FUNCTION:
-                    return new JsFunc(new JsFuncWapper(control, value, es).Call);
+                    return new JsFunc(new JsFuncWapper(miniblink, value, es).Call);
                 case jsType.ARRAY:
                     var len = MBApi.jsGetLength(es, value);
                     var array = new object[len];
                     for (var i = 0; i < array.Length; i++)
                     {
-                        array[i] = MBApi.jsGetAt(es, value, i).ToValue(control, es);
+                        array[i] = MBApi.jsGetAt(es, value, i).ToValue(miniblink, es);
                     }
 
                     return array;
@@ -120,7 +96,7 @@ namespace QQ2564874169.Miniblink
                     var map = (IDictionary<string, object>) exp;
                     foreach (var k in keys)
                     {
-                        map.Add(k, MBApi.jsGet(es, value, k).ToValue(control, es));
+                        map.Add(k, MBApi.jsGet(es, value, k).ToValue(miniblink, es));
                     }
 
                     return exp;
@@ -129,7 +105,7 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        public static long ToJsValue(this object obj, Control control, IntPtr es)
+        public static long ToJsValue(this object obj, IMiniblink miniblink, IntPtr es)
         {
             if (obj == null)
                 return MBApi.jsUndefined();
@@ -154,7 +130,7 @@ namespace QQ2564874169.Miniblink
                 MBApi.jsSetLength(es, array, list.Count);
                 for (var i = 0; i < list.Count; i++)
                 {
-                    MBApi.jsSetAt(es, array, i, list[i].ToJsValue(control, es));
+                    MBApi.jsSetAt(es, array, i, list[i].ToJsValue(miniblink, es));
                 }
 
                 return array;
@@ -170,10 +146,10 @@ namespace QQ2564874169.Miniblink
                         var fps = new List<object>();
                         for (var i = 0; i < fcount; i++)
                         {
-                            fps.Add(MBApi.jsArg(fes, i).ToValue(control, fes));
+                            fps.Add(MBApi.jsArg(fes, i).ToValue(miniblink, fes));
                         }
 
-                        return func(fps.ToArray()).ToJsValue(control, fes);
+                        return func(fps.ToArray()).ToJsValue(miniblink, fes);
                     });
                 _keepref.Add(funcptr.ToInt64(), jsfunc);
                 var funcdata = new jsData
@@ -195,7 +171,7 @@ namespace QQ2564874169.Miniblink
             {
                 var v = p.GetValue(obj, null);
                 if (v == null) continue;
-                MBApi.jsSet(es, jsobj, p.Name, v.ToJsValue(control, es));
+                MBApi.jsSet(es, jsobj, p.Name, v.ToJsValue(miniblink, es));
             }
 
             return jsobj;
@@ -205,8 +181,7 @@ namespace QQ2564874169.Miniblink
         {
             Marshal.FreeHGlobal(funcptr);
             var key = funcptr.ToInt64();
-            if (_keepref.ContainsKey(key))
-                _keepref.Remove(key);
+            _keepref.Remove(key);
         }
 
         public static T GetCustomAttribute<T>(this MethodInfo method)

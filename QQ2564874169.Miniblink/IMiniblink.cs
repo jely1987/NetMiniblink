@@ -77,7 +77,8 @@ namespace QQ2564874169.Miniblink
         event EventHandler<ConfirmEventArgs> ConfirmBefore;
         event EventHandler<PromptEventArgs> PromptBefore;
 	    event EventHandler<DidCreateScriptContextEventArgs> DidCreateScriptContext;
-        event EventHandler<WindowOpenEventArgs> WindowOpen; 
+        event EventHandler<WindowOpenEventArgs> WindowOpen;
+        event EventHandler<EventArgs> Destroy;
 
         void ScrollTo(int x, int y);
 		void RegisterNetFunc(object target);
@@ -94,5 +95,6 @@ namespace QQ2564874169.Miniblink
 		void Reload();
         void DrawToBitmap(Action<ScreenshotImage> callback);
         void Print(Action<PrintPreviewDialog> callback);
+        void SafeInvoke(Action<object> callback, object state = null);
     }
 }

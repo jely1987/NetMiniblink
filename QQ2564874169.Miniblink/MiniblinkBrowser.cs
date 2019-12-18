@@ -328,6 +328,7 @@ namespace QQ2564874169.Miniblink
         }
 
         public event EventHandler<WindowOpenEventArgs> WindowOpen;
+        public event EventHandler<EventArgs> Destroy;
 
         protected virtual WindowOpenEventArgs OnWindowOpen(string url, string name,
             IDictionary<string, string> specs, bool replace)
@@ -602,7 +603,6 @@ namespace QQ2564874169.Miniblink
             remove { _loadUrlBegin -= value; }
         }
 
-        //todo 提供默认实现
         private wkeDownloadCallback _wkeDownload;
         private EventHandler<DownloadEventArgs> _download;
 
@@ -644,11 +644,12 @@ namespace QQ2564874169.Miniblink
 
         protected virtual byte OnDownload(IntPtr mb, IntPtr param, IntPtr url)
         {
-            var e = new DownloadEventArgs
-            {
-                Url = url.ToUTF8String()
-            };
+            var e = new DownloadEventArgs(url.ToUTF8String());
             _download?.Invoke(this, e);
+            if (e.Cancel == false)
+            {
+                new Downloader(this, e).Start();
+            }
             return 0;
         }
 
@@ -656,7 +657,7 @@ namespace QQ2564874169.Miniblink
         {
             if (job.Data != null)
             {
-                this.UIInvoke(() =>
+                SafeInvoke(s =>
                 {
                     if (job.ResponseContentType != null)
                     {
@@ -669,7 +670,7 @@ namespace QQ2564874169.Miniblink
             }
             else
             {
-                this.UIInvoke(() =>
+                SafeInvoke(s =>
                 {
                     if (job.BeginArgs.HookRequest)
                     {
@@ -777,6 +778,18 @@ namespace QQ2564874169.Miniblink
         #endregion
 
         #region 公共方法
+
+        public void SafeInvoke(Action<object> callback, object state = null)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(callback, state);
+            }
+            else
+            {
+                callback(state);
+            }
+        }
 
         public void ShowDevTools()
         {
@@ -1062,6 +1075,7 @@ namespace QQ2564874169.Miniblink
                 MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, null, IntPtr.Zero);
                 MBApi.wkeOnDownload(MiniblinkHandle, null, IntPtr.Zero);
                 MBApi.wkeOnCreateView(MiniblinkHandle, null, IntPtr.Zero);
+                Destroy?.Invoke(this, new EventArgs());
             }
         }
 
@@ -1648,7 +1662,7 @@ namespace QQ2564874169.Miniblink
                 MouseEventArgs e;
                 while (_mouseMoveEvents.TryDequeue(out e))
                 {
-                    this.UIInvoke(s =>
+                    SafeInvoke(s =>
                     {
                         OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, (MouseEventArgs) s);
                         base.OnMouseMove((MouseEventArgs) s);

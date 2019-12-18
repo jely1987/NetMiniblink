@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
 using System.Text;
 
 namespace QQ2564874169.Miniblink
 {
-    public class CookieCollection : IList<Cookie>
+    public class CookieCollection
     {
         public int Count
         {
             get { return _container.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
         }
 
         private bool _enable;
@@ -57,7 +53,7 @@ namespace QQ2564874169.Miniblink
             }
             _file = path;
             _miniblink = miniblink;
-            _miniblink.NavigateBefore += _miniblink_NavigateBefore;
+            _miniblink.NavigateBefore += NavigateBefore;
             Enable = true;
         }
 
@@ -68,7 +64,7 @@ namespace QQ2564874169.Miniblink
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ReloadCookiesFromFile);
         }
 
-        private void _miniblink_NavigateBefore(object sender, NavigateEventArgs e)
+        private void NavigateBefore(object sender, NavigateEventArgs e)
         {
             if (Enable == false) return;
             if (_miniblink.Url == e.Url)
@@ -77,11 +73,10 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private void Reload()
+        private void Reload(string host)
         {
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.FlushCookiesToFile);
             _container = new CookieContainer();
-            var host = new Uri(_miniblink.Url).Host;
             var rows = File.ReadAllLines(_file, Encoding.UTF8);
             foreach (var row in rows)
             {
@@ -121,11 +116,12 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private IList<Cookie> GetCookies()
+        public ReadOnlyCollection<Cookie> GetCookies(string url = null)
         {
-            Reload();
+            var uri = new Uri(url ?? _miniblink.Url);
+            Reload(uri.Host);
             var list = new List<Cookie>();
-            foreach (Cookie item in _container.GetCookies(new Uri(_miniblink.Url)))
+            foreach (Cookie item in _container.GetCookies(uri))
             {
                 if (list.Contains(item) == false)
                 {
@@ -150,16 +146,6 @@ namespace QQ2564874169.Miniblink
             }
 
             return ck;
-        }
-
-        public IEnumerator<Cookie> GetEnumerator()
-        {
-            return GetCookies().GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
 
         public void Add(Cookie cookie)
@@ -240,36 +226,6 @@ namespace QQ2564874169.Miniblink
             }
 
             return false;
-        }
-
-        public void CopyTo(Cookie[] array, int arrayIndex)
-        {
-            var list = GetCookies();
-            for (var i = 0; i < list.Count && arrayIndex < array.Length; i++, arrayIndex++)
-            {
-                array[arrayIndex] = list[i];
-            }
-        }
-
-        public void Insert(int index, Cookie item)
-        {
-            Add(item);
-        }
-
-        public int IndexOf(Cookie item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveAt(int index)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Cookie this[int index]
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
         }
     }
 }

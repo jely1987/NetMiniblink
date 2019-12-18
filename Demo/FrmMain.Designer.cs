@@ -53,14 +53,16 @@
             System.Windows.Forms.TreeNode treeNode14 = new System.Windows.Forms.TreeNode("打印与截图");
             System.Windows.Forms.TreeNode treeNode15 = new System.Windows.Forms.TreeNode("自宿主web服务器");
             System.Windows.Forms.TreeNode treeNode16 = new System.Windows.Forms.TreeNode("开发者工具");
-            System.Windows.Forms.TreeNode treeNode17 = new System.Windows.Forms.TreeNode("功能演示", new System.Windows.Forms.TreeNode[] {
+            System.Windows.Forms.TreeNode treeNode17 = new System.Windows.Forms.TreeNode("文件下载");
+            System.Windows.Forms.TreeNode treeNode18 = new System.Windows.Forms.TreeNode("功能演示", new System.Windows.Forms.TreeNode[] {
             treeNode4,
             treeNode8,
             treeNode12,
             treeNode13,
             treeNode14,
             treeNode15,
-            treeNode16});
+            treeNode16,
+            treeNode17});
             this.button6 = new System.Windows.Forms.Button();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.SuspendLayout();
@@ -133,9 +135,12 @@
             treeNode16.Tag = "dev_tools";
             treeNode16.Text = "开发者工具";
             treeNode17.Name = "节点0";
-            treeNode17.Text = "功能演示";
+            treeNode17.Tag = "download";
+            treeNode17.Text = "文件下载";
+            treeNode18.Name = "节点0";
+            treeNode18.Text = "功能演示";
             this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode17});
+            treeNode18});
             this.treeView1.Size = new System.Drawing.Size(279, 296);
             this.treeView1.TabIndex = 6;
             this.treeView1.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView1_NodeMouseClick);
