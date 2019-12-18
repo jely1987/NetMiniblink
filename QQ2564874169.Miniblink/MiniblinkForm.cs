@@ -853,6 +853,11 @@ namespace QQ2564874169.Miniblink
             _browser.DrawToBitmap(callback);
         }
 
+        public Bitmap DrawToBitmap(Rectangle? rect = null)
+        {
+            return _browser.DrawToBitmap(rect);
+        }
+
         public void Print(Action<PrintPreviewDialog> callback)
         {
             _browser.Print(callback);

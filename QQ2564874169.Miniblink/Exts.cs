@@ -73,6 +73,18 @@ namespace QQ2564874169.Miniblink
             }
         }
 
+        public static void UIInvoke(this Control control, Action<object> callback, object state)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(callback, state);
+            }
+            else
+            {
+                callback(state);
+            }
+        }
+
         public static object ToValue(this long value, Control control, IntPtr es)
         {
             if (value == 0) return null;

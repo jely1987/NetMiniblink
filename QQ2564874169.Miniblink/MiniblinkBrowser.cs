@@ -12,6 +12,8 @@ using System.Reflection;
 using System.Runtime.Caching;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
@@ -30,6 +32,8 @@ namespace QQ2564874169.Miniblink
 
         private bool _fireDropFile;
 
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool FireDropFile
         {
             get { return _fireDropFile; }
@@ -193,6 +197,114 @@ namespace QQ2564874169.Miniblink
             }
         }
 
+        private bool _memoryCacheEnable = true;
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool MemoryCacheEnable
+        {
+            get { return _memoryCacheEnable; }
+            set
+            {
+                _memoryCacheEnable = value;
+
+                if (!Utils.IsDesignMode())
+                {
+                    MBApi.wkeSetMemoryCacheEnable(MiniblinkHandle, _memoryCacheEnable);
+                }
+            }
+        }
+
+        private bool _headlessEnabled;
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool HeadlessEnabled
+        {
+            get { return _headlessEnabled; }
+            set
+            {
+                _headlessEnabled = value;
+
+                if (!Utils.IsDesignMode())
+                {
+                    MBApi.wkeSetHeadlessEnabled(MiniblinkHandle, _headlessEnabled);
+                }
+            }
+        }
+
+        private bool _npapiPluginsEnable = true;
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool NpapiPluginsEnable
+        {
+            get { return _npapiPluginsEnable; }
+            set
+            {
+                _npapiPluginsEnable = value;
+
+                if (!Utils.IsDesignMode())
+                {
+                    MBApi.wkeSetNpapiPluginsEnabled(MiniblinkHandle, _npapiPluginsEnable);
+                }
+            }
+        }
+
+        private bool _cspCheckEnable;
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool CspCheckEnable
+        {
+            get { return _cspCheckEnable; }
+            set
+            {
+                _cspCheckEnable = value;
+
+                if (!Utils.IsDesignMode())
+                {
+                    MBApi.wkeSetCspCheckEnable(MiniblinkHandle, _cspCheckEnable);
+                }
+            }
+        }
+
+        private bool _touchEnabled;
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool TouchEnabled
+        {
+            get { return _touchEnabled; }
+            set
+            {
+                _touchEnabled = value;
+
+                if (!Utils.IsDesignMode())
+                {
+                    MBApi.wkeSetTouchEnabled(MiniblinkHandle, _touchEnabled);
+                }
+            }
+        }
+
+        private bool _mouseEnabled = true;
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool MouseEnabled
+        {
+            get { return _mouseEnabled; }
+            set
+            {
+                _mouseEnabled = value;
+
+                if (!Utils.IsDesignMode())
+                {
+                    MBApi.wkeSetMouseEnabled(MiniblinkHandle, _mouseEnabled);
+                }
+            }
+        }
+
         #endregion
 
         #region 事件
@@ -256,102 +368,6 @@ namespace QQ2564874169.Miniblink
 
         private wkeURLChangedCallback2 _wkeUrlChanged;
         private EventHandler<UrlChangedEventArgs> _urlChanged;
-
-        private bool _memoryCacheEnable = true;
-
-        public bool MemoryCacheEnable
-        {
-            get { return _memoryCacheEnable; }
-            set
-            {
-                _memoryCacheEnable = value;
-
-                if (!Utils.IsDesignMode())
-                {
-                    MBApi.wkeSetMemoryCacheEnable(MiniblinkHandle, _memoryCacheEnable);
-                }
-            }
-        }
-
-        private bool _headlessEnabled;
-
-        public bool HeadlessEnabled
-        {
-            get { return _headlessEnabled; }
-            set
-            {
-                _headlessEnabled = value;
-
-                if (!Utils.IsDesignMode())
-                {
-                    MBApi.wkeSetHeadlessEnabled(MiniblinkHandle, _headlessEnabled);
-                }
-            }
-        }
-
-        private bool _npapiPluginsEnable = true;
-
-        public bool NpapiPluginsEnable
-        {
-            get { return _npapiPluginsEnable; }
-            set
-            {
-                _npapiPluginsEnable = value;
-
-                if (!Utils.IsDesignMode())
-                {
-                    MBApi.wkeSetNpapiPluginsEnabled(MiniblinkHandle, _npapiPluginsEnable);
-                }
-            }
-        }
-
-        private bool _cspCheckEnable;
-
-        public bool CspCheckEnable
-        {
-            get { return _cspCheckEnable; }
-            set
-            {
-                _cspCheckEnable = value;
-
-                if (!Utils.IsDesignMode())
-                {
-                    MBApi.wkeSetCspCheckEnable(MiniblinkHandle, _cspCheckEnable);
-                }
-            }
-        }
-
-        private bool _touchEnabled;
-
-        public bool TouchEnabled
-        {
-            get { return _touchEnabled; }
-            set
-            {
-                _touchEnabled = value;
-
-                if (!Utils.IsDesignMode())
-                {
-                    MBApi.wkeSetTouchEnabled(MiniblinkHandle, _touchEnabled);
-                }
-            }
-        }
-
-        private bool _mouseEnabled = true;
-
-        public bool MouseEnabled
-        {
-            get { return _mouseEnabled; }
-            set
-            {
-                _mouseEnabled = value;
-
-                if (!Utils.IsDesignMode())
-                {
-                    MBApi.wkeSetMouseEnabled(MiniblinkHandle, _mouseEnabled);
-                }
-            }
-        }
 
         public event EventHandler<UrlChangedEventArgs> UrlChanged
         {
@@ -907,6 +923,9 @@ namespace QQ2564874169.Miniblink
         private wkeCreateViewCallback _createView;
         private Hashtable _ref = new Hashtable();
         private MemoryCache _cache = new MemoryCache(Guid.NewGuid().ToString());
+        private ConcurrentQueue<MouseEventArgs> _mouseMoveEvents = new ConcurrentQueue<MouseEventArgs>();
+        private AutoResetEvent _wmMoveAre = new AutoResetEvent(false);
+        private Task _moveTask;
 
         public event EventHandler<PaintUpdatedEventArgs> PaintUpdated;
         public IList<ILoadResource> LoadResourceHandlerList { get; }
@@ -945,6 +964,8 @@ namespace QQ2564874169.Miniblink
                 {
                     throw new WKECreateException();
                 }
+
+                _moveTask = Task.Factory.StartNew(FireMouseMove);
                 _browserPaintUpdated += BrowserPaintUpdated;
                 _paintBitUpdated = OnWkeOnPaintBitUpdated;
                 _createView = OnCreateView;
@@ -1111,7 +1132,6 @@ namespace QQ2564874169.Miniblink
             }
             var sec = new TimeSpan(DateTime.Now.Ticks - st);
             //Console.WriteLine(sec.TotalMilliseconds);
-
         }
 
         public void ScrollTo(int x, int y)
@@ -1227,20 +1247,21 @@ namespace QQ2564874169.Miniblink
             new DrawToBitmapUtil(this).ToImage(callback);
         }
 
-        public Bitmap DrawToBitmap()
+        public Bitmap DrawToBitmap(Rectangle? rect = null)
         {
-            return DrawToBitmap(new Rectangle(0, 0, ViewWidth, ViewHeight));
-        }
+            if (rect.HasValue == false)
+            {
+                rect = new Rectangle(0, 0, ViewWidth, ViewHeight);
+            }
 
-        public Bitmap DrawToBitmap(Rectangle rect)
-        {
-            //todo 为实现
-            var image = new Bitmap(rect.Width, rect.Height);
-            var bitmap = image.LockBits(new Rectangle(rect.X, rect.Y, image.Width, image.Height), ImageLockMode.WriteOnly,
-                PixelFormat.Format32bppArgb);
-            MBApi.wkePaint(MiniblinkHandle, bitmap.Scan0, 0);
-            image.UnlockBits(bitmap);
-            return image;
+            using (var image = new Bitmap(ViewWidth, ViewHeight))
+            {
+                var bitmap = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
+                    ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                MBApi.wkePaint(MiniblinkHandle, bitmap.Scan0, 0);
+                image.UnlockBits(bitmap);
+                return image.Clone(rect.Value, PixelFormat.Format32bppArgb);
+            }
         }
 
         private void RegisterJsFunc()
@@ -1505,6 +1526,7 @@ namespace QQ2564874169.Miniblink
             {
                 MBApi.wkeResize(MiniblinkHandle, Width, Height);
             }
+
             base.OnResize(e);
         }
 
@@ -1623,9 +1645,26 @@ namespace QQ2564874169.Miniblink
             base.OnMouseDoubleClick(e);
         }
 
+        private void FireMouseMove()
+        {
+            while (true)
+            {
+                _wmMoveAre.WaitOne();
+                MouseEventArgs e;
+                while (_mouseMoveEvents.TryDequeue(out e))
+                {
+                    this.UIInvoke(s => { OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, (MouseEventArgs) s); }, e);
+                }
+
+                _wmMoveAre.Reset();
+            }
+        }
+
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, e);
+            _mouseMoveEvents.Enqueue(e);
+            _wmMoveAre.Set();
+
             base.OnMouseMove(e);
         }
 
