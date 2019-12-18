@@ -802,7 +802,7 @@ namespace QQ2564874169.Miniblink
 
         public void BindNetFunc(NetFunc func)
         {
-            var funcvalue = new wkeJsNativeFunction((es, state) =>
+            func.jsFunc = new wkeJsNativeFunction((es, state) =>
             {
                 var handle = GCHandle.FromIntPtr(state);
                 var nfunc = (NetFunc)handle.Target;
@@ -819,7 +819,7 @@ namespace QQ2564874169.Miniblink
 
             var ptr = GCHandle.ToIntPtr(GCHandle.Alloc(func));
 
-            MBApi.wkeJsBindFunction(func.Name, funcvalue, ptr, 0);
+            MBApi.wkeJsBindFunction(func.Name, func.jsFunc, ptr, 0);
         }
 
         public bool GoForward()
@@ -1034,7 +1034,7 @@ namespace QQ2564874169.Miniblink
             {
                 var e = new NavigateEventArgs
                 {
-                    Url = url.ToUTF8String(),
+                    Url = url.WKEToUTF8String(),
                     Type = NavigateType.BlankLink
                 };
                 OnNavigateBefore(e);

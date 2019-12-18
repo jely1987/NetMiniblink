@@ -18,6 +18,7 @@ namespace QQ2564874169.Miniblink
         public string Name { get; }
         private NetFuncDelegate _func { get; }
         private object _state { get; }
+        internal wkeJsNativeFunction jsFunc;
 
         public NetFunc(string name, NetFuncDelegate func, object state = null)
         {
