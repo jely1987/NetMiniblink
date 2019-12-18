@@ -237,8 +237,8 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(ProjectDir)Webres" "$(TargetDir)Webres\" /s /y
 xcopy "$(ProjectDir)Libs\front_end" "$(TargetDir)front_end\" /s /y
-copy "$(ProjectDir)Libs\node_x86.dll" "$(TargetDir)node_x86.dll" /y
-copy "$(ProjectDir)Libs\node_x64.dll" "$(TargetDir)node_x64.dll" /y</PostBuildEvent>
+copy "$(ProjectDir)Libs\miniblink_x86.dll" "$(TargetDir)miniblink_x86.dll" /y
+copy "$(ProjectDir)Libs\miniblink_x64.dll" "$(TargetDir)miniblink_x64.dll" /y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

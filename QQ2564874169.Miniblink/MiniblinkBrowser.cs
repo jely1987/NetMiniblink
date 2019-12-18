@@ -644,12 +644,10 @@ namespace QQ2564874169.Miniblink
 
         protected virtual byte OnDownload(IntPtr mb, IntPtr param, IntPtr url)
         {
-            var e = new DownloadEventArgs(url.ToUTF8String());
+            var downloader = new Downloader(this);
+            var e = downloader.Create(url.ToUTF8String());
             _download?.Invoke(this, e);
-            if (e.Cancel == false)
-            {
-                new Downloader(this, e).Start();
-            }
+            downloader.Execute(e);
             return 0;
         }
 
@@ -938,7 +936,6 @@ namespace QQ2564874169.Miniblink
         private MemoryCache _cache = new MemoryCache(Guid.NewGuid().ToString());
         private ConcurrentQueue<MouseEventArgs> _mouseMoveEvents = new ConcurrentQueue<MouseEventArgs>();
         private AutoResetEvent _mouseMoveAre = new AutoResetEvent(false);
-        private Task _moveTask;
 
         public event EventHandler<PaintUpdatedEventArgs> PaintUpdated;
         public IList<ILoadResource> LoadResourceHandlerList { get; }
@@ -957,6 +954,7 @@ namespace QQ2564874169.Miniblink
             }
         }
         public CookieCollection Cookies { get; }
+        public bool MouseMoveOptimize { get; set; } = true;
 
         public MiniblinkBrowser()
         {
@@ -978,7 +976,7 @@ namespace QQ2564874169.Miniblink
                     throw new WKECreateException();
                 }
 
-                _moveTask = Task.Factory.StartNew(FireMouseMove);
+                Task.Factory.StartNew(FireMouseMove);
                 _browserPaintUpdated += BrowserPaintUpdated;
                 _paintBitUpdated = OnWkeOnPaintBitUpdated;
                 _createView = OnCreateView;
@@ -1675,8 +1673,15 @@ namespace QQ2564874169.Miniblink
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            _mouseMoveEvents.Enqueue(e);
-            _mouseMoveAre.Set();
+            if (MouseMoveOptimize)
+            {
+                _mouseMoveEvents.Enqueue(e);
+                _mouseMoveAre.Set();
+            }
+            else
+            {
+                OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, e);
+            }
         }
 
         protected override void OnMouseWheel(MouseEventArgs e)

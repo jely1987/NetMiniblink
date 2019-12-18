@@ -49,7 +49,7 @@ namespace QQ2564874169.Miniblink
         {
             if (File.Exists(path) == false)
             {
-                throw new FileNotFoundException("cookies文件不存在", path);
+                File.Create(path).Close();
             }
             _file = path;
             _miniblink = miniblink;

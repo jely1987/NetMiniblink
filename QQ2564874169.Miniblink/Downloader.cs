@@ -7,88 +7,129 @@ namespace QQ2564874169.Miniblink
 {
     public class Downloader
     {
-        private DownloadEventArgs _args;
         private IMiniblink _miniblink;
         private bool _cancel;
 
-        internal Downloader(IMiniblink miniblink, DownloadEventArgs args)
+        internal Downloader(IMiniblink miniblink)
         {
-            _args = args;
             _miniblink = miniblink;
             _miniblink.Destroy += _miniblink_Destroy;
         }
 
         private void _miniblink_Destroy(object sender, EventArgs e)
         {
-            _cancel = true;
             _miniblink.Destroy -= _miniblink_Destroy;
+            _cancel = true;
         }
 
-        public void Start()
+        public DownloadEventArgs Create(string url)
         {
-            var cookies = _miniblink.Cookies.GetCookies(_args.Url);
-            var http = (HttpWebRequest) WebRequest.Create(_args.Url);
+            var http = (HttpWebRequest) WebRequest.Create(url);
             http.Method = "get";
             http.AllowAutoRedirect = true;
             http.UserAgent = _miniblink.UserAgent;
-            foreach (var item in cookies)
+            foreach (var item in _miniblink.Cookies.GetCookies(url))
             {
                 http.CookieContainer.Add(item);
             }
-
-            Task.Factory.StartNew(() => { Do(http); }).ContinueWith(t =>
+            var resp = http.GetResponse();
+            var e = new DownloadEventArgs(url)
             {
-                if (_cancel == false)
-                {
-                    _args.OnFinish(new DownloadFinshEventArgs
-                    {
-                        Error = t.Exception?.GetBaseException()
-                    });
-                }
-            });
+                FileLength = resp.ContentLength,
+                Response = resp
+            };
+            return e;
         }
 
-        private void Do(WebRequest http)
+        private static void SaveToFile(DownloadEventArgs e)
         {
-            var resp = http.GetResponse();
-            var total = resp.ContentLength;
-            var rec = 0L;
-            using (var sm = resp.GetResponseStream())
+            var path = Path.Combine(Environment.GetEnvironmentVariable("TEMP") ?? "", Guid.NewGuid().ToString());
+            var file = File.Create(path);
+            e.Progress += (s, p) => { file.Write(p.Data, 0, p.Data.Length); };
+            e.Finish += (s, p) =>
             {
-                using (var buf = new MemoryStream(1024 * 1024 * 2))
-                {
-                    int len;
-                    var log = DateTime.Now.Ticks;
-                    var data = new byte[1024 * 512];
-                    while ((len = sm.Read(data, 0, data.Length)) > 0 && _cancel == false)
-                    {
-                        buf.Write(data, 0, len);
-                        rec += len;
-                        if (rec > total)
-                        {
-                            throw new Exception("数据异常，无法下载");
-                        }
+                file.Close();
 
-                        if (new TimeSpan(DateTime.Now.Ticks - log).TotalSeconds >= 1 || rec == total)
+                if (p.Error == null)
+                {
+                    File.Move(path, e.FilePath);
+                }
+                else
+                {
+                    File.Delete(path);
+                }
+            };
+        }
+
+        public void Execute(DownloadEventArgs e)
+        {
+            if (e.Cancel)
+            {
+                e.Response?.Close();
+                return;
+            }
+
+            if (e.FilePath != null)
+            {
+                SaveToFile(e);
+            }
+            Task.Factory.StartNew(() =>
+            {
+                var rec = 0L;
+                using (var sm = e.Response.GetResponseStream())
+                {
+                    using (var buf = new MemoryStream(1024 * 1024 * 2))
+                    {
+                        int len;
+                        var log = DateTime.Now.Ticks;
+                        var data = new byte[1024 * 512];
+                        while ((len = sm.Read(data, 0, data.Length)) > 0 && _cancel == false)
                         {
-                            var pres = new DownloadProgressEventArgs
+                            buf.Write(data, 0, len);
+                            rec += len;
+                            if (rec > e.FileLength)
                             {
-                                Total = total,
-                                Received = rec,
-                                Data = buf.ToArray()
-                            };
-                            _miniblink.SafeInvoke(s => { _args.OnProgress((DownloadProgressEventArgs) s); }, pres);
-                            buf.SetLength(0);
-                            buf.Position = 0;
-                            log = DateTime.Now.Ticks;
-                            if (pres.Cancel)
+                                throw new Exception("数据异常，无法下载");
+                            }
+
+                            if (new TimeSpan(DateTime.Now.Ticks - log).TotalSeconds >= 1 || rec == e.FileLength)
                             {
-                                break;
+                                var pres = new DownloadProgressEventArgs
+                                {
+                                    Total = e.FileLength,
+                                    Received = rec,
+                                    Data = buf.ToArray()
+                                };
+                                if (_cancel == false)
+                                {
+                                    _miniblink.SafeInvoke(s => { e.OnProgress((DownloadProgressEventArgs) s); }, pres);
+                                }
+
+                                buf.SetLength(0);
+                                buf.Position = 0;
+                                log = DateTime.Now.Ticks;
+                                if (pres.Cancel)
+                                {
+                                    _cancel = true;
+                                    break;
+                                }
                             }
                         }
                     }
                 }
-            }
+            }).ContinueWith(t =>
+            {
+                _miniblink.SafeInvoke(s =>
+                {
+                    e.OnFinish(new DownloadFinishEventArgs
+                    {
+                        Error = t.Exception?.GetBaseException(),
+                        IsCompleted = _cancel == false
+                    });
+                });
+
+                e.Response?.Close();
+            });
         }
     }
 }

@@ -29,9 +29,13 @@ namespace Demo
         {
             e.Progress += DownloadProgress;
             e.Finish += DownloadFinish;
+            //将文件保存到指定的位置
+            //如果不设置，下载的内容只会存在内存里，通过Progress事件可以获取
+            e.FilePath = Guid.NewGuid() + ".exe";
+            MessageBox.Show("左上角显示下载进度");
         }
 
-        private void DownloadFinish(object sender, DownloadFinshEventArgs e)
+        private void DownloadFinish(object sender, DownloadFinishEventArgs e)
         {
             MessageBox.Show("下载完成");
             Text = "";

@@ -8,8 +8,8 @@ namespace QQ2564874169.Miniblink
 {
     internal class MBApi
     {
-        private const string DLL_x86 = "node_x86.dll";
-        private const string DLL_x64 = "node_x64.dll";
+        private const string DLL_x86 = "miniblink_x86.dll";
+        private const string DLL_x64 = "miniblink_x64.dll";
 
         private static bool is64()
         {

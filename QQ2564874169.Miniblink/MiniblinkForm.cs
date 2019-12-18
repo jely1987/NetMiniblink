@@ -751,6 +751,12 @@ namespace QQ2564874169.Miniblink
             remove { _browser.WindowOpen -= value; }
         }
 
+        public event EventHandler<EventArgs> Destroy
+        {
+            add { _browser.Destroy += value; }
+            remove { _browser.Destroy -= value; }
+        }
+
         public void ScrollTo(int x, int y)
         {
             _browser.ScrollTo(x, y);

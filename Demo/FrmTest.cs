@@ -29,7 +29,7 @@ namespace Demo
         private void FrmTest_Download(object sender, DownloadEventArgs e)
         {
             e.Progress += E_Progress;
-            e.SaveToFile("111.exe");
+            e.FilePath = "111.exe";
         }
 
         private void E_Progress(object sender, DownloadProgressEventArgs e)
