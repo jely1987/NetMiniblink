@@ -34,7 +34,7 @@ namespace QQ2564874169.Miniblink
         /// <summary>
         /// 调整大小的触发范围
         /// </summary>
-        public FormResizeWidth ResizeWidth { get; private set; }
+        public FormResizeWidth ResizeWidth { get; }
 
         private FormWindowState _windowState = FormWindowState.Normal;
         private Rectangle? _stateRect;
@@ -92,8 +92,10 @@ namespace QQ2564874169.Miniblink
 		private Point _resizePos;
 		private Size _resizeSize;
 		private bool _isdrop;
-		private Point _dropstart;
-		private Point _dropWinstart;
+		private Point _dropPos;
+		private Point _dropLoc;
+        private bool _bakMouseEn;
+        private bool _bakTouchEn;
 		private string _dragfunc;
 		private string _maxfunc;
 		private string _minfunc;
@@ -164,12 +166,18 @@ namespace QQ2564874169.Miniblink
         {
             if (isRemove)
             {
+                _browser.MouseEnabled = _bakMouseEn;
+                _browser.TouchEnabled = _bakTouchEn;
                 _browser.MouseMove -= DropMove;
                 _browser.MouseUp -= DropUp;
                 _browser.MouseLeave -= DropLeave;
             }
             else
             {
+                _bakMouseEn = _browser.MouseEnabled;
+                _bakTouchEn = _browser.TouchEnabled;
+                _browser.MouseEnabled = false;
+                _browser.TouchEnabled = false;
                 _browser.MouseMove += DropMove;
                 _browser.MouseUp += DropUp;
                 _browser.MouseLeave += DropLeave;
@@ -190,10 +198,10 @@ namespace QQ2564874169.Miniblink
 
         private void DropMove(object sender, MouseEventArgs e)
         {
-            var nx = MousePosition.X - _dropstart.X;
-            var ny = MousePosition.Y - _dropstart.Y;
-            nx = _dropWinstart.X + nx;
-            ny = _dropWinstart.Y + ny;
+            var nx = MousePosition.X - _dropPos.X;
+            var ny = MousePosition.Y - _dropPos.Y;
+            nx = _dropLoc.X + nx;
+            ny = _dropLoc.Y + ny;
             Location = new Point(nx, ny);
             Cursor = Cursors.SizeAll;
         }
@@ -205,8 +213,8 @@ namespace QQ2564874169.Miniblink
                 MouseButtons == MouseButtons.Left)
             {
                 _isdrop = true;
-                _dropstart = MousePosition;
-                _dropWinstart = Location;
+                _dropPos = MousePosition;
+                _dropLoc = Location;
                 Cursor = Cursors.SizeAll;
                 DropEvent(false);
             }

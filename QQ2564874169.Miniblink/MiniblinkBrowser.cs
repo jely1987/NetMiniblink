@@ -924,7 +924,7 @@ namespace QQ2564874169.Miniblink
         private Hashtable _ref = new Hashtable();
         private MemoryCache _cache = new MemoryCache(Guid.NewGuid().ToString());
         private ConcurrentQueue<MouseEventArgs> _mouseMoveEvents = new ConcurrentQueue<MouseEventArgs>();
-        private AutoResetEvent _wmMoveAre = new AutoResetEvent(false);
+        private AutoResetEvent _mouseMoveAre = new AutoResetEvent(false);
         private Task _moveTask;
 
         public event EventHandler<PaintUpdatedEventArgs> PaintUpdated;
@@ -1119,19 +1119,14 @@ namespace QQ2564874169.Miniblink
 
         private void BrowserPaintUpdated(object sender, PaintUpdatedEventArgs e)
         {
-            var st = DateTime.Now.Ticks;
             if (!IsDisposed)
             {
                 using (var g = CreateGraphics())
                 {
-                    g.DrawImage(e.Image,
-                        new RectangleF(e.Rect.X, e.Rect.Y, e.Rect.Width, e.Rect.Height),
-                        new RectangleF(e.Rect.X, e.Rect.Y, e.Rect.Width, e.Rect.Height),
-                        GraphicsUnit.Pixel);
+                    var rect = new RectangleF(e.Rect.X, e.Rect.Y, e.Rect.Width, e.Rect.Height);
+                    g.DrawImage(e.Image, rect, rect, GraphicsUnit.Pixel);
                 }
             }
-            var sec = new TimeSpan(DateTime.Now.Ticks - st);
-            //Console.WriteLine(sec.TotalMilliseconds);
         }
 
         public void ScrollTo(int x, int y)
@@ -1649,23 +1644,25 @@ namespace QQ2564874169.Miniblink
         {
             while (true)
             {
-                _wmMoveAre.WaitOne();
+                _mouseMoveAre.WaitOne();
                 MouseEventArgs e;
                 while (_mouseMoveEvents.TryDequeue(out e))
                 {
-                    this.UIInvoke(s => { OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, (MouseEventArgs) s); }, e);
+                    this.UIInvoke(s =>
+                    {
+                        OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, (MouseEventArgs) s);
+                        base.OnMouseMove((MouseEventArgs) s);
+                    }, e);
                 }
 
-                _wmMoveAre.Reset();
+                _mouseMoveAre.Reset();
             }
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
             _mouseMoveEvents.Enqueue(e);
-            _wmMoveAre.Set();
-
-            base.OnMouseMove(e);
+            _mouseMoveAre.Set();
         }
 
         protected override void OnMouseWheel(MouseEventArgs e)
@@ -1690,21 +1687,24 @@ namespace QQ2564874169.Miniblink
 
         private void OnWkeMouseEvent(WinConst msg, MouseEventArgs e)
         {
-            var flags = 0;
+            if (MouseEnabled || TouchEnabled)
+            {
+                var flags = 0;
 
-            if (ModifierKeys.HasFlag(Keys.Control))
-                flags |= (int)wkeMouseFlags.WKE_CONTROL;
-            if (ModifierKeys.HasFlag(Keys.LShiftKey))
-                flags |= (int)wkeMouseFlags.WKE_SHIFT;
+                if (ModifierKeys.HasFlag(Keys.Control))
+                    flags |= (int)wkeMouseFlags.WKE_CONTROL;
+                if (ModifierKeys.HasFlag(Keys.LShiftKey))
+                    flags |= (int)wkeMouseFlags.WKE_SHIFT;
 
-            if (e.Button.HasFlag(MouseButtons.Left))
-                flags |= (int)wkeMouseFlags.WKE_LBUTTON;
-            if (e.Button.HasFlag(MouseButtons.Middle))
-                flags |= (int)wkeMouseFlags.WKE_MBUTTON;
-            if (e.Button.HasFlag(MouseButtons.Right))
-                flags |= (int)wkeMouseFlags.WKE_RBUTTON;
+                if (e.Button.HasFlag(MouseButtons.Left))
+                    flags |= (int)wkeMouseFlags.WKE_LBUTTON;
+                if (e.Button.HasFlag(MouseButtons.Middle))
+                    flags |= (int)wkeMouseFlags.WKE_MBUTTON;
+                if (e.Button.HasFlag(MouseButtons.Right))
+                    flags |= (int)wkeMouseFlags.WKE_RBUTTON;
 
-            MBApi.wkeFireMouseEvent(MiniblinkHandle, (int)msg, e.X, e.Y, flags);
+                MBApi.wkeFireMouseEvent(MiniblinkHandle, (int)msg, e.X, e.Y, flags);
+            }
         }
 
         private void SetWkeCursor()
