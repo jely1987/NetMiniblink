@@ -92,7 +92,7 @@ namespace QQ2564874169.Miniblink
 
                 if (domain.StartsWith("."))
                 {
-                    if (host.EndsWith(domain) || ("." + host).Equals(domain) == false)
+                    if (host.EndsWith(domain) == false && ("." + host).Equals(domain) == false)
                     {
                         continue;
                     }
