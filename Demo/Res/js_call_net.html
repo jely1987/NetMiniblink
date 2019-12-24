@@ -176,6 +176,7 @@
     <li>[NetFunc]默认使用方法名作为函数命名，可以用[NetFunc("newFuncName")]明确指定命名。</li>
     <li>[NetFunc]其实是BindNetFunc方法的自动实现版本。</li>
     <li>[NetFunc]是RegisterNetFunc方法扫描并绑定的，而且它可以扫描任意类型。</li>
+    <li>RegisterNetFunc只在窗体模式下会默认扫描当前窗体，控件模式需要手动调用来指定去哪找[NetFunc]。</li>
     <li>JsFunc对象可以在不同的线程使用，因为内部其实是绑定了线程的。</li>
 </ol>
 </body>
