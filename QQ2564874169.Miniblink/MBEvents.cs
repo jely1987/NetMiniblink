@@ -127,7 +127,7 @@ namespace QQ2564874169.Miniblink
             return MBApi.wkeNetGetHTTPHeaderField(Job.Handle, name).ToUTF8String();
         }
 
-        public void WatchLoadUrlEnd(Action<LoadUrlEndArgs> callback, object state = null)
+        public void Response(Action<LoadUrlEndArgs> callback, object state = null)
         {
             _loadUrlEnd.Add(new Tuple<Action<LoadUrlEndArgs>, object>(callback, state));
 
@@ -174,7 +174,24 @@ namespace QQ2564874169.Miniblink
         public wkeRequestType RequestMethod { get; internal set; }
         public string Url { get; internal set; }
         public IntPtr Job { get; }
-        public byte[] Data { get; internal set; }
+        private byte[] _data;
+
+        public byte[] Data
+        {
+            get { return _data; }
+            set
+            {
+                if (_data == null)
+                {
+                    _data = value;
+                }
+                else
+                {
+                    _data = value;
+                    Modify = true;
+                }
+            }
+        }
         public object State { get; internal set; }
         public string Mime { get; }
         internal bool Modify;
@@ -183,12 +200,6 @@ namespace QQ2564874169.Miniblink
         {
             Job = job;
             Mime = MBApi.wkeNetGetMIMEType(job).ToUTF8String();
-        }
-
-        public void ReplaceData(byte[] data)
-        {
-            Modify = true;
-            Data = data;
         }
 
         public string GetHeader(string name)

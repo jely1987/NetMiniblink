@@ -81,6 +81,12 @@
     <Compile Include="FrmFileLoad.Designer.cs">
       <DependentUpon>FrmFileLoad.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmHook.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmHook.Designer.cs">
+      <DependentUpon>FrmHook.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmTransparent.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -168,6 +174,9 @@
     <EmbeddedResource Include="FrmFileLoad.resx">
       <DependentUpon>FrmFileLoad.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FrmHook.resx">
+      <DependentUpon>FrmHook.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmTransparent.resx">
       <DependentUpon>FrmTransparent.cs</DependentUpon>
     </EmbeddedResource>
@@ -233,6 +242,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Res\zipdemo.zip" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Res\hook.html" />
+    <EmbeddedResource Include="Res\js\hook.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

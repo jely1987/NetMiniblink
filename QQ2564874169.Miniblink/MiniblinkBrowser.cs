@@ -670,9 +670,9 @@ namespace QQ2564874169.Miniblink
             {
                 SafeInvoke(s =>
                 {
-                    if (job.BeginArgs.HookRequest)
+                    if (job.Begin.HookRequest)
                     {
-                        if (job.BeginArgs.IsLocalFile)
+                        if (job.Begin.IsLocalFile)
                         {
                             OnLoadUrlEnd(job.WebView, job.Handle);
                         }
@@ -694,11 +694,10 @@ namespace QQ2564874169.Miniblink
             var rawurl = url.ToUTF8String();
             var e = new LoadUrlBeginEventArgs
             {
-                Job = new NetJob(mb, job, JobCompleted) { Url = rawurl },
                 Url = rawurl,
                 RequestMethod = MBApi.wkeNetGetRequestMethod(job)
             };
-            e.Job.BeginArgs = e;
+            e.Job = new NetJob(mb, e, job, JobCompleted);
             _jobToMethod.AddOrUpdate(job.ToInt64(), e.RequestMethod, (i, m) => e.RequestMethod);
             _loadUrlBegin(this, e);
 
@@ -1015,7 +1014,7 @@ namespace QQ2564874169.Miniblink
             var pass = _cache.Get(key);
             if (pass != null) return;
 
-            e.WatchLoadUrlEnd(p =>
+            e.Response(p =>
             {
                 if (ResourceCache != null && ResourceCache.Matchs(p.Mime, p.Url) && p.Data.Length > 0)
                 {

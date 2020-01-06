@@ -13,19 +13,21 @@ namespace QQ2564874169.Miniblink
 		public string Url { get; internal set; }
 
         internal bool IsAsync;
-        internal LoadUrlBeginEventArgs BeginArgs;
+        internal LoadUrlBeginEventArgs Begin { get; }
         private Action<NetJob> _completed;
 
-	    internal NetJob(IntPtr webview, IntPtr job, Action<NetJob> completed = null)
-	    {
-		    Handle = job;
-		    WebView = webview;
-		    _completed = completed;
-	    }
+        internal NetJob(IntPtr webview, LoadUrlBeginEventArgs begin, IntPtr job, Action<NetJob> completed = null)
+        {
+            Handle = job;
+            WebView = webview;
+            Begin = begin;
+            Url = begin.Url;
+            _completed = completed;
+        }
 
-	    public void Wait(Action<NetJob> callback, object state = null)
+        public void Wait(Action<NetJob> callback, object state = null)
 	    {
-			if(BeginArgs.Ended)
+			if(Begin.Ended)
 				return;
 
 		    IsAsync = true;
@@ -47,7 +49,7 @@ namespace QQ2564874169.Miniblink
 
 	    public void WatchLoadUrlEnd(Action<LoadUrlEndArgs> callback, object state = null)
 	    {
-		    BeginArgs.WatchLoadUrlEnd(callback);
+            Begin.Response(callback);
 	    }
     }
 }

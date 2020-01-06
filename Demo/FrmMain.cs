@@ -85,6 +85,9 @@ namespace Demo
                 case "download":
                     form = new FrmDownload();
                     break;
+                case "hook":
+                    form = new FrmHook();
+                    break;
             }
 
             if (form != null)
