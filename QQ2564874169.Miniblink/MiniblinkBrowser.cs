@@ -1503,17 +1503,27 @@ namespace QQ2564874169.Miniblink
             new PrintUtil(this).Start(callback);
         }
 
-        private void OnDropFiles(int x, int y, params string[] files)
+        private void OnDropFiles(bool isDone, int x, int y, string[] files)
         {
-            var data = string.Join(",", files);
-            x += ScrollLeft;
-            y += ScrollTop;
-            CallJsFunc("fireDropFileEvent", data, x, y);
+            if (FireDropFile)
+            {
+                var data = string.Join(",", files);
+                x += ScrollLeft;
+                y += ScrollTop;
+                CallJsFunc("fireDropFileEvent", data, x, y, isDone);
+            }
         }
 
         private void DragFileEnter(object sender, DragEventArgs e)
         {
-            e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.All : DragDropEffects.None;
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.All;
+                var items = (Array) e.Data.GetData(DataFormats.FileDrop);
+                var files = items.Cast<string>().ToArray();
+                var p = PointToClient(new Point(e.X, e.Y));
+                OnDropFiles(false, p.X, p.Y, files);
+            }
         }
 
         private void DragFileDrop(object sender, DragEventArgs e)
@@ -1521,7 +1531,7 @@ namespace QQ2564874169.Miniblink
             var items = (Array) e.Data.GetData(DataFormats.FileDrop);
             var files = items.Cast<string>().ToArray();
             var p = PointToClient(new Point(e.X, e.Y));
-            OnDropFiles(p.X, p.Y, files);
+            OnDropFiles(true, p.X, p.Y, files);
         }
 
         #region 消息处理

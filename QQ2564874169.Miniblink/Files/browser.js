@@ -21,13 +21,14 @@ if (window[openHookName]) {
     };
 }
 
-window.fireDropFileEvent = function(files,x,y) {
+window.fireDropFileEvent = function (files, x, y, isDone) {
     var e = new CustomEvent("dropFile",
         {
             detail: {
                 files: files.split(","),
                 x: x,
-                y: y
+                y: y,
+                isDone: isDone
             }
         });
     window.dispatchEvent(e);
