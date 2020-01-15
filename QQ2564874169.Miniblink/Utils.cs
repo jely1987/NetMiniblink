@@ -59,24 +59,6 @@ namespace QQ2564874169.Miniblink
             return data;
         }
 
-        public static bool IsDesignMode()
-        {
-            var returnFlag = false;
-
-#if DEBUG
-            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
-            {
-                returnFlag = true;
-            }
-            else if (Process.GetCurrentProcess().ProcessName == "devenv")
-            {
-                returnFlag = true;
-            }
-#endif
-
-            return returnFlag;
-        }
-
         public static List<Cookie> ParseCookies(string cookies, string defaultDomain = null)
         {
             var regx = new Regex("expires=(.+?GMT)", RegexOptions.IgnoreCase);

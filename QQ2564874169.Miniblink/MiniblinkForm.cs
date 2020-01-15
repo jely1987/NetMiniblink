@@ -113,7 +113,7 @@ namespace QQ2564874169.Miniblink
 			IsTransparent = isTransparent;
             ResizeWidth = new FormResizeWidth(5);
 
-            if (!Utils.IsDesignMode())
+            if (!IsDesignMode())
             {
                 if (IsTransparent)
                 {
@@ -224,7 +224,7 @@ namespace QQ2564874169.Miniblink
 
         private void MiniblinkForm_Load(object sender, EventArgs e)
         {
-            if (!Utils.IsDesignMode() && IsTransparent)
+            if (!IsDesignMode() && IsTransparent)
             {
                 Shown += SetTransparentStartPos;
                 SetTransparent();
@@ -283,7 +283,7 @@ namespace QQ2564874169.Miniblink
 
         private void Miniblink_Paint(object sender, PaintUpdatedEventArgs e)
 	    {
-	        if (!IsDisposed && !Utils.IsDesignMode() && IsTransparent)
+	        if (!IsDisposed && !IsDesignMode() && IsTransparent)
             {
                 TransparentPaint(e.Image, e.Image.Width, e.Image.Height);
 
@@ -568,9 +568,14 @@ namespace QQ2564874169.Miniblink
             e.Frame.RunJs(js);
 		}
 
+        internal bool IsDesignMode()
+        {
+            return _browser.IsDesignMode();
+        }
+
         #region IMiniblink成员
 
-		[Browsable(false)]
+        [Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public float Zoom
 		{

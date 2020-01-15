@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Dynamic;
@@ -107,10 +108,10 @@ namespace QQ2564874169.Miniblink
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public float Zoom
         {
-            get { return Utils.IsDesignMode() ? 0 : MBApi.wkeGetZoomFactor(MiniblinkHandle); }
+            get { return IsDesignMode() ? 0 : MBApi.wkeGetZoomFactor(MiniblinkHandle); }
             set
             {
-                if (!Utils.IsDesignMode())
+                if (!IsDesignMode())
                 {
                     MBApi.wkeSetZoomFactor(MiniblinkHandle, value);
                 }
@@ -121,10 +122,10 @@ namespace QQ2564874169.Miniblink
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string UserAgent
         {
-            get { return Utils.IsDesignMode() ? "" : MBApi.wkeGetUserAgent(MiniblinkHandle).ToUTF8String(); }
+            get { return IsDesignMode() ? "" : MBApi.wkeGetUserAgent(MiniblinkHandle).ToUTF8String(); }
             set
             {
-                if (!Utils.IsDesignMode())
+                if (!IsDesignMode())
                 {
                     MBApi.wkeSetUserAgent(MiniblinkHandle, value);
                 }
@@ -137,14 +138,14 @@ namespace QQ2564874169.Miniblink
         {
             get
             {
-                return Utils.IsDesignMode()
+                return IsDesignMode()
                     ? 0
                     : Convert.ToInt32(
                         RunJs("return Math.max(document.documentElement.scrollTop,document.body.scrollTop)"));
             }
             set
             {
-                if (!Utils.IsDesignMode())
+                if (!IsDesignMode())
                 {
                     ScrollTo(ScrollLeft, value);
                 }
@@ -157,14 +158,14 @@ namespace QQ2564874169.Miniblink
         {
             get
             {
-                return Utils.IsDesignMode()
+                return IsDesignMode()
                     ? 0
                     : Convert.ToInt32(
                         RunJs("return Math.max(document.documentElement.scrollLeft,document.body.scrollLeft)"));
             }
             set
             {
-                if (!Utils.IsDesignMode())
+                if (!IsDesignMode())
                 {
                     ScrollTo(value, ScrollTop);
                 }
@@ -177,7 +178,7 @@ namespace QQ2564874169.Miniblink
         {
             get
             {
-                return Utils.IsDesignMode()
+                return IsDesignMode()
                     ? 0
                     : Convert.ToInt32(
                         RunJs("return Math.max(document.documentElement.scrollHeight,document.body.scrollHeight)"));
@@ -190,7 +191,7 @@ namespace QQ2564874169.Miniblink
         {
             get
             {
-                return Utils.IsDesignMode()
+                return IsDesignMode()
                     ? 0
                     : Convert.ToInt32(
                         RunJs("return Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)"));
@@ -208,7 +209,7 @@ namespace QQ2564874169.Miniblink
             {
                 _memoryCacheEnable = value;
 
-                if (!Utils.IsDesignMode())
+                if (!IsDesignMode())
                 {
                     MBApi.wkeSetMemoryCacheEnable(MiniblinkHandle, _memoryCacheEnable);
                 }
@@ -226,7 +227,7 @@ namespace QQ2564874169.Miniblink
             {
                 _headlessEnabled = value;
 
-                if (!Utils.IsDesignMode())
+                if (!IsDesignMode())
                 {
                     MBApi.wkeSetHeadlessEnabled(MiniblinkHandle, _headlessEnabled);
                 }
@@ -244,7 +245,7 @@ namespace QQ2564874169.Miniblink
             {
                 _npapiPluginsEnable = value;
 
-                if (!Utils.IsDesignMode())
+                if (!IsDesignMode())
                 {
                     MBApi.wkeSetNpapiPluginsEnabled(MiniblinkHandle, _npapiPluginsEnable);
                 }
@@ -262,7 +263,7 @@ namespace QQ2564874169.Miniblink
             {
                 _cspCheckEnable = value;
 
-                if (!Utils.IsDesignMode())
+                if (!IsDesignMode())
                 {
                     MBApi.wkeSetCspCheckEnable(MiniblinkHandle, _cspCheckEnable);
                 }
@@ -280,7 +281,7 @@ namespace QQ2564874169.Miniblink
             {
                 _touchEnabled = value;
 
-                if (!Utils.IsDesignMode())
+                if (!IsDesignMode())
                 {
                     MBApi.wkeSetTouchEnabled(MiniblinkHandle, _touchEnabled);
                 }
@@ -298,7 +299,7 @@ namespace QQ2564874169.Miniblink
             {
                 _mouseEnabled = value;
 
-                if (!Utils.IsDesignMode())
+                if (!IsDesignMode())
                 {
                     MBApi.wkeSetMouseEnabled(MiniblinkHandle, _mouseEnabled);
                 }
@@ -961,7 +962,7 @@ namespace QQ2564874169.Miniblink
 
             LoadResourceHandlerList = new List<ILoadResource>();
 
-            if (!Utils.IsDesignMode())
+            if (!IsDesignMode() && !DesignMode)
             {
                 if (MBApi.wkeIsInitialize() == false)
                 {
@@ -1054,12 +1055,12 @@ namespace QQ2564874169.Miniblink
                 OnNavigateBefore(mb, param, type, url);
             }
 
-            return IntPtr.Zero;
+            return new IntPtr(1);
         }
 
         private void DestroyCallback()
         {
-            if (!Utils.IsDesignMode())
+            if (!IsDesignMode())
             {
                 MBApi.wkeOnPaintBitUpdated(MiniblinkHandle, null, IntPtr.Zero);
                 MBApi.wkeOnPaintUpdated(MiniblinkHandle, null, IntPtr.Zero);
@@ -1091,7 +1092,7 @@ namespace QQ2564874169.Miniblink
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (!Utils.IsDesignMode() && !IsDisposed)
+            if (!IsDesignMode() && !IsDisposed)
             {
                 using (var bitmap = DrawToBitmap())
                 {
@@ -1524,11 +1525,29 @@ namespace QQ2564874169.Miniblink
             OnDropFiles(p.X, p.Y, files);
         }
 
+        internal bool IsDesignMode()
+        {
+            var returnFlag = false;
+
+#if DEBUG
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+            {
+                returnFlag = true;
+            }
+            else if (Process.GetCurrentProcess().ProcessName == "devenv")
+            {
+                returnFlag = true;
+            }
+#endif
+
+            return returnFlag || DesignMode;
+        }
+
         #region 消息处理
 
         protected override void OnResize(EventArgs e)
         {
-            if (!Utils.IsDesignMode() && MiniblinkHandle != IntPtr.Zero)
+            if (!IsDesignMode() && MiniblinkHandle != IntPtr.Zero)
             {
                 MBApi.wkeResize(MiniblinkHandle, Width, Height);
             }

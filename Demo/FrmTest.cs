@@ -22,19 +22,19 @@ namespace Demo
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            Download += FrmTest_Download;
-            LoadUri("https://im.qq.com/pcqq/");
+            NetResponse += FrmTest_NetResponse;
+            LoadUrlBegin += FrmTest_LoadUrlBegin;
+            LoadUri("https://www.bilibili.com");
         }
 
-        private void FrmTest_Download(object sender, DownloadEventArgs e)
+        private void FrmTest_LoadUrlBegin(object sender, LoadUrlBeginEventArgs e)
         {
-            e.Progress += E_Progress;
-            e.FilePath = "111.exe";
+            Console.WriteLine("begin : "+e.RequestMethod + " = " + e.Url);
         }
 
-        private void E_Progress(object sender, DownloadProgressEventArgs e)
+        private void FrmTest_NetResponse(object sender, NetResponseEventArgs e)
         {
-            Console.WriteLine(e.Total + "\t" + e.Received);
+            Console.WriteLine("resp : "+e.RequestMethod + " = " + e.Url);
         }
 
         private void button1_Click(object sender, EventArgs e)
