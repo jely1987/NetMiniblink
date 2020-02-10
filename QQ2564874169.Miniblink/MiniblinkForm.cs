@@ -782,10 +782,10 @@ namespace QQ2564874169.Miniblink
 			return _browser.CallJsFunc(funcName, param);
 		}
 
-		public void BindNetFunc(NetFunc func)
-		{
-			_browser.BindNetFunc(func);
-		}
+        public void BindNetFunc(NetFunc func, bool bindToSubFrame = false)
+        {
+            _browser.BindNetFunc(func, bindToSubFrame);
+        }
 
         public bool GoForward()
 		{

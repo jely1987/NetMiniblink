@@ -259,6 +259,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Res\drop_file.html" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Res\test.html" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(ProjectDir)Webres" "$(TargetDir)Webres\" /s /y

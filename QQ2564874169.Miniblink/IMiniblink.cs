@@ -85,7 +85,7 @@ namespace QQ2564874169.Miniblink
 		void ShowDevTools();
 		object RunJs(string script);
 		object CallJsFunc(string funcName, params object[] param);
-		void BindNetFunc(NetFunc func);
+        void BindNetFunc(NetFunc func, bool bindToSubFrame = false);
         bool GoForward();
         bool GoBack();
 		void SetProxy(WKEProxy proxy);

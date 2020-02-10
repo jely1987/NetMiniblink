@@ -810,7 +810,7 @@ namespace QQ2564874169.Miniblink
             return MBApi.jsCall(es, func, MBApi.jsUndefined(), args, args.Length).ToValue(this, es);
         }
 
-        public void BindNetFunc(NetFunc func)
+        public void BindNetFunc(NetFunc func, bool bindToSubFrame = false)
         {
             func.jsFunc = new wkeJsNativeFunction((es, state) =>
             {
@@ -830,6 +830,11 @@ namespace QQ2564874169.Miniblink
             var ptr = GCHandle.ToIntPtr(GCHandle.Alloc(func));
 
             MBApi.wkeJsBindFunction(func.Name, func.jsFunc, ptr, 0);
+
+            if (bindToSubFrame)
+            {
+                _netFuncBindToSubFrame.Add(func);
+            }
         }
 
         public bool GoForward()
@@ -932,6 +937,7 @@ namespace QQ2564874169.Miniblink
         private wkePaintBitUpdatedCallback _paintBitUpdated;
         private wkeCreateViewCallback _createView;
         private Hashtable _ref = new Hashtable();
+        private IList<NetFunc> _netFuncBindToSubFrame = new List<NetFunc>();
         private MemoryCache _cache = new MemoryCache(Guid.NewGuid().ToString());
         private ConcurrentQueue<MouseEventArgs> _mouseMoveEvents = new ConcurrentQueue<MouseEventArgs>();
         private AutoResetEvent _mouseMoveAre = new AutoResetEvent(false);
@@ -1159,7 +1165,7 @@ namespace QQ2564874169.Miniblink
                 if (attr == null) continue;
                 BindNetFunc(new NetFunc(attr.Name ?? method.Name, ctx =>
                 {
-                    var m = (MethodInfo) ctx.State;
+                    var m = (MethodInfo)ctx.State;
                     object ret;
                     var mps = m.GetParameters();
                     if (mps.Length < 1)
@@ -1184,8 +1190,6 @@ namespace QQ2564874169.Miniblink
                                         pt = pt.GetGenericArguments().First();
                                     }
                                 }
-
-
                                 if (pt == typeof(DateTime) && !(v is DateTime))
                                 {
                                     long l_date;
@@ -1194,7 +1198,6 @@ namespace QQ2564874169.Miniblink
                                         v = l_date.ToDate();
                                     }
                                 }
-
                                 if (v is JsFunc || pt == typeof(object) || pt == typeof(ExpandoObject))
                                 {
                                     mpvs[i] = v;
@@ -1218,7 +1221,7 @@ namespace QQ2564874169.Miniblink
                     }
 
                     return ret;
-                }, method));
+                }, method), attr.BindToSubFrame);
             }
         }
 
@@ -1278,12 +1281,16 @@ namespace QQ2564874169.Miniblink
 
         private void HookJs(object sender, DidCreateScriptContextEventArgs e)
         {
-            var map = new Dictionary<string,string>
+            var map = new Dictionary<string, string>
             {
-                {"popHookName", _popHookName},
-                {"openHookName", _openHookName}
+                {"popHookName", $"'{_popHookName}'"},
+                {"openHookName", $"'{_openHookName}'"}
             };
-            var vars = string.Join(";", map.Keys.Select(k => $"var {k}='{map[k]}';")) + ";";
+            if (e.Frame.IsMain == false)
+            {
+                map.Add("netFuncList", "[" + string.Join(",", _netFuncBindToSubFrame.Select(i => "'" + i.Name + "'")) + "]");
+            }
+            var vars = string.Join(";", map.Keys.Select(k => $"var {k}={map[k]};")) + ";";
             var js = string.Join(".", typeof(MiniblinkBrowser).Namespace, "Files", "browser.js");
 
             using (var sm = typeof(MiniblinkBrowser).Assembly.GetManifestResourceStream(js))
@@ -1294,10 +1301,9 @@ namespace QQ2564874169.Miniblink
                     {
                         js = vars + reader.ReadToEnd();
                     }
+                    e.Frame.RunJs(js);
                 }
             }
-
-            e.Frame.RunJs(js);
         }
 
         private AlertEventArgs OnAlert(string message, string title)

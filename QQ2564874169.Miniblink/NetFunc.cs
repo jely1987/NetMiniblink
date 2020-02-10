@@ -42,10 +42,12 @@ namespace QQ2564874169.Miniblink
     public class NetFuncAttribute : Attribute
     {
         public string Name { get; }
+        public bool BindToSubFrame { get; set; }
 
         public NetFuncAttribute(string functionName = null)
         {
             Name = functionName;
+            BindToSubFrame = true;
         }
     }
 }

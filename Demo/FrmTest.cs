@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using QQ2564874169.Miniblink;
+using QQ2564874169.Miniblink.LoadResourceImpl;
 
 namespace Demo
 {
@@ -18,23 +19,12 @@ namespace Demo
         public FrmTest()
         {
             InitializeComponent();
+            LoadResourceHandlerList.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            Download += FrmTest_Download;
-            LoadUri("https://im.qq.com/pcqq/");
-        }
-
-        private void FrmTest_Download(object sender, DownloadEventArgs e)
-        {
-            e.Progress += E_Progress;
-            e.FilePath = "111.exe";
-        }
-
-        private void E_Progress(object sender, DownloadProgressEventArgs e)
-        {
-            Console.WriteLine(e.Total + "\t" + e.Received);
+            LoadUri("http://loc.res/test.html");
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -49,6 +39,18 @@ namespace Demo
         private void button3_Click(object sender, EventArgs e)
         {
             Reload();
+        }
+
+        [NetFunc]
+        private void cunzai()
+        {
+            MessageBox.Show("66666");
+        }
+
+        [NetFunc(BindToSubFrame = false)]
+        private void bucunzai()
+        {
+
         }
     }
 }
