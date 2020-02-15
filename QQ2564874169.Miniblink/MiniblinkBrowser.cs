@@ -16,11 +16,38 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Ionic.Zip;
 
 namespace QQ2564874169.Miniblink
 {
     public partial class MiniblinkBrowser : UserControl, IMiniblink
     {
+        static MiniblinkBrowser()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
+        }
+
+        private static Assembly AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (args.Name.StartsWith("DotNetZip,"))
+            {
+                var resource = typeof(IMiniblink).Namespace + ".Files.DotNetZip.dll";
+                var curAsm = Assembly.GetExecutingAssembly();
+                using (var sm = curAsm.GetManifestResourceStream(resource))
+                {
+                    if (sm == null)
+                    {
+                        throw new Exception("没有找到DotNetZip.dll");
+                    }
+                    var data = new byte[sm.Length];
+                    sm.Read(data, 0, data.Length);
+                    return Assembly.Load(data);
+                }
+            }
+
+            return null;
+        }
+
         #region 属性
 
         [Browsable(false)]
@@ -791,7 +818,19 @@ namespace QQ2564874169.Miniblink
 
         public void ShowDevTools()
         {
-            var path = Path.Combine(Application.StartupPath, "front_end", "inspector.html");
+            var dir = Path.Combine(Application.StartupPath, "front_end");
+            if (Directory.Exists(dir) == false)
+            {
+                var zipPath = typeof(IMiniblink).Namespace + ".Files.front_end.zip";
+                using (var sm = Assembly.GetExecutingAssembly().GetManifestResourceStream(zipPath))
+                {
+                    using (var zip = ZipFile.Read(sm))
+                    {
+                        zip.ExtractAll(Application.StartupPath);
+                    }
+                }
+            }
+            var path = Path.Combine(dir, "inspector.html");
             MBApi.wkeShowDevtools(MiniblinkHandle, path, null, IntPtr.Zero);
         }
 

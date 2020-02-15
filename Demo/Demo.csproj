@@ -265,7 +265,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(ProjectDir)Webres" "$(TargetDir)Webres\" /s /y
-xcopy "$(ProjectDir)Libs\front_end" "$(TargetDir)front_end\" /s /y
 copy "$(ProjectDir)Libs\miniblink_x86.dll" "$(TargetDir)miniblink_x86.dll" /y
 copy "$(ProjectDir)Libs\miniblink_x64.dll" "$(TargetDir)miniblink_x64.dll" /y</PostBuildEvent>
   </PropertyGroup>

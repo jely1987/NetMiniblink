@@ -12,32 +12,6 @@ namespace QQ2564874169.Miniblink.LoadResourceImpl
         private ZipFile _zip;
         private string _pwd;
 
-        static ZipLoader()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-        }
-
-        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            if (args.Name.StartsWith("DotNetZip,"))
-            {
-                var resource = typeof(IMiniblink).Namespace + ".Files.DotNetZip.dll";
-                var curAsm = Assembly.GetExecutingAssembly();
-                using (var sm = curAsm.GetManifestResourceStream(resource))
-                {
-                    if (sm == null)
-                    {
-                        throw new Exception("没有找到DotNetZip.dll");
-                    }
-                    var data = new byte[sm.Length];
-                    sm.Read(data, 0, data.Length);
-                    return Assembly.Load(data);
-                }
-            }
-
-            return null;
-        }
-
         public ZipLoader(string zipPath, string domain, string pwd = null)
         {
             if (File.Exists(zipPath) == false)
