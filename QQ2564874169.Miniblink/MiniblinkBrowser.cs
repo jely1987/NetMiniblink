@@ -150,13 +150,6 @@ namespace QQ2564874169.Miniblink
         public string UserAgent
         {
             get { return IsDesignMode() ? "" : MBApi.wkeGetUserAgent(MiniblinkHandle).ToUTF8String(); }
-            set
-            {
-                if (!IsDesignMode())
-                {
-                    MBApi.wkeSetUserAgent(MiniblinkHandle, value);
-                }
-            }
         }
 
         [Browsable(false)]

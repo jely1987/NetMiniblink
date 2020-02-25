@@ -588,7 +588,6 @@ namespace QQ2564874169.Miniblink
 		public string UserAgent
 		{
 			get { return _browser.UserAgent; }
-			set { _browser.UserAgent = value; }
 		}
 
         [Browsable(false)]

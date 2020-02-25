@@ -25,7 +25,7 @@ namespace QQ2564874169.Miniblink
 		bool CanGoBack { get; }
 		bool CanGoForward { get; }
 		float Zoom { get; set; }
-		string UserAgent { get; set; }
+		string UserAgent { get; }
         DeviceParameter DeviceParameter { get; }
         CookieCollection Cookies { get; }
         /// <summary>
