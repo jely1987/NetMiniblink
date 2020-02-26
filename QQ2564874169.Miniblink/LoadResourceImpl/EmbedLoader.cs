@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace QQ2564874169.Miniblink.LoadResourceImpl
@@ -6,21 +8,23 @@ namespace QQ2564874169.Miniblink.LoadResourceImpl
     public class EmbedLoader : ILoadResource
     {
         private Assembly _assembly;
-        private string _dir;
+        private string _asmDir;
         private string _namespace;
         private string _domain;
 
-        public EmbedLoader(Assembly resAssembly, string resDir, string domain)
+        public EmbedLoader(Assembly resAssembly, string resAsmDir, string domain)
         {
             _domain = domain;
             _assembly = resAssembly;
-            _dir = resDir;
+            _asmDir = resAsmDir;
             _namespace = resAssembly.EntryPoint.DeclaringType?.Namespace;
         }
 
         public byte[] ByUri(Uri uri)
         {
-            var path = string.Join(".", _namespace, _dir, uri.AbsolutePath.TrimStart('/').Replace("/", "."));
+            var items = uri.Segments.Take(uri.Segments.Length - 1).Select(i => i.Replace("-", "_"));
+            var dir = string.Join("", items).TrimStart('/').Replace("/", ".");
+            var path = string.Join(".", _namespace, _asmDir, dir + uri.Segments.Last());
 
             using (var sm = _assembly.GetManifestResourceStream(path))
             {
