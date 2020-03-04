@@ -6,7 +6,7 @@
 - 支持b/s开发模式，给习惯web的人用，关键是使用ajax不会卡界面，并且分离界面和逻辑。
 - 本封装是面向UI的，不是浏览器！
 
-!(https://images.gitee.com/uploads/images/2020/0304/133534_fcad9dea_307669.png "")
+![view](https://images.gitee.com/uploads/images/2020/0304/133534_fcad9dea_307669.png "view")
 - Demo下载：(https://gitee.com/aochulai/NetMiniblink/releases)
 
 ### 2019-12-18
