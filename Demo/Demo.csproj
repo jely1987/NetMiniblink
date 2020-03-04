@@ -63,6 +63,12 @@
     <Compile Include="FrmDownload.Designer.cs">
       <DependentUpon>FrmDownload.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmDropFile.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDropFile.Designer.cs">
+      <DependentUpon>FrmDropFile.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmEmbedLoad.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -165,6 +171,9 @@
     <EmbeddedResource Include="FrmDownload.resx">
       <DependentUpon>FrmDownload.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FrmDropFile.resx">
+      <DependentUpon>FrmDropFile.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmEmbedLoad.resx">
       <DependentUpon>FrmEmbedLoad.cs</DependentUpon>
     </EmbeddedResource>
@@ -246,6 +255,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Res\hook.html" />
     <EmbeddedResource Include="Res\js\hook.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Res\drop_file.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

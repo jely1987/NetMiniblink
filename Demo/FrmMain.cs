@@ -88,6 +88,9 @@ namespace Demo
                 case "hook":
                     form = new FrmHook();
                     break;
+                case "drop_file":
+                    form = new FrmDropFile();
+                    break;
             }
 
             if (form != null)

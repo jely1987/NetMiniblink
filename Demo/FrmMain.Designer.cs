@@ -55,7 +55,8 @@
             System.Windows.Forms.TreeNode treeNode16 = new System.Windows.Forms.TreeNode("自宿主web服务器");
             System.Windows.Forms.TreeNode treeNode17 = new System.Windows.Forms.TreeNode("开发者工具");
             System.Windows.Forms.TreeNode treeNode18 = new System.Windows.Forms.TreeNode("文件下载");
-            System.Windows.Forms.TreeNode treeNode19 = new System.Windows.Forms.TreeNode("功能演示", new System.Windows.Forms.TreeNode[] {
+            System.Windows.Forms.TreeNode treeNode19 = new System.Windows.Forms.TreeNode("文件拖放");
+            System.Windows.Forms.TreeNode treeNode20 = new System.Windows.Forms.TreeNode("功能演示", new System.Windows.Forms.TreeNode[] {
             treeNode4,
             treeNode8,
             treeNode12,
@@ -64,7 +65,8 @@
             treeNode15,
             treeNode16,
             treeNode17,
-            treeNode18});
+            treeNode18,
+            treeNode19});
             this.button6 = new System.Windows.Forms.Button();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.SuspendLayout();
@@ -143,10 +145,13 @@
             treeNode18.Tag = "download";
             treeNode18.Text = "文件下载";
             treeNode19.Name = "节点0";
-            treeNode19.Text = "功能演示";
+            treeNode19.Tag = "drop_file";
+            treeNode19.Text = "文件拖放";
+            treeNode20.Name = "节点0";
+            treeNode20.Text = "功能演示";
             this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode19});
-            this.treeView1.Size = new System.Drawing.Size(279, 296);
+            treeNode20});
+            this.treeView1.Size = new System.Drawing.Size(279, 314);
             this.treeView1.TabIndex = 6;
             this.treeView1.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView1_NodeMouseClick);
             // 
@@ -154,7 +159,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(303, 381);
+            this.ClientSize = new System.Drawing.Size(303, 399);
             this.Controls.Add(this.treeView1);
             this.Controls.Add(this.button6);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
