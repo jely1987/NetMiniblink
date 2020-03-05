@@ -716,7 +716,7 @@ namespace QQ2564874169.Miniblink
             var e = new LoadUrlBeginEventArgs
             {
                 Url = rawurl,
-                RequestMethod = MBApi.wkeNetGetRequestMethod(job)
+                //RequestMethod = MBApi.wkeNetGetRequestMethod(job)
             };
             e.Job = new NetJob(mb, e, job, JobCompleted);
             _jobToMethod.AddOrUpdate(job.ToInt64(), e.RequestMethod, (i, m) => e.RequestMethod);

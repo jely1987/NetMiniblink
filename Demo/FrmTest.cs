@@ -25,8 +25,7 @@ namespace Demo
         private void FrmTest_Load(object sender, EventArgs e)
         {
             LoadUrlBegin += FrmTest_LoadUrlBegin;
-            NetResponse += FrmTest_NetResponse;
-            LoadUri("http://www.baidu.com");
+            LoadUri("http://api.juheba.top:8888/shop/web/index.html#/main/home");
         }
 
         private void FrmTest_NetResponse(object sender, NetResponseEventArgs e)
@@ -36,7 +35,7 @@ namespace Demo
 
         private void FrmTest_LoadUrlBegin(object sender, LoadUrlBeginEventArgs e)
         {
-            e.Response(a => { Console.WriteLine($"{a.RequestMethod} = {e.Url}"); });
+            Console.WriteLine(e.Url);
         }
 
         private void button1_Click(object sender, EventArgs e)

@@ -58,117 +58,6 @@ namespace QQ2564874169.Miniblink
         }
     }
 
-    public class NetResponseEventArgs : MiniblinkEventArgs
-    {
-        public string Url { get; }
-        public wkeRequestType RequestMethod { get; internal set; }
-        public IntPtr Job { get; }
-        public bool Cancel { get; set; }
-        public string ContentType { get; }
-        internal byte[] Data {  get; private set; }
-
-        internal NetResponseEventArgs(string url, IntPtr job)
-        {
-            Url = url;
-            Job = job;
-            //RequestMethod = MBApi.wkeNetGetRequestMethod(job);
-            ContentType = MBApi.wkeNetGetMIMEType(job).ToUTF8String();
-        }
-
-        public string GetHeader(string name)
-        {
-            return MBApi.wkeNetGetHTTPHeaderFieldFromResponse(Job, name).ToUTF8String();
-        }
-
-        public void SetData(byte[] data)
-        {
-            Data = data;
-        }
-    }
-
-    public class LoadUrlBeginEventArgs : MiniblinkEventArgs
-    {
-        private static ConcurrentDictionary<long, LoadUrlBeginEventArgs> _args =
-            new ConcurrentDictionary<long, LoadUrlBeginEventArgs>();
-
-        public wkeRequestType RequestMethod { get; internal set; }
-        public string Url { get; internal set; }
-        public NetJob Job { get; internal set; }
-        public byte[] Data { get; set; }
-        public bool Cancel { get; set; }
-        public bool IsLocalFile { get; internal set; }
-        internal bool HookRequest { get; set; }
-        private List<Tuple<Action<LoadUrlEndArgs>, object>> _loadUrlEnd;
-        internal bool Ended;
-        private PostBody _postBody;
-
-        internal LoadUrlBeginEventArgs()
-        {
-            _loadUrlEnd = new List<Tuple<Action<LoadUrlEndArgs>, object>>();
-        }
-
-        public PostBody GetPostBody()
-        {
-            if (_postBody == null)
-            {
-                _postBody = new PostBody(Job.Handle);
-            }
-
-            return _postBody;
-        }
-
-        public void SetHeader(string name, string value)
-        {
-            MBApi.wkeNetSetHTTPHeaderField(Job.Handle, name, value);
-        }
-
-        public string GetHeader(string name)
-        {
-            return MBApi.wkeNetGetHTTPHeaderField(Job.Handle, name).ToUTF8String();
-        }
-
-        public void Response(Action<LoadUrlEndArgs> callback, object state = null)
-        {
-            _loadUrlEnd.Add(new Tuple<Action<LoadUrlEndArgs>, object>(callback, state));
-
-            if (HookRequest == false)
-            {
-                _args.TryAdd(Job.Handle.ToInt64(), this);
-
-                HookRequest = true;
-            }
-        }
-
-        internal LoadUrlEndArgs OnLoadUrlEnd(byte[] data)
-        {
-            Ended = true;
-
-            if (HookRequest == false)
-                return null;
-
-            var e = new LoadUrlEndArgs(Job.Handle)
-            {
-                Data = data,
-                RequestMethod = RequestMethod,
-                Url = Url
-            };
-
-            _loadUrlEnd.ForEach(item =>
-            {
-                e.State = item.Item2;
-                item.Item1.Invoke(e);
-            });
-
-            return e;
-        }
-
-        internal static LoadUrlBeginEventArgs GetByJob(IntPtr job)
-        {
-            LoadUrlBeginEventArgs e;
-            return _args.TryRemove(job.ToInt64(), out e) ? e : null;
-        }
-    }
-
     public class LoadUrlEndArgs : MiniblinkEventArgs
     {
         public wkeRequestType RequestMethod { get; internal set; }
@@ -331,6 +220,153 @@ namespace QQ2564874169.Miniblink
         {
             Specs = new Dictionary<string, string>();
             LoadUrl = true;
+        }
+    }
+
+    public class NetResponseEventArgs : MiniblinkEventArgs
+    {
+        public string Url { get; }
+        public wkeRequestType RequestMethod { get; internal set; }
+        public IntPtr Job { get; }
+        public bool Cancel { get; set; }
+        public string ContentType { get; }
+        internal byte[] Data { get; private set; }
+
+        internal NetResponseEventArgs(string url, IntPtr job)
+        {
+            Url = url;
+            Job = job;
+            //RequestMethod = MBApi.wkeNetGetRequestMethod(job);
+            ContentType = MBApi.wkeNetGetMIMEType(job).ToUTF8String();
+        }
+
+        public string GetHeader(string name)
+        {
+            return MBApi.wkeNetGetHTTPHeaderFieldFromResponse(Job, name).ToUTF8String();
+        }
+
+        public void SetData(byte[] data)
+        {
+            Data = data;
+        }
+    }
+
+    public class LoadUrlBeginEventArgs : MiniblinkEventArgs
+    {
+        private static ConcurrentDictionary<long, LoadUrlBeginEventArgs> _args =
+            new ConcurrentDictionary<long, LoadUrlBeginEventArgs>();
+
+        public wkeRequestType RequestMethod { get; internal set; }
+        public string Url { get; internal set; }
+        public NetJob Job { get; internal set; }
+        public byte[] Data { get; set; }
+        public bool Cancel { get; set; }
+        public bool IsLocalFile { get; internal set; }
+        internal bool HookRequest { get; set; }
+        private List<Tuple<Action<LoadUrlEndArgs>, object>> _loadUrlEnd;
+        internal bool Ended;
+        private PostBody _postBody;
+
+        internal LoadUrlBeginEventArgs()
+        {
+            _loadUrlEnd = new List<Tuple<Action<LoadUrlEndArgs>, object>>();
+        }
+
+        public PostBody GetPostBody()
+        {
+            if (_postBody == null && RequestMethod == wkeRequestType.Post)
+            {
+                _postBody = new PostBody(Job.Handle);
+            }
+
+            return _postBody;
+        }
+
+        public void SetHeader(string name, string value)
+        {
+            MBApi.wkeNetSetHTTPHeaderField(Job.Handle, name, value);
+        }
+
+        public string GetHeader(string name)
+        {
+            return MBApi.wkeNetGetHTTPHeaderField(Job.Handle, name).ToUTF8String();
+        }
+
+        public void Response(Action<LoadUrlEndArgs> callback, object state = null)
+        {
+            _loadUrlEnd.Add(new Tuple<Action<LoadUrlEndArgs>, object>(callback, state));
+
+            if (HookRequest == false)
+            {
+                _args.TryAdd(Job.Handle.ToInt64(), this);
+
+                HookRequest = true;
+            }
+        }
+
+        internal LoadUrlEndArgs OnLoadUrlEnd(byte[] data)
+        {
+            Ended = true;
+
+            if (HookRequest == false)
+                return null;
+
+            var e = new LoadUrlEndArgs(Job.Handle)
+            {
+                Data = data,
+                RequestMethod = RequestMethod,
+                Url = Url
+            };
+
+            _loadUrlEnd.ForEach(item =>
+            {
+                e.State = item.Item2;
+                item.Item1.Invoke(e);
+            });
+
+            return e;
+        }
+
+        internal static LoadUrlBeginEventArgs GetByJob(IntPtr job)
+        {
+            LoadUrlBeginEventArgs e;
+            return _args.TryRemove(job.ToInt64(), out e) ? e : null;
+        }
+    }
+
+    public class ResponseEventArgs : MiniblinkEventArgs
+    {
+
+    }
+
+    public class RequestEventArgs : MiniblinkEventArgs
+    {
+        internal enum State
+        {
+            Before,
+            Wait,
+            Post,
+            NetResp,
+            Finish
+        }
+
+        public string Url { get; }
+        public string Method { get; }
+        public bool Cancel { get; set; }
+        public event EventHandler<ResponseEventArgs> Response;
+        private IntPtr _job;
+        private State _state;
+
+        internal RequestEventArgs(string url, IntPtr job)
+        {
+            Url = url;
+            _job = job;
+            _state = State.Before;
+        }
+
+        public void SetData(byte[] data)
+        {
+
         }
     }
 }

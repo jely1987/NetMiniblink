@@ -2254,5 +2254,23 @@ namespace QQ2564874169.Miniblink
                 wkeOnPaintBitUpdated_x86(webView, callback, param);
             }
         }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeOnLoadUrlFail", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeOnLoadUrlFail_x86(IntPtr webView, wkeLoadUrlFailCallback callback, IntPtr param);
+
+        [DllImport(DLL_x64, EntryPoint = "wkeOnLoadUrlFail", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeOnLoadUrlFail_x64(IntPtr webView, wkeLoadUrlFailCallback callback, IntPtr param);
+
+        public void wkeOnLoadUrlFail(IntPtr webView, wkeLoadUrlFailCallback callback, IntPtr param)
+        {
+            if (is64())
+            {
+                wkeOnLoadUrlFail_x64(webView, callback, param);
+            }
+            else
+            {
+                wkeOnLoadUrlFail_x86(webView, callback, param);
+            }
+        }
     }
 }

@@ -67,4 +67,7 @@ namespace QQ2564874169.Miniblink
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void wkePaintBitUpdatedCallback(IntPtr webView, IntPtr param, IntPtr buffer, IntPtr rect,
         int width, int height);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate void wkeLoadUrlFailCallback(IntPtr webView, IntPtr param, IntPtr url, IntPtr job);
 }
