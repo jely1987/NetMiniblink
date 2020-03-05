@@ -80,9 +80,9 @@
     <Compile Include="IMiniblink.cs" />
     <Compile Include="IResourceCache.cs" />
     <Compile Include="JsFunc.cs" />
-    <Compile Include="LoadResourceImpl\EmbedLoader.cs" />
-    <Compile Include="LoadResourceImpl\FileLoader.cs" />
-    <Compile Include="LoadResourceImpl\ZipLoader.cs" />
+    <Compile Include="ResourceLoader\EmbedLoader.cs" />
+    <Compile Include="ResourceLoader\FileLoader.cs" />
+    <Compile Include="ResourceLoader\ZipLoader.cs" />
     <Compile Include="LocalHttp\ApiNameAttribute.cs" />
     <Compile Include="LocalHttp\NetApi.cs" />
     <Compile Include="LocalHttp\NetApiAfter.cs" />
@@ -119,7 +119,7 @@
     <Compile Include="PrintUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FormShadowWidth.cs" />
-    <Compile Include="ResourceCacheImpl\FileCache.cs" />
+    <Compile Include="ResourceCache\FileCache.cs" />
     <Compile Include="ScreenshotImage.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="WinApi.cs" />

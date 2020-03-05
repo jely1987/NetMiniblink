@@ -588,7 +588,7 @@ namespace QQ2564874169.Miniblink
             _jobToMethod.TryGetValue(job.ToInt64(), out type);
             var e = new NetResponseEventArgs(url, job)
             {
-                RequestMethod = type
+                RequestMethod = MBApi.wkeNetGetRequestMethod(job)
             };
 
             _netResponse(this, e);
@@ -976,7 +976,7 @@ namespace QQ2564874169.Miniblink
         private AutoResetEvent _mouseMoveAre = new AutoResetEvent(false);
 
         public event EventHandler<PaintUpdatedEventArgs> PaintUpdated;
-        public IList<ILoadResource> LoadResourceHandlerList { get; }
+        public IList<ILoadResource> ResourceLoader { get; }
         private IResourceCache _resourceCache;
         public IResourceCache ResourceCache
         {
@@ -998,7 +998,7 @@ namespace QQ2564874169.Miniblink
         {
             InitializeComponent();
 
-            LoadResourceHandlerList = new List<ILoadResource>();
+            ResourceLoader = new List<ILoadResource>();
 
             if (!IsDesignMode() && !DesignMode)
             {
@@ -1118,7 +1118,7 @@ namespace QQ2564874169.Miniblink
         protected override void OnHandleDestroyed(EventArgs e)
         {
             DestroyCallback();
-            LoadResourceHandlerList.Clear();
+            ResourceLoader.Clear();
             _ref.Clear();
             base.OnHandleDestroyed(e);
         }
@@ -1260,7 +1260,7 @@ namespace QQ2564874169.Miniblink
 
         private void LoadResource(object sender, LoadUrlBeginEventArgs e)
         {
-            if (LoadResourceHandlerList.Count < 1)
+            if (ResourceLoader.Count < 1)
                 return;
             if (e.RequestMethod != wkeRequestType.Get)
                 return;
@@ -1270,7 +1270,7 @@ namespace QQ2564874169.Miniblink
 
             var uri = new Uri(url);
 
-            foreach (var handler in LoadResourceHandlerList.ToArray())
+            foreach (var handler in ResourceLoader.ToArray())
             {
                 if (handler.Domain.Equals(uri.Host, StringComparison.OrdinalIgnoreCase) == false)
                     continue;

@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using QQ2564874169.Miniblink;
-using QQ2564874169.Miniblink.LoadResourceImpl;
+using QQ2564874169.Miniblink.ResourceLoader;
 
 namespace Demo
 {
@@ -18,7 +18,7 @@ namespace Demo
         public FrmZipLoad()
         {
             InitializeComponent();
-            LoadResourceHandlerList.Add(new ZipLoader(
+            ResourceLoader.Add(new ZipLoader(
                 Assembly.GetExecutingAssembly(),
                 "/Demo/Res/zipdemo.zip",
                 "loc.web"));

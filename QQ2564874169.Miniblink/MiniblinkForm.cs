@@ -621,7 +621,7 @@ namespace QQ2564874169.Miniblink
         public bool CanGoBack => _browser.CanGoBack;
 		public bool CanGoForward => _browser.CanGoForward;
         public DeviceParameter DeviceParameter => _browser.DeviceParameter;
-        public IList<ILoadResource> LoadResourceHandlerList => _browser.LoadResourceHandlerList;
+        public IList<ILoadResource> ResourceLoader => _browser.ResourceLoader;
         public CookieCollection Cookies => _browser.Cookies;
 
         public IResourceCache ResourceCache

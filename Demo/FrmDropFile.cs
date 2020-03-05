@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using QQ2564874169.Miniblink.LoadResourceImpl;
+using QQ2564874169.Miniblink.ResourceLoader;
 
 namespace Demo
 {
@@ -15,7 +15,7 @@ namespace Demo
         public FrmDropFile()
         {
             InitializeComponent();
-            miniblinkBrowser1.LoadResourceHandlerList.Add(new EmbedLoader(GetType().Assembly, "Res", "loc.res"));
+            miniblinkBrowser1.ResourceLoader.Add(new EmbedLoader(GetType().Assembly, "Res", "loc.res"));
         }
 
         private void FrmDropFile_Load(object sender, EventArgs e)

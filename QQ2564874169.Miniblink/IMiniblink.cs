@@ -35,7 +35,7 @@ namespace QQ2564874169.Miniblink
         /// <summary>
         /// 资源加载的Handler集合，一个请求发起前先从此集合中尝试加载资源，无法加载才发起真实请求。
         /// </summary>
-        IList<ILoadResource> LoadResourceHandlerList { get; }
+        IList<ILoadResource> ResourceLoader { get; }
         /// <summary>
         /// 资源缓存
         /// </summary>

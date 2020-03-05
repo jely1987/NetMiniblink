@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using QQ2564874169.Miniblink;
-using QQ2564874169.Miniblink.LoadResourceImpl;
+using QQ2564874169.Miniblink.ResourceLoader;
 
 namespace Demo
 {
@@ -17,7 +17,7 @@ namespace Demo
         public FrmWindow()
         {
             InitializeComponent();
-            LoadResourceHandlerList.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmFormMode_Load(object sender, EventArgs e)

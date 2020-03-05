@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using QQ2564874169.Miniblink;
-using QQ2564874169.Miniblink.LoadResourceImpl;
+using QQ2564874169.Miniblink.ResourceLoader;
 
 namespace Demo
 {
@@ -19,7 +19,7 @@ namespace Demo
         {
             InitializeComponent();
             var appDir = Application.StartupPath;
-            LoadResourceHandlerList.Add(new FileLoader(Path.Combine(appDir, "Webres"), "loc.res"));
+            ResourceLoader.Add(new FileLoader(Path.Combine(appDir, "Webres"), "loc.res"));
         }
 
         private void FrmFileLoad_Load(object sender, EventArgs e)

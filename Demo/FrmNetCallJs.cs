@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using QQ2564874169.Miniblink;
-using QQ2564874169.Miniblink.LoadResourceImpl;
+using QQ2564874169.Miniblink.ResourceLoader;
 
 namespace Demo
 {
@@ -10,7 +10,7 @@ namespace Demo
         public FrmNetCallJs()
         {
             InitializeComponent();
-            LoadResourceHandlerList.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmNetCallJs_Load(object sender, EventArgs e)

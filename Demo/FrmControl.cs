@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using QQ2564874169.Miniblink.LoadResourceImpl;
+using QQ2564874169.Miniblink.ResourceLoader;
 
 namespace Demo
 {
@@ -16,7 +16,7 @@ namespace Demo
         public FrmControl()
         {
             InitializeComponent();
-            miniblinkBrowser1.LoadResourceHandlerList.Add(
+            miniblinkBrowser1.ResourceLoader.Add(
                 new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
