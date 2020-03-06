@@ -195,6 +195,48 @@ namespace QQ2564874169.Miniblink
             var items = t.GetCustomAttributes(typeof(T), true);
             return items.Length > 0 ? (T)items.First() : default(T);
         }
+
+        public static Dictionary<string, string> ToDict(this wkeSlist slist)
+        {
+            var list = new List<string>();
+
+            while (true)
+            {
+                if (slist.str == IntPtr.Zero)
+                {
+                    break;
+                }
+
+                list.Add(slist.str.ToUTF8String());
+
+                if (slist.next == IntPtr.Zero)
+                {
+                    break;
+                }
+                else
+                {
+                    slist = (wkeSlist) Marshal.PtrToStructure(slist.next, typeof(wkeSlist));
+                }
+            }
+
+            var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            string k = null;
+
+            foreach (var item in list)
+            {
+                if (k == null)
+                {
+                    k = item;
+                }
+                else
+                {
+                    map.Add(k, item);
+                    k = null;
+                }
+            }
+
+            return map;
+        }
     }
 }
 

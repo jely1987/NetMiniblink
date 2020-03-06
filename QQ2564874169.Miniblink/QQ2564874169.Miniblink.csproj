@@ -113,8 +113,7 @@
     <Compile Include="MBEnums.cs" />
     <Compile Include="MBEvents.cs" />
     <Compile Include="MBModels.cs" />
-    <Compile Include="NetJob.cs" />
-    <Compile Include="PostBody.cs" />
+    <Compile Include="MBPostBody.cs" />
     <Compile Include="DrawToBitmapUtil.cs" />
     <Compile Include="PrintUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

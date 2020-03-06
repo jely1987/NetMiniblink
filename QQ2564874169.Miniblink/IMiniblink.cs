@@ -69,8 +69,7 @@ namespace QQ2564874169.Miniblink
 		event EventHandler<NavigateEventArgs> NavigateBefore;
 		event EventHandler<DocumentReadyEventArgs> DocumentReady;
 		event EventHandler<ConsoleMessageEventArgs> ConsoleMessage;
-		event EventHandler<NetResponseEventArgs> NetResponse;
-		event EventHandler<LoadUrlBeginEventArgs> LoadUrlBegin;
+		event EventHandler<RequestEventArgs> RequestBefore;
         event EventHandler<PaintUpdatedEventArgs> PaintUpdated;
         event EventHandler<DownloadEventArgs> Download;
         event EventHandler<AlertEventArgs> AlertBefore;

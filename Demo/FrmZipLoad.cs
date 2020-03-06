@@ -18,15 +18,15 @@ namespace Demo
         public FrmZipLoad()
         {
             InitializeComponent();
-            ResourceLoader.Add(new ZipLoader(
-                Assembly.GetExecutingAssembly(),
+            View.ResourceLoader.Add(new ZipLoader(
+                typeof(FrmZipLoad).Assembly,
                 "/Demo/Res/zipdemo.zip",
                 "loc.web"));
         }
 
         private void FrmZipLoad_Load(object sender, EventArgs e)
         {
-            LoadUri("http://loc.web/demo.html");
+            View.LoadUri("http://loc.web/demo.html");
         }
     }
 }

@@ -21,8 +21,8 @@ namespace Demo
         private void FrmDownload_Load(object sender, EventArgs e)
         {
             Text = "";
-            Download += FrmDownload_Download;
-            LoadUri("https://im.qq.com/pcqq/");
+            View.Download += FrmDownload_Download;
+            View.LoadUri("https://im.qq.com/pcqq/");
         }
 
         private void FrmDownload_Download(object sender, DownloadEventArgs e)

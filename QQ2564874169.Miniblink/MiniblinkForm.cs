@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
 {
-	public partial class MiniblinkForm : Form, IMiniblink, IMessageFilter
+	public partial class MiniblinkForm : Form, IMessageFilter
     {
         /// <summary>
         /// 是否透明模式
@@ -85,6 +85,7 @@ namespace QQ2564874169.Miniblink
                 _windowState = value;
             }
         }
+        public MiniblinkBrowser View { get; }
 
         private ResizeDirect _direct;
 		private bool _resizeing;
@@ -110,27 +111,34 @@ namespace QQ2564874169.Miniblink
 		{
             Application.AddMessageFilter(this);
 			InitializeComponent();
-			IsTransparent = isTransparent;
-            ResizeWidth = new FormResizeWidth(5);
+            View = new MiniblinkBrowser
+            {
+                Dock = DockStyle.Fill
+            };
+            Controls.Add(View);
+
+            IsTransparent = isTransparent;
 
             if (!IsDesignMode())
             {
+                ResizeWidth = new FormResizeWidth(5);
+
                 if (IsTransparent)
                 {
                     NoneBorderResize = true;
                     FormBorderStyle = FormBorderStyle.None;
-                    _browser.PaintUpdated += Miniblink_Paint;
+                    View.PaintUpdated += Miniblink_Paint;
                 }
 
                 DropByClass = FormBorderStyle == FormBorderStyle.None;
                 var tmp = Guid.NewGuid().ToString().Replace("-", "");
-                BindNetFunc(new NetFunc(_dragfunc = "drag" + tmp, DropStart));
-                BindNetFunc(new NetFunc(_maxfunc = "max" + tmp, MaxFunc));
-                BindNetFunc(new NetFunc(_minfunc = "min" + tmp, MinFunc));
-                BindNetFunc(new NetFunc(_closefunc = "close" + tmp, CloseFunc));
+                View.BindNetFunc(new NetFunc(_dragfunc = "drag" + tmp, DropStart));
+                View.BindNetFunc(new NetFunc(_maxfunc = "max" + tmp, MaxFunc));
+                View.BindNetFunc(new NetFunc(_minfunc = "min" + tmp, MinFunc));
+                View.BindNetFunc(new NetFunc(_closefunc = "close" + tmp, CloseFunc));
 
-                DocumentReady += RegisterJsEvent;
-                RegisterNetFunc(this);
+                View.DocumentReady += RegisterJsEvent;
+                View.RegisterNetFunc(this);
             }
         }
 
@@ -141,7 +149,7 @@ namespace QQ2564874169.Miniblink
             {
                 WinApi.SetWindowLong(Handle, (int)WinConst.GWL_EXSTYLE, style | (int)WinConst.WS_EX_LAYERED);
             }
-            MBApi.wkeSetTransparent(_browser.MiniblinkHandle, true);
+            MBApi.wkeSetTransparent(View.MiniblinkHandle, true);
         }
 
         private void SetTransparentStartPos(object sender, EventArgs e)
@@ -166,21 +174,21 @@ namespace QQ2564874169.Miniblink
         {
             if (isRemove)
             {
-                _browser.MouseEnabled = _bakMouseEn;
-                _browser.TouchEnabled = _bakTouchEn;
-                _browser.MouseMove -= DropMove;
-                _browser.MouseUp -= DropUp;
-                _browser.MouseLeave -= DropLeave;
+                View.MouseEnabled = _bakMouseEn;
+                View.TouchEnabled = _bakTouchEn;
+                View.MouseMove -= DropMove;
+                View.MouseUp -= DropUp;
+                View.MouseLeave -= DropLeave;
             }
             else
             {
-                _bakMouseEn = _browser.MouseEnabled;
-                _bakTouchEn = _browser.TouchEnabled;
-                _browser.MouseEnabled = false;
-                _browser.TouchEnabled = false;
-                _browser.MouseMove += DropMove;
-                _browser.MouseUp += DropUp;
-                _browser.MouseLeave += DropLeave;
+                _bakMouseEn = View.MouseEnabled;
+                _bakTouchEn = View.TouchEnabled;
+                View.MouseEnabled = false;
+                View.TouchEnabled = false;
+                View.MouseMove += DropMove;
+                View.MouseUp += DropUp;
+                View.MouseLeave += DropLeave;
             }
         }
 
@@ -228,7 +236,7 @@ namespace QQ2564874169.Miniblink
             {
                 Shown += SetTransparentStartPos;
                 SetTransparent();
-                using (var image = _browser.DrawToBitmap())
+                using (var image = View.DrawToBitmap())
                 {
                     TransparentPaint(image, image.Width, image.Height);
                 }
@@ -244,7 +252,7 @@ namespace QQ2564874169.Miniblink
                 //窗口还原消息
                 if (Utils.Dword(m.WParam).ToInt32() == 61728)
                 {
-                    using (var image = _browser.DrawToBitmap())
+                    using (var image = View.DrawToBitmap())
                     {
                         TransparentPaint(image, image.Width, image.Height);
                     }
@@ -368,61 +376,63 @@ namespace QQ2564874169.Miniblink
 					if (MouseButtons != MouseButtons.Left)
                     {
                         _resizeing = false;
-                        SafeInvoke(s => { Cursor = DefaultCursor; });
+                        Invoke(new Action(() => { Cursor = DefaultCursor; }));
                         break;
                     }
                     
 					var curr = MousePosition;
-					if (curr.X != last.X || curr.Y != last.Y)
-					{
-						var xx = curr.X - _resizeStart.X;
-						var xy = curr.Y - _resizeStart.Y;
-						int nx = Left, ny = Top, nw = Width, nh = Height;
+                    if (curr.X != last.X || curr.Y != last.Y)
+                    {
+                        var xx = curr.X - _resizeStart.X;
+                        var xy = curr.Y - _resizeStart.Y;
+                        int nx = Left, ny = Top, nw = Width, nh = Height;
 
                         switch (_direct)
-						{
-							case ResizeDirect.Left:
-								nw = _resizeSize.Width - xx;
-								nx = _resizePos.X + xx;
+                        {
+                            case ResizeDirect.Left:
+                                nw = _resizeSize.Width - xx;
+                                nx = _resizePos.X + xx;
                                 break;
-							case ResizeDirect.Right:
-								nw = _resizeSize.Width + xx;
+                            case ResizeDirect.Right:
+                                nw = _resizeSize.Width + xx;
                                 break;
-							case ResizeDirect.Top:
-								nh = _resizeSize.Height - xy;
-								ny = _resizePos.Y + xy;
+                            case ResizeDirect.Top:
+                                nh = _resizeSize.Height - xy;
+                                ny = _resizePos.Y + xy;
                                 break;
-							case ResizeDirect.Bottom:
-								nh = _resizeSize.Height + xy;
+                            case ResizeDirect.Bottom:
+                                nh = _resizeSize.Height + xy;
                                 break;
-							case ResizeDirect.LeftTop:
-								nw = _resizeSize.Width - xx;
-								nx = _resizePos.X + xx;
-								nh = _resizeSize.Height - xy;
-								ny = _resizePos.Y + xy;
+                            case ResizeDirect.LeftTop:
+                                nw = _resizeSize.Width - xx;
+                                nx = _resizePos.X + xx;
+                                nh = _resizeSize.Height - xy;
+                                ny = _resizePos.Y + xy;
                                 break;
-							case ResizeDirect.LeftBottom:
-								nw = _resizeSize.Width - xx;
-								nx = _resizePos.X + xx;
-								nh = _resizeSize.Height + xy;
+                            case ResizeDirect.LeftBottom:
+                                nw = _resizeSize.Width - xx;
+                                nx = _resizePos.X + xx;
+                                nh = _resizeSize.Height + xy;
                                 break;
-							case ResizeDirect.RightTop:
-								nw = _resizeSize.Width + xx;
-								nh = _resizeSize.Height - xy;
-								ny = _resizePos.Y + xy;
+                            case ResizeDirect.RightTop:
+                                nw = _resizeSize.Width + xx;
+                                nh = _resizeSize.Height - xy;
+                                ny = _resizePos.Y + xy;
                                 break;
-							case ResizeDirect.RightBottom:
-								nw = _resizeSize.Width + xx;
-								nh = _resizeSize.Height + xy;
+                            case ResizeDirect.RightBottom:
+                                nw = _resizeSize.Width + xx;
+                                nh = _resizeSize.Height + xy;
                                 break;
-						}
-                        SafeInvoke(s =>
-						{
-							Size = new Size(nw, nh);
-							Location = new Point(nx, ny);
-                        });
-					}
-					last = curr;
+                        }
+
+                        Invoke(new Action(() =>
+                        {
+                            Size = new Size(nw, nh);
+                            Location = new Point(nx, ny);
+                        }));
+                    }
+
+                    last = curr;
 					waiter.SpinOnce();
 				}
 			});
@@ -570,323 +580,8 @@ namespace QQ2564874169.Miniblink
 
         internal bool IsDesignMode()
         {
-            return _browser.IsDesignMode();
+            return View.IsDesignMode();
         }
-
-        #region IMiniblink成员
-
-        [Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public float Zoom
-		{
-			get { return _browser.Zoom; }
-			set { _browser.Zoom = value; }
-		}
-
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public string UserAgent
-		{
-			get { return _browser.UserAgent; }
-		}
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public int ScrollTop
-        {
-            get { return _browser.ScrollTop; }
-            set { _browser.ScrollTop = value; }
-        }
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public int ScrollLeft
-        {
-            get { return _browser.ScrollLeft; }
-            set { _browser.ScrollLeft = value; }
-        }
-
-        public IntPtr MiniblinkHandle => _browser.MiniblinkHandle;
-        public int ScrollHeight => _browser.ScrollHeight;
-        public int ScrollWidth => _browser.ScrollWidth;
-		public string Url => _browser.Url;
-		public bool IsDocumentReady => _browser.IsDocumentReady;
-		public string DocumentTitle => _browser.DocumentTitle;
-		public int DocumentWidth => _browser.DocumentWidth;
-		public int DocumentHeight => _browser.DocumentHeight;
-		public int ContentWidth => _browser.ContentWidth;
-		public int ContentHeight => _browser.ContentHeight;
-        public int ViewWidth => _browser.ViewWidth;
-        public int ViewHeight => _browser.ViewHeight;
-        public bool CanGoBack => _browser.CanGoBack;
-		public bool CanGoForward => _browser.CanGoForward;
-        public DeviceParameter DeviceParameter => _browser.DeviceParameter;
-        public IList<ILoadResource> ResourceLoader => _browser.ResourceLoader;
-        public CookieCollection Cookies => _browser.Cookies;
-
-        public IResourceCache ResourceCache
-        {
-            get { return _browser.ResourceCache; }
-            set { _browser.ResourceCache = value; }
-        }
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool MemoryCacheEnable
-        {
-            get { return _browser.MemoryCacheEnable; }
-            set { _browser.MemoryCacheEnable = value; }
-        }
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool HeadlessEnabled
-        {
-            get { return _browser.HeadlessEnabled; }
-            set { _browser.HeadlessEnabled = value; }
-        }
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool NpapiPluginsEnable
-        {
-            get { return _browser.NpapiPluginsEnable; }
-            set { _browser.NpapiPluginsEnable = value; }
-        }
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool CspCheckEnable
-        {
-            get { return _browser.CspCheckEnable; }
-            set { _browser.CspCheckEnable = value; }
-        }
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool TouchEnabled
-        {
-            get { return _browser.TouchEnabled; }
-            set { _browser.TouchEnabled = value; }
-        }
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool MouseEnabled
-        {
-            get { return _browser.MouseEnabled; }
-            set { _browser.MouseEnabled = value; }
-        }
-
-        public bool FireDropFile
-        {
-            get { return _browser.FireDropFile;}
-            set { _browser.FireDropFile = value; }
-        }
-
-        public event EventHandler<UrlChangedEventArgs> UrlChanged
-		{
-			add { _browser.UrlChanged += value; }
-			remove { _browser.UrlChanged -= value; }
-		}
-		public event EventHandler<NavigateEventArgs> NavigateBefore
-		{
-			add { _browser.NavigateBefore += value; }
-			remove { _browser.NavigateBefore -= value; }
-		}
-		public event EventHandler<DocumentReadyEventArgs> DocumentReady
-		{
-			add { _browser.DocumentReady += value; }
-			remove { _browser.DocumentReady -= value; }
-		}
-		public event EventHandler<ConsoleMessageEventArgs> ConsoleMessage
-		{
-			add { _browser.ConsoleMessage += value; }
-			remove { _browser.ConsoleMessage -= value; }
-		}
-		public event EventHandler<NetResponseEventArgs> NetResponse
-		{
-			add { _browser.NetResponse += value; }
-			remove { _browser.NetResponse -= value; }
-		}
-		public event EventHandler<LoadUrlBeginEventArgs> LoadUrlBegin
-		{
-			add { _browser.LoadUrlBegin += value; }
-			remove { _browser.LoadUrlBegin -= value; }
-		}
-        public event EventHandler<DownloadEventArgs> Download
-        {
-            add { _browser.Download += value; }
-            remove { _browser.Download -= value; }
-        }
-
-        public event EventHandler<AlertEventArgs> AlertBefore
-        {
-            add { _browser.AlertBefore += value; }
-            remove { _browser.AlertBefore -= value; }
-        }
-
-        public event EventHandler<ConfirmEventArgs> ConfirmBefore
-        {
-            add { _browser.ConfirmBefore += value; }
-            remove { _browser.ConfirmBefore -= value; }
-        }
-        public event EventHandler<PromptEventArgs> PromptBefore
-        {
-            add { _browser.PromptBefore += value; }
-            remove { _browser.PromptBefore -= value; }
-        }
-
-        public event EventHandler<PaintUpdatedEventArgs> PaintUpdated
-	    {
-	        add { _browser.PaintUpdated += value; }
-	        remove { _browser.PaintUpdated -= value; }
-	    }
-
-	    public event EventHandler<DidCreateScriptContextEventArgs> DidCreateScriptContext
-	    {
-	        add { _browser.DidCreateScriptContext += value; }
-	        remove { _browser.DidCreateScriptContext -= value; }
-	    }
-
-        public event EventHandler<WindowOpenEventArgs> WindowOpen
-        {
-            add { _browser.WindowOpen += value; }
-            remove { _browser.WindowOpen -= value; }
-        }
-
-        public event EventHandler<EventArgs> Destroy
-        {
-            add { _browser.Destroy += value; }
-            remove { _browser.Destroy -= value; }
-        }
-
-        public void ScrollTo(int x, int y)
-        {
-            _browser.ScrollTo(x, y);
-        }
-
-        public void RegisterNetFunc(object target)
-		{
-			_browser.RegisterNetFunc(target);
-		}
-
-		public void ShowDevTools()
-		{
-			_browser.ShowDevTools();
-		}
-
-		public object RunJs(string script)
-		{
-			return _browser.RunJs(script);
-		}
-
-		public object CallJsFunc(string funcName, params object[] param)
-		{
-			return _browser.CallJsFunc(funcName, param);
-		}
-
-        public void BindNetFunc(NetFunc func, bool bindToSubFrame = false)
-        {
-            _browser.BindNetFunc(func, bindToSubFrame);
-        }
-
-        public bool GoForward()
-		{
-			return _browser.GoForward();
-		}
-
-		public void EditorSelectAll()
-		{
-			_browser.EditorSelectAll();
-		}
-
-		public void EditorUnSelect()
-		{
-			_browser.EditorUnSelect();
-		}
-
-		public void EditorCopy()
-		{
-			_browser.EditorCopy();
-		}
-
-		public void EditorCut()
-		{
-			_browser.EditorCut();
-		}
-
-		public void EditorPaste()
-		{
-			_browser.EditorPaste();
-		}
-
-		public void EditorDelete()
-		{
-			_browser.EditorDelete();
-		}
-
-		public void EditorUndo()
-		{
-			_browser.EditorUndo();
-		}
-
-		public void EditorRedo()
-		{
-			_browser.EditorRedo();
-		}
-
-		public bool GoBack()
-		{
-			return _browser.GoBack();
-		}
-
-		public void SetProxy(WKEProxy proxy)
-		{
-			_browser.SetProxy(proxy);
-		}
-
-		public void LoadUri(string uri)
-		{
-			_browser.LoadUri(uri);
-		}
-
-		public void LoadHtml(string html, string baseUrl = null)
-		{
-			_browser.LoadHtml(html, baseUrl);
-		}
-
-		public void StopLoading()
-		{
-			_browser.StopLoading();
-		}
-
-		public void Reload()
-		{
-			_browser.Reload();
-		}
-
-        public void DrawToBitmap(Action<ScreenshotImage> callback)
-        {
-            _browser.DrawToBitmap(callback);
-        }
-
-        public Bitmap DrawToBitmap(Rectangle? rect = null)
-        {
-            return _browser.DrawToBitmap(rect);
-        }
-
-        public void Print(Action<PrintPreviewDialog> callback)
-        {
-            _browser.Print(callback);
-        }
-
-        public void SafeInvoke(Action<object> callback, object state = null)
-        {
-            _browser.SafeInvoke(callback, state);
-        }
-
-        #endregion
 
         private enum ResizeDirect
 		{

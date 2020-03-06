@@ -20,12 +20,12 @@ namespace Demo
 
         private void FrmDevTools_Load(object sender, EventArgs e)
         {
-            LoadUri("https://www.baidu.com");
+            View.LoadUri("https://www.baidu.com");
         }
 
         private void btnDevTools_Click(object sender, EventArgs e)
         {
-            ShowDevTools();
+            View.ShowDevTools();
         }
     }
 }

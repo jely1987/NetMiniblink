@@ -2261,7 +2261,7 @@ namespace QQ2564874169.Miniblink
         [DllImport(DLL_x64, EntryPoint = "wkeOnLoadUrlFail", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnLoadUrlFail_x64(IntPtr webView, wkeLoadUrlFailCallback callback, IntPtr param);
 
-        public void wkeOnLoadUrlFail(IntPtr webView, wkeLoadUrlFailCallback callback, IntPtr param)
+        public static void wkeOnLoadUrlFail(IntPtr webView, wkeLoadUrlFailCallback callback, IntPtr param)
         {
             if (is64())
             {
@@ -2271,6 +2271,22 @@ namespace QQ2564874169.Miniblink
             {
                 wkeOnLoadUrlFail_x86(webView, callback, param);
             }
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeNetGetRawResponseHead", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr wkeNetGetRawResponseHead_x86(IntPtr job);
+
+        [DllImport(DLL_x64, EntryPoint = "wkeNetGetRawResponseHead", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr wkeNetGetRawResponseHead_x64(IntPtr job);
+
+        public static IntPtr wkeNetGetRawResponseHead(IntPtr job)
+        {
+            if (is64())
+            {
+                return wkeNetGetRawResponseHead_x64(job);
+            }
+
+            return wkeNetGetRawResponseHead_x86(job);
         }
     }
 }

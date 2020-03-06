@@ -6,11 +6,11 @@ using System.Text;
 
 namespace QQ2564874169.Miniblink
 {
-    public class PostBody
+    public class MBPostBody
     {
         private Dictionary<string, string> _param;
 
-        internal PostBody(IntPtr job)
+        internal MBPostBody(IntPtr job)
         {
             _param = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 

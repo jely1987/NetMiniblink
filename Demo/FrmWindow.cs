@@ -17,13 +17,13 @@ namespace Demo
         public FrmWindow()
         {
             InitializeComponent();
-            ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmFormMode_Load(object sender, EventArgs e)
         {
             DropByClass = true;
-            LoadUri("http://loc.res/window.html");
+            View.LoadUri("http://loc.res/window.html");
         }
     }
 }

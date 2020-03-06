@@ -18,7 +18,7 @@ namespace Demo
         {
             InitializeComponent();
             ShowInTaskbar = false;
-            ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmTransparent_Load(object sender, EventArgs e)
@@ -26,7 +26,7 @@ namespace Demo
             DropByClass = true;
             Width = 300;
             Height = 300;
-            LoadUri("http://loc.res/transparent.html");
+            View.LoadUri("http://loc.res/transparent.html");
         }
     }
 }

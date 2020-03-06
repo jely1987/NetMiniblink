@@ -10,28 +10,28 @@ namespace Demo
         public FrmNetCallJs()
         {
             InitializeComponent();
-            ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmNetCallJs_Load(object sender, EventArgs e)
         {
-            LoadUri("http://loc.res/net_call_js.html");
+            View.LoadUri("http://loc.res/net_call_js.html");
         }
 
         private void btnFunc1_Click(object sender, EventArgs e)
         {
-            CallJsFunc("func_1", "小张", 15);
+            View.CallJsFunc("func_1", "小张", 15);
         }
 
         private void btnFunc2_Click(object sender, EventArgs e)
         {
-            var result = CallJsFunc("func_2");
+            var result = View.CallJsFunc("func_2");
             MessageBox.Show("名字叫：" + result);
         }
 
         private void btnFunc3_Click(object sender, EventArgs e)
         {
-            CallJsFunc("func_3", new TempNetFunc(param =>
+            View.CallJsFunc("func_3", new TempNetFunc(param =>
             {
                 var n1 = Convert.ToInt32(param[0]);
                 var n2 = Convert.ToInt32(param[1]);
@@ -41,7 +41,7 @@ namespace Demo
 
         private void btnFunc4_Click(object sender, EventArgs e)
         {
-            dynamic data = CallJsFunc("func_4");
+            dynamic data = View.CallJsFunc("func_4");
             if (data.age >= 18)
             {
                 MessageBox.Show(data.name + "已成年");
@@ -54,7 +54,7 @@ namespace Demo
 
         private void btnFunc5_Click(object sender, EventArgs e)
         {
-            dynamic func = CallJsFunc("func_5");
+            dynamic func = View.CallJsFunc("func_5");
             func("王老五");
         }
     }

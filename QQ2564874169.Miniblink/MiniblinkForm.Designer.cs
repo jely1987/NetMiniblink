@@ -30,24 +30,13 @@ namespace QQ2564874169.Miniblink
 		/// </summary>
 		private void InitializeComponent()
 		{
-            this._browser = new QQ2564874169.Miniblink.MiniblinkBrowser();
             this.SuspendLayout();
-            // 
-            // _browser
-            // 
-            this._browser.BackColor = System.Drawing.Color.White;
-            this._browser.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._browser.Location = new System.Drawing.Point(0, 0);
-            this._browser.Name = "_browser";
-            this._browser.Size = new System.Drawing.Size(429, 335);
-            this._browser.TabIndex = 0;
             // 
             // MiniblinkForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(429, 335);
-            this.Controls.Add(this._browser);
             this.KeyPreview = true;
             this.Name = "MiniblinkForm";
             this.Text = "MiniblinkForm";
@@ -57,7 +46,5 @@ namespace QQ2564874169.Miniblink
 		}
 
 		#endregion
-
-		private MiniblinkBrowser _browser;
 	}
 }

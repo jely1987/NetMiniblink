@@ -4,6 +4,13 @@ using System.Runtime.InteropServices;
 namespace QQ2564874169.Miniblink
 {
     [StructLayout(LayoutKind.Sequential)]
+    internal struct wkeSlist
+    {
+        public IntPtr str;
+        public IntPtr next;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     internal struct wkeRect
     {
         public int x;

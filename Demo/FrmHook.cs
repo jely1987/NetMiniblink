@@ -17,16 +17,16 @@ namespace Demo
         public FrmHook()
         {
             InitializeComponent();
-            ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmHook_Load(object sender, EventArgs e)
         {
-            LoadUrlBegin += FrmHook_LoadUrlBegin;
-            LoadUri("http://loc.res/hook.html");
+            View.RequestBefore += FrmHook_LoadUrlBegin;
+            View.LoadUri("http://loc.res/hook.html");
         }
 
-        private void FrmHook_LoadUrlBegin(object sender, LoadUrlBeginEventArgs e)
+        private void FrmHook_LoadUrlBegin(object sender, RequestEventArgs e)
         {
             if (e.Url.Contains("notexists.js"))
             {
@@ -37,13 +37,13 @@ namespace Demo
             if (e.Url.Contains("hook.js"))
             {
                 //监视此请求的实际返回结果
-                e.Response(res =>
+                e.Response += (s, res) =>
                 {
                     var js = Encoding.UTF8.GetString(res.Data);
                     js = js.Replace("name=", "姓名=");
                     //替换实际返回结果
                     res.Data = Encoding.UTF8.GetBytes(js);
-                });
+                };
             }
         }
     }

@@ -17,12 +17,12 @@ namespace Demo
         public FrmEmbedLoad()
         {
             InitializeComponent();
-            ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmEmbedLoad_Load(object sender, EventArgs e)
         {
-            LoadUri("http://loc.res/embed_loader.html");
+            View.LoadUri("http://loc.res/embed_loader.html");
         }
     }
 }

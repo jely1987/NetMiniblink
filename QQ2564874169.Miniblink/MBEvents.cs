@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
@@ -54,58 +56,6 @@ namespace QQ2564874169.Miniblink
         public string StackTrace { get; internal set; }
 
         internal ConsoleMessageEventArgs()
-        {
-        }
-    }
-
-    public class LoadUrlEndArgs : MiniblinkEventArgs
-    {
-        public wkeRequestType RequestMethod { get; internal set; }
-        public string Url { get; internal set; }
-        public IntPtr Job { get; }
-        private byte[] _data;
-
-        public byte[] Data
-        {
-            get { return _data; }
-            set
-            {
-                if (_data == null)
-                {
-                    _data = value;
-                }
-                else
-                {
-                    _data = value;
-                    Modify = true;
-                }
-            }
-        }
-        public object State { get; internal set; }
-        public string Mime { get; }
-        internal bool Modify;
-
-        internal LoadUrlEndArgs(IntPtr job)
-        {
-            Job = job;
-            Mime = MBApi.wkeNetGetMIMEType(job).ToUTF8String();
-        }
-
-        public string GetHeader(string name)
-        {
-            return MBApi.wkeNetGetHTTPHeaderFieldFromResponse(Job, name).ToUTF8String();
-        }
-    }
-
-    public class WndMsgEventArgs : MiniblinkEventArgs
-    {
-        public IntPtr Handle { get; internal set; }
-        public int Message { get; internal set; }
-        public IntPtr WParam { get; internal set; }
-        public IntPtr LParam { get; internal set; }
-        public IntPtr? Result { get; set; }
-
-        internal WndMsgEventArgs()
         {
         }
     }
@@ -223,150 +173,339 @@ namespace QQ2564874169.Miniblink
         }
     }
 
-    public class NetResponseEventArgs : MiniblinkEventArgs
+    public class RequestAsync
     {
-        public string Url { get; }
-        public wkeRequestType RequestMethod { get; internal set; }
-        public IntPtr Job { get; }
-        public bool Cancel { get; set; }
-        public string ContentType { get; }
+        public object State { get; }
+
+        internal string ContentType { get; private set; }
         internal byte[] Data { get; private set; }
 
-        internal NetResponseEventArgs(string url, IntPtr job)
+        internal RequestAsync(object state)
         {
-            Url = url;
-            Job = job;
-            //RequestMethod = MBApi.wkeNetGetRequestMethod(job);
-            ContentType = MBApi.wkeNetGetMIMEType(job).ToUTF8String();
-        }
-
-        public string GetHeader(string name)
-        {
-            return MBApi.wkeNetGetHTTPHeaderFieldFromResponse(Job, name).ToUTF8String();
+            State = state;
         }
 
         public void SetData(byte[] data)
         {
             Data = data;
         }
+
+        public void SetContentType(string contentType)
+        {
+            ContentType = contentType;
+        }
     }
 
-    public class LoadUrlBeginEventArgs : MiniblinkEventArgs
+    public class NetDataEventArgs : MiniblinkEventArgs
     {
-        private static ConcurrentDictionary<long, LoadUrlBeginEventArgs> _args =
-            new ConcurrentDictionary<long, LoadUrlBeginEventArgs>();
-
-        public wkeRequestType RequestMethod { get; internal set; }
-        public string Url { get; internal set; }
-        public NetJob Job { get; internal set; }
-        public byte[] Data { get; set; }
         public bool Cancel { get; set; }
-        public bool IsLocalFile { get; internal set; }
-        internal bool HookRequest { get; set; }
-        private List<Tuple<Action<LoadUrlEndArgs>, object>> _loadUrlEnd;
-        internal bool Ended;
-        private PostBody _postBody;
 
-        internal LoadUrlBeginEventArgs()
+        public string Url
         {
-            _loadUrlEnd = new List<Tuple<Action<LoadUrlEndArgs>, object>>();
+            get { return _request.Url; }
         }
 
-        public PostBody GetPostBody()
+        public string Method
         {
-            if (_postBody == null && RequestMethod == wkeRequestType.Post)
-            {
-                _postBody = new PostBody(Job.Handle);
-            }
-
-            return _postBody;
+            get { return _request.Method; }
         }
 
-        public void SetHeader(string name, string value)
+        public string ContentType
         {
-            MBApi.wkeNetSetHTTPHeaderField(Job.Handle, name, value);
+            get { return MBApi.wkeNetGetMIMEType(_request.NetJob).ToUTF8String(); }
+            set { MBApi.wkeNetSetMIMEType(_request.NetJob, value); }
         }
 
-        public string GetHeader(string name)
+        internal byte[] Data { get; private set; }
+        private RequestEventArgs _request;
+
+        internal NetDataEventArgs(RequestEventArgs request)
         {
-            return MBApi.wkeNetGetHTTPHeaderField(Job.Handle, name).ToUTF8String();
+            _request = request;
         }
 
-        public void Response(Action<LoadUrlEndArgs> callback, object state = null)
+        public void SetData(byte[] data)
         {
-            _loadUrlEnd.Add(new Tuple<Action<LoadUrlEndArgs>, object>(callback, state));
-
-            if (HookRequest == false)
-            {
-                _args.TryAdd(Job.Handle.ToInt64(), this);
-
-                HookRequest = true;
-            }
+            Data = data;
         }
 
-        internal LoadUrlEndArgs OnLoadUrlEnd(byte[] data)
+        public IDictionary<string, string> GetHeaders()
         {
-            Ended = true;
-
-            if (HookRequest == false)
-                return null;
-
-            var e = new LoadUrlEndArgs(Job.Handle)
-            {
-                Data = data,
-                RequestMethod = RequestMethod,
-                Url = Url
-            };
-
-            _loadUrlEnd.ForEach(item =>
-            {
-                e.State = item.Item2;
-                item.Item1.Invoke(e);
-            });
-
-            return e;
-        }
-
-        internal static LoadUrlBeginEventArgs GetByJob(IntPtr job)
-        {
-            LoadUrlBeginEventArgs e;
-            return _args.TryRemove(job.ToInt64(), out e) ? e : null;
+            var ptr = MBApi.wkeNetGetRawResponseHead(_request.NetJob);
+            var slist = (wkeSlist) Marshal.PtrToStructure(ptr, typeof(wkeSlist));
+            return slist.ToDict();
         }
     }
 
     public class ResponseEventArgs : MiniblinkEventArgs
     {
+        internal bool IsSetData { get; private set; }
 
+        private byte[] _data;
+
+        public byte[] Data
+        {
+            get { return _data; }
+            set
+            {
+                _data = value;
+                IsSetData = true;
+            }
+        }
+
+        public string Url
+        {
+            get { return _request.Url; }
+        }
+
+        public string Method
+        {
+            get { return _request.Method; }
+        }
+
+        public string ContentType
+        {
+            get { return MBApi.wkeNetGetMIMEType(_request.NetJob).ToUTF8String(); }
+            set { MBApi.wkeNetSetMIMEType(_request.NetJob, value); }
+        }
+
+        private RequestEventArgs _request;
+
+        internal ResponseEventArgs(RequestEventArgs request, byte[] data)
+        {
+            Data = data;
+            _request = request;
+        }
+
+        public IDictionary<string, string> GetHeaders()
+        {
+            var ptr = MBApi.wkeNetGetRawResponseHead(_request.NetJob);
+            var slist = (wkeSlist)Marshal.PtrToStructure(ptr, typeof(wkeSlist));
+            return slist.ToDict();
+        }
     }
 
     public class RequestEventArgs : MiniblinkEventArgs
     {
-        internal enum State
+        private enum Status
         {
             Before,
-            Wait,
+            Async,
             Post,
-            NetResp,
-            Finish
+            Net,
+            Valid
         }
 
         public string Url { get; }
         public string Method { get; }
         public bool Cancel { get; set; }
-        public event EventHandler<ResponseEventArgs> Response;
-        private IntPtr _job;
-        private State _state;
+        public byte[] Data { get; set; }
 
-        internal RequestEventArgs(string url, IntPtr job)
+        public MBPostBody PostBody
         {
-            Url = url;
-            _job = job;
-            _state = State.Before;
+            get
+            {
+                if ("post".SW(Method) && _body == null)
+                {
+                    _body = new MBPostBody(NetJob);
+                }
+
+                return _body;
+            }
         }
 
-        public void SetData(byte[] data)
-        {
+        /// <summary>
+        /// 接收到网络数据时
+        /// </summary>
+        public event EventHandler<NetDataEventArgs> NetData;
+        /// <summary>
+        /// 加载失败时
+        /// </summary>
+        public event EventHandler<EventArgs> LoadFail; 
+        public event EventHandler<ResponseEventArgs> Response;
+        public event EventHandler<EventArgs> Finish; 
 
+        internal IMiniblink Miniblink { get; }
+        internal object State { get; set; }
+        internal IntPtr NetJob { get; }
+        private Status _status;
+        private MBPostBody _body;
+
+        internal RequestEventArgs(IMiniblink miniblink, string url, IntPtr job)
+        {
+            //var type = MBApi.wkeNetGetRequestMethod(NetJob);
+            //switch (type)
+            //{
+            //    case wkeRequestType.Get:
+            //        Method = "GET";
+            //        break;
+            //    case wkeRequestType.Post:
+            //        Method = "POST";
+            //        break;
+            //    case wkeRequestType.Put:
+            //        Method = "PUT";
+            //        break;
+            //    default:
+            //        Method = "UNKNOW";
+            //        break;
+            //}
+
+            Url = url;
+            Miniblink = miniblink;
+            NetJob = job;
+            _status = Status.Before;
+        }
+
+        public void Async(Action<RequestAsync> callback, object state = null)
+        {
+            MBApi.wkeNetHoldJobToAsynCommit(NetJob);
+            _status = Status.Async;
+            Task.Factory.StartNew(s =>
+            {
+                var ps = (object[]) s;
+                var req = (RequestEventArgs) ps[0];
+                var pm = ps[1];
+                var e = new RequestAsync(pm);
+                try
+                {
+                    callback(e);
+                }
+                finally
+                {
+                    if (e.ContentType != null || e.Data != null)
+                    {
+                        req.Miniblink.SafeInvoke(_ =>
+                        {
+                            if (e.ContentType != null)
+                            {
+                                MBApi.wkeNetSetMIMEType(req.NetJob, e.ContentType);
+                            }
+
+                            if (e.Data != null)
+                            {
+                                req.SetData(e.Data);
+                            }
+                        });
+                    }
+                    MBApi.wkeNetContinueJob(req.NetJob);
+                    var t = req.NetData?.GetInvocationList().Length;
+                    t += req.LoadFail?.GetInvocationList().Length;
+                    t += req.Response?.GetInvocationList().Length;
+                    if (t == 0)
+                    {
+                        req._status = Status.Valid;
+                        Finish?.Invoke(req, new EventArgs());
+                    }
+                    else
+                    {
+                        req._status = Status.Post;
+                    }
+                }
+            }, new[] {this, state});
+        }
+
+        public void SetHeader(string name, string value)
+        {
+            MBApi.wkeNetSetHTTPHeaderField(NetJob, name, value);
+        }
+
+        private void SetData(byte[] data)
+        {
+            if (data != null && data.Length > 0)
+            {
+                MBApi.wkeNetSetData(NetJob, data, data.Length);
+            }
+            else
+            {
+                MBApi.wkeNetSetData(NetJob, new byte[] {0}, 1);
+            }
+        }
+
+        internal bool OnBegin()
+        {
+            if (_status == Status.Async)
+            {
+                Cancel = false;
+                return Cancel;
+            }
+            if (_status == Status.Before && Data != null)
+            {
+                SetData(Data);
+                Cancel = true;
+                _status = Status.Valid;
+            }
+            else if (Response?.GetInvocationList().Length > 0)
+            {
+                MBApi.wkeNetHookRequest(NetJob);
+                Cancel = false;
+            }
+
+            if (Cancel)
+            {
+                MBApi.wkeNetCancelRequest(NetJob);
+                Finish?.Invoke(this, new EventArgs());
+            }
+            else
+            {
+                _status = Status.Post;
+            }
+
+            return Cancel;
+        }
+
+        internal bool OnNetData()
+        {
+            _status = Status.Net;
+            var cancel = false;
+
+            if (NetData != null)
+            {
+                var e = new NetDataEventArgs(this);
+                NetData?.Invoke(this, e);
+
+                if (e.Data != null)
+                {
+                    SetData(e.Data);
+                }
+
+                cancel = e.Cancel;
+            }
+
+            if (Response == null || Response.GetInvocationList().Length == 0)
+            {
+                Finish?.Invoke(this, new EventArgs());
+            }
+
+            return cancel;
+        }
+
+        internal void OnFail()
+        {
+            _status = Status.Net;
+
+            LoadFail?.Invoke(this, new EventArgs());
+
+            if (Response == null || Response.GetInvocationList().Length == 0)
+            {
+                Finish?.Invoke(this, new EventArgs());
+            }
+        }
+
+        internal void OnResponse(byte[] data)
+        {
+            _status = Status.Valid;
+
+            if (Response != null)
+            {
+                var e = new ResponseEventArgs(this, data);
+                Response?.Invoke(this, e);
+                if (e.IsSetData)
+                {
+                    SetData(e.Data);
+                }
+            }
+            
+            Finish?.Invoke(this, new EventArgs());
         }
     }
 }

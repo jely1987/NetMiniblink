@@ -20,12 +20,12 @@ namespace Demo
 
         private void FrmImage_Load(object sender, EventArgs e)
         {
-            LoadUri("https://gitee.com/aochulai/NetMiniblink/raw/master/README.md");
+            View.LoadUri("https://gitee.com/aochulai/NetMiniblink/raw/master/README.md");
         }
 
         private void btnImage_Click(object sender, EventArgs e)
         {
-            DrawToBitmap(arg =>
+            View.DrawToBitmap(arg =>
             {
                 arg.GetImage().Save(Guid.NewGuid() + ".png");
                 MessageBox.Show("截图已保存");
@@ -34,7 +34,7 @@ namespace Demo
 
         private void btnPrint_Click(object sender, EventArgs e)
         {
-            Print(dialog => { dialog.ShowDialog(); });
+            View.Print(dialog => { dialog.ShowDialog(); });
         }
     }
 }

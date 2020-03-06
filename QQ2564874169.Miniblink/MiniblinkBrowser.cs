@@ -550,79 +550,6 @@ namespace QQ2564874169.Miniblink
             });
         }
 
-        private wkeNetResponseCallback _wkeNetResponse;
-        private EventHandler<NetResponseEventArgs> _netResponse;
-
-        public event EventHandler<NetResponseEventArgs> NetResponse
-        {
-            add
-            {
-                if (_wkeNetResponse == null)
-                {
-                    MBApi.wkeNetOnResponse(MiniblinkHandle, _wkeNetResponse = new wkeNetResponseCallback(OnNetResponse),
-                        IntPtr.Zero);
-                }
-
-                _netResponse += value;
-            }
-            remove
-            {
-                _netResponse -= value;
-
-                if (_netResponse == null)
-                {
-                    MBApi.wkeNetOnResponse(MiniblinkHandle, null, IntPtr.Zero);
-                }
-            }
-        }
-
-        private ConcurrentDictionary<long, wkeRequestType> _jobToMethod =
-            new ConcurrentDictionary<long, wkeRequestType>();
-
-        protected virtual bool OnNetResponse(IntPtr mb, IntPtr param, string url, IntPtr job)
-        {
-            if (_netResponse == null)
-                return true;
-
-            wkeRequestType type;
-            _jobToMethod.TryGetValue(job.ToInt64(), out type);
-            var e = new NetResponseEventArgs(url, job)
-            {
-                RequestMethod = MBApi.wkeNetGetRequestMethod(job)
-            };
-
-            _netResponse(this, e);
-
-            if (e.Data != null)
-            {
-                NetSetData(e.Job, e.Data);
-                return true;
-            }
-
-            return e.Cancel;
-        }
-
-        private wkeLoadUrlBeginCallback _wkeLoadUrlBegin;
-        private wkeLoadUrlEndCallback _wkeLoadUrlEnd;
-        private EventHandler<LoadUrlBeginEventArgs> _loadUrlBegin;
-
-        public event EventHandler<LoadUrlBeginEventArgs> LoadUrlBegin
-        {
-            add
-            {
-                if (_wkeLoadUrlBegin == null)
-                {
-                    MBApi.wkeOnLoadUrlBegin(MiniblinkHandle,
-                        _wkeLoadUrlBegin = new wkeLoadUrlBeginCallback(OnLoadUrlBegin),
-                        IntPtr.Zero);
-                    MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, _wkeLoadUrlEnd = new wkeLoadUrlEndCallback(OnLoadUrlEnd),
-                        IntPtr.Zero);
-                }
-
-                _loadUrlBegin += value;
-            }
-            remove { _loadUrlBegin -= value; }
-        }
 
         private wkeDownloadCallback _wkeDownload;
         private EventHandler<DownloadEventArgs> _download;
@@ -672,124 +599,87 @@ namespace QQ2564874169.Miniblink
             return 0;
         }
 
-        private void JobCompleted(NetJob job)
+
+        private ConcurrentDictionary<long, RequestEventArgs> _requestMap =
+            new ConcurrentDictionary<long, RequestEventArgs>();
+
+        private wkeLoadUrlBeginCallback _wkeLoadUrlBegin;
+        private wkeNetResponseCallback _wkeNetResponse;
+        private wkeLoadUrlEndCallback _wkeLoadUrlEnd;
+        private wkeLoadUrlFailCallback _wkeLoadUrlFail;
+        private EventHandler<RequestEventArgs> _requestBefore;
+
+        public event EventHandler<RequestEventArgs> RequestBefore
         {
-            if (job.Data != null)
+            add
             {
-                SafeInvoke(s =>
+                if (_requestBefore == null)
                 {
-                    if (job.ResponseContentType != null)
-                    {
-                        MBApi.wkeNetSetMIMEType(job.Handle, job.ResponseContentType);
-                    }
+                    MBApi.wkeOnLoadUrlBegin(MiniblinkHandle,
+                        _wkeLoadUrlBegin = new wkeLoadUrlBeginCallback(OnLoadUrlBegin),
+                        IntPtr.Zero);
+                    MBApi.wkeNetOnResponse(MiniblinkHandle, _wkeNetResponse = new wkeNetResponseCallback(OnNetResponse),
+                        IntPtr.Zero);
+                    MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, _wkeLoadUrlEnd = new wkeLoadUrlEndCallback(OnLoadUrlEnd),
+                        IntPtr.Zero);
+                    MBApi.wkeOnLoadUrlFail(MiniblinkHandle, _wkeLoadUrlFail = new wkeLoadUrlFailCallback(OnLoadFail),
+                        IntPtr.Zero);
+                }
 
-                    NetSetData(job.Handle, job.Data);
-                    MBApi.wkeNetContinueJob(job.Handle);
-                });
+                _requestBefore += value;
             }
-            else
-            {
-                SafeInvoke(s =>
-                {
-                    if (job.Begin.HookRequest)
-                    {
-                        if (job.Begin.IsLocalFile)
-                        {
-                            OnLoadUrlEnd(job.WebView, job.Handle);
-                        }
-                        else
-                        {
-                            MBApi.wkeNetHookRequest(job.Handle);
-                        }
-                    }
-
-                    MBApi.wkeNetContinueJob(job.Handle);
-                });
-            }
+            remove { _requestBefore -= value; }
         }
 
         protected virtual bool OnLoadUrlBegin(IntPtr mb, IntPtr param, IntPtr url, IntPtr job)
         {
-            if (_loadUrlBegin == null)
-                return false;
-            var rawurl = url.ToUTF8String();
-            var e = new LoadUrlBeginEventArgs
+            var e = new RequestEventArgs(this, url.ToUTF8String(), job);
+            
+            if (_requestBefore != null)
             {
-                Url = rawurl,
-                //RequestMethod = MBApi.wkeNetGetRequestMethod(job)
-            };
-            e.Job = new NetJob(mb, e, job, JobCompleted);
-            _jobToMethod.AddOrUpdate(job.ToInt64(), e.RequestMethod, (i, m) => e.RequestMethod);
-            _loadUrlBegin(this, e);
-
-            if (e.Job.IsAsync)
-            {
-                return false;
-            }
-
-            if (e.Data != null)
-            {
-                if (!e.HookRequest || !OnLoadUrlEnd(mb, job, e.Data))
+                _requestBefore?.Invoke(this, e);
+                _requestMap.AddOrUpdate(job.ToInt64(), e, (k, v) => e);
+                e.State = job.ToInt64();
+                e.Finish += (fs, fe) =>
                 {
-                    NetSetData(job, e.Data);
-                }
-                MBApi.wkeNetCancelRequest(job);
-                return true;
+                    var req = (RequestEventArgs) fs;
+                    _requestMap.TryRemove((long) req.State, out req);
+                };
             }
+            return e.OnBegin();
+        }
 
-            if (e.HookRequest)
+        protected virtual bool OnNetResponse(IntPtr mb, IntPtr param, string url, IntPtr job)
+        {
+            RequestEventArgs req;
+            if (_requestMap.TryGetValue(job.ToInt64(), out req))
             {
-                if (e.IsLocalFile)
-                {
-                    OnLoadUrlEnd(mb, job, e.Data);
-                    MBApi.wkeNetCancelRequest(job);
-                    return true;
-                }
-
-                MBApi.wkeNetHookRequest(job);
-                return false;
+                return req.OnNetData();
             }
 
-            if (e.Cancel)
+            return false;
+        }
+
+        protected virtual void OnLoadFail(IntPtr mb, IntPtr param, IntPtr url, IntPtr job)
+        {
+            RequestEventArgs req;
+            if (_requestMap.TryGetValue(job.ToInt64(), out req))
             {
-                NetSetData(job);
+                req.OnFail();
             }
-
-            return e.Cancel;
         }
 
         private void OnLoadUrlEnd(IntPtr mb, IntPtr param, IntPtr url, IntPtr job, IntPtr buf, int length)
         {
-            var data = new byte[length];
-            if (buf != IntPtr.Zero)
-                Marshal.Copy(buf, data, 0, length);
-            OnLoadUrlEnd(mb, job, data);
-        }
-
-        protected virtual bool OnLoadUrlEnd(IntPtr mb, IntPtr job, byte[] data = null)
-        {
-            var begin = LoadUrlBeginEventArgs.GetByJob(job);
-            if (begin != null)
+            RequestEventArgs req;
+            if (_requestMap.TryGetValue(job.ToInt64(), out req))
             {
-                var end = begin.OnLoadUrlEnd(data);
-                if (end.Modify || begin.IsLocalFile)
+                var data = new byte[length];
+                if (buf != IntPtr.Zero)
                 {
-                    NetSetData(job, end.Data);
-                    return true;
+                    Marshal.Copy(buf, data, 0, length);
                 }
-            }
-            return false;
-        }
-
-        private static void NetSetData(IntPtr job, byte[] data = null)
-        {
-            if (data != null && data.Length > 0)
-            {
-                MBApi.wkeNetSetData(job, data, data.Length);
-            }
-            else
-            {
-                MBApi.wkeNetSetData(job, new byte[] { 0 }, 1);
+                req.OnResponse(data);
             }
         }
 
@@ -1018,9 +908,8 @@ namespace QQ2564874169.Miniblink
                 _browserPaintUpdated += BrowserPaintUpdated;
                 _paintBitUpdated = OnWkeOnPaintBitUpdated;
                 _createView = OnCreateView;
-                LoadUrlBegin += LoadResource;
-                LoadUrlBegin += LoadCache;
-                NavigateBefore += NavBefore;
+                RequestBefore += LoadResource;
+                RequestBefore += LoadCache;
                 DidCreateScriptContext += HookJs;
 
                 MBApi.wkeSetContextMenuEnabled(MiniblinkHandle, false);
@@ -1037,9 +926,9 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private void LoadCache(object sender, LoadUrlBeginEventArgs e)
+        private void LoadCache(object sender, RequestEventArgs e)
         {
-            if (ResourceCache == null || e.RequestMethod != wkeRequestType.Get)
+            if (ResourceCache == null || "get".SW(e.Method) == false)
                 return;
 
             var data = ResourceCache.Get(e.Url);
@@ -1053,11 +942,12 @@ namespace QQ2564874169.Miniblink
             var pass = _cache.Get(key);
             if (pass != null) return;
 
-            e.Response(p =>
+            e.Response += (rs, re) =>
             {
-                if (ResourceCache != null && ResourceCache.Matchs(p.Mime, p.Url) && p.Data.Length > 0)
+                if (ResourceCache.Matchs(re.ContentType, re.Url) &&
+                    re.Data != null && re.Data.Length > 0)
                 {
-                    ResourceCache.Save(p.Url, p.Data);
+                    ResourceCache.Save(re.Url, re.Data);
                 }
                 else
                 {
@@ -1066,15 +956,7 @@ namespace QQ2564874169.Miniblink
                         SlidingExpiration = TimeSpan.FromHours(1)
                     });
                 }
-            });
-        }
-
-        private void NavBefore(object sender, NavigateEventArgs e)
-        {
-            if (e.Type != NavigateType.BlankLink && e.Type != NavigateType.WindowOpen)
-            {
-                _jobToMethod.Clear();
-            }
+            };
         }
 
         private IntPtr OnCreateView(IntPtr mb, IntPtr param, wkeNavigationType type, IntPtr url, IntPtr windowFeatures)
@@ -1087,6 +969,11 @@ namespace QQ2564874169.Miniblink
                     Type = NavigateType.BlankLink
                 };
                 OnNavigateBefore(e);
+
+                if (e.Cancel == false)
+                {
+                    LoadUri(e.Url);
+                }
             }
             else
             {
@@ -1258,11 +1145,11 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private void LoadResource(object sender, LoadUrlBeginEventArgs e)
+        private void LoadResource(object sender, RequestEventArgs e)
         {
             if (ResourceLoader.Count < 1)
                 return;
-            if (e.RequestMethod != wkeRequestType.Get)
+            if ("get".SW(e.Method) == false)
                 return;
             var url = e.Url;
             if (url.SW("http:") == false && url.SW("https:") == false)
@@ -1274,7 +1161,6 @@ namespace QQ2564874169.Miniblink
             {
                 if (handler.Domain.Equals(uri.Host, StringComparison.OrdinalIgnoreCase) == false)
                     continue;
-                e.IsLocalFile = true;
                 var data = handler.ByUri(uri);
                 if (data != null)
                 {

@@ -12,8 +12,8 @@ namespace Demo
         public FrmWeb()
         {
             InitializeComponent();
-            ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
-            ConsoleMessage += FrmWeb_ConsoleMessage;
+            View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            View.ConsoleMessage += FrmWeb_ConsoleMessage;
         }
 
         private void FrmWeb_ConsoleMessage(object sender, ConsoleMessageEventArgs e)
@@ -23,7 +23,7 @@ namespace Demo
 
         private void FrmWeb_Load(object sender, EventArgs e)
         {
-            LoadUri("http://loc.res/web.html");
+            View.LoadUri("http://loc.res/web.html");
         }
 
         [NetFunc("webapi")]

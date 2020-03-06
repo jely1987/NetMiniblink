@@ -26,12 +26,12 @@ namespace QQ2564874169.Miniblink
                 {
                     if (value)
                     {
-                        _miniblink.LoadUrlBegin -= ClearCookie;
+                        _miniblink.RequestBefore -= ClearCookie;
                     }
                     else
                     {
                         _container = new CookieContainer();
-                        _miniblink.LoadUrlBegin += ClearCookie;
+                        _miniblink.RequestBefore += ClearCookie;
                         MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, 
                             wkeCookieCommand.FlushCookiesToFile);
                     }
@@ -57,7 +57,7 @@ namespace QQ2564874169.Miniblink
             Enable = true;
         }
 
-        private void ClearCookie(object sender, LoadUrlBeginEventArgs e)
+        private void ClearCookie(object sender, RequestEventArgs e)
         {
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ClearAllCookies);
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ClearSessionCookies);

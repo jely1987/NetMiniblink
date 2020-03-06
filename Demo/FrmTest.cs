@@ -19,23 +19,44 @@ namespace Demo
         public FrmTest()
         {
             InitializeComponent();
-            ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            LoadUrlBegin += FrmTest_LoadUrlBegin;
-            LoadUri("http://api.juheba.top:8888/shop/web/index.html#/main/home");
+            View.RequestBefore += View_RequestBefore;
+            View.LoadUri("https://www.baidu.com");
         }
 
-        private void FrmTest_NetResponse(object sender, NetResponseEventArgs e)
+        private void View_RequestBefore(object sender, RequestEventArgs e)
         {
-            Console.WriteLine("resp = " + e.RequestMethod);
+            e.Response += e_response;
         }
 
-        private void FrmTest_LoadUrlBegin(object sender, LoadUrlBeginEventArgs e)
+        private void e_response(object sender, ResponseEventArgs e)
         {
             Console.WriteLine(e.Url);
+            var head = e.GetHeaders();
+            foreach (var name in head.Keys)
+            {
+                Console.WriteLine($"\t{name} = {head[name]}");
+            }
+        }
+
+        private void url_net_data(object sender, NetDataEventArgs e)
+        {
+            Console.WriteLine(e.Url);
+            var head = e.GetHeaders();
+            foreach (var name in head.Keys)
+            {
+                Console.WriteLine($"\t{name} = {head[name]}");
+            }
+        }
+
+        private void url_load_fail(object sender, EventArgs e)
+        {
+            var req = (RequestEventArgs) sender;
+            Console.WriteLine($"{req.Method} = {req.Url}");
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -44,12 +65,12 @@ namespace Demo
 
         private void button2_Click(object sender, EventArgs e)
         {
-
+            View.ShowDevTools();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            Reload();
+            View.Reload();
         }
 
         [NetFunc]

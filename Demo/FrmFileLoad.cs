@@ -19,12 +19,12 @@ namespace Demo
         {
             InitializeComponent();
             var appDir = Application.StartupPath;
-            ResourceLoader.Add(new FileLoader(Path.Combine(appDir, "Webres"), "loc.res"));
+            View.ResourceLoader.Add(new FileLoader(Path.Combine(appDir, "Webres"), "loc.res"));
         }
 
         private void FrmFileLoad_Load(object sender, EventArgs e)
         {
-            LoadUri("http://loc.res/file_loader.html");
+            View.LoadUri("http://loc.res/file_loader.html");
         }
     }
 }

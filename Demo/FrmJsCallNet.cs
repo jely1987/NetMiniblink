@@ -17,12 +17,12 @@ namespace Demo
         public FrmJsCallNet()
         {
             InitializeComponent();
-            ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmJsCallNet_Load(object sender, EventArgs e)
         {
-            LoadUri("http://loc.res/js_call_net.html");
+            View.LoadUri("http://loc.res/js_call_net.html");
         }
 
         [NetFunc]
