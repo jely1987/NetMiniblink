@@ -50,6 +50,25 @@ namespace QQ2564874169.Miniblink
 
         #region 属性
 
+        public IList<ILoadResource> ResourceLoader { get; }
+        public CookieCollection Cookies { get; }
+        public bool MouseMoveOptimize { get; set; } = true;
+
+        private IResourceCache _resourceCache;
+        public IResourceCache ResourceCache
+        {
+            get { return _resourceCache; }
+            set
+            {
+                _resourceCache = value;
+
+                if (_resourceCache == null)
+                {
+                    _cache.Trim(100);
+                }
+            }
+        }
+
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IntPtr MiniblinkHandle { get; private set; }
@@ -330,6 +349,8 @@ namespace QQ2564874169.Miniblink
 
         #region 事件
 
+        public event EventHandler<PaintUpdatedEventArgs> PaintUpdated;
+
         private wkeDidCreateScriptContextCallback _wkeDidCreateScriptContextCallback;
         private EventHandler<DidCreateScriptContextEventArgs> _didCreateScriptContextCallback;
 
@@ -599,10 +620,6 @@ namespace QQ2564874169.Miniblink
             return 0;
         }
 
-
-        private ConcurrentDictionary<long, RequestEventArgs> _requestMap =
-            new ConcurrentDictionary<long, RequestEventArgs>();
-
         private wkeLoadUrlBeginCallback _wkeLoadUrlBegin;
         private wkeNetResponseCallback _wkeNetResponse;
         private wkeLoadUrlEndCallback _wkeLoadUrlEnd;
@@ -856,33 +873,16 @@ namespace QQ2564874169.Miniblink
 
         private static string _popHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private static string _openHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
+        private MemoryCache _cache = new MemoryCache(Guid.NewGuid().ToString());
         private EventHandler<PaintUpdatedEventArgs> _browserPaintUpdated;
         private wkePaintBitUpdatedCallback _paintBitUpdated;
         private wkeCreateViewCallback _createView;
         private Hashtable _ref = new Hashtable();
         private IList<NetFunc> _netFuncBindToSubFrame = new List<NetFunc>();
-        private MemoryCache _cache = new MemoryCache(Guid.NewGuid().ToString());
         private ConcurrentQueue<MouseEventArgs> _mouseMoveEvents = new ConcurrentQueue<MouseEventArgs>();
         private AutoResetEvent _mouseMoveAre = new AutoResetEvent(false);
-
-        public event EventHandler<PaintUpdatedEventArgs> PaintUpdated;
-        public IList<ILoadResource> ResourceLoader { get; }
-        private IResourceCache _resourceCache;
-        public IResourceCache ResourceCache
-        {
-            get { return _resourceCache; }
-            set
-            {
-                _resourceCache = value;
-
-                if (_resourceCache == null)
-                {
-                    _cache.Trim(100);
-                }
-            }
-        }
-        public CookieCollection Cookies { get; }
-        public bool MouseMoveOptimize { get; set; } = true;
+        private ConcurrentDictionary<long, RequestEventArgs> _requestMap =
+            new ConcurrentDictionary<long, RequestEventArgs>();
 
         public MiniblinkBrowser()
         {
@@ -1005,8 +1005,15 @@ namespace QQ2564874169.Miniblink
         protected override void OnHandleDestroyed(EventArgs e)
         {
             DestroyCallback();
+            PaintUpdated = null;
+            ResourceCache = null;
             ResourceLoader.Clear();
             _ref.Clear();
+            _requestMap.Clear();
+            _cache.Dispose();
+            _netFuncBindToSubFrame.Clear();
+            _mouseMoveEvents = null;
+            _mouseMoveAre.Dispose();
             base.OnHandleDestroyed(e);
         }
 
@@ -1149,13 +1156,12 @@ namespace QQ2564874169.Miniblink
         {
             if (ResourceLoader.Count < 1)
                 return;
-            if ("get".SW(e.Method) == false)
-                return;
-            var url = e.Url;
-            if (url.SW("http:") == false && url.SW("https:") == false)
+            //if ("get".SW(e.Method) == false)
+            //    return;
+            if (e.Url.SW("http:") == false && e.Url.SW("https:") == false)
                 return;
 
-            var uri = new Uri(url);
+            var uri = new Uri(e.Url);
 
             foreach (var handler in ResourceLoader.ToArray())
             {
@@ -1606,11 +1612,11 @@ namespace QQ2564874169.Miniblink
 
         private void FireMouseMove()
         {
-            while (true)
+            MouseEventArgs e;
+            while (_mouseMoveAre != null)
             {
                 _mouseMoveAre.WaitOne();
-                MouseEventArgs e;
-                while (_mouseMoveEvents.TryDequeue(out e))
+                while (_mouseMoveEvents != null && _mouseMoveEvents.TryDequeue(out e))
                 {
                     SafeInvoke(s =>
                     {
@@ -1619,7 +1625,7 @@ namespace QQ2564874169.Miniblink
                     }, e);
                 }
 
-                _mouseMoveAre.Reset();
+                _mouseMoveAre?.Reset();
             }
         }
 

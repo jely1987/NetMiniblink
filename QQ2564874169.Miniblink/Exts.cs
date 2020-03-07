@@ -215,7 +215,7 @@ namespace QQ2564874169.Miniblink
                 }
                 else
                 {
-                    slist = (wkeSlist) Marshal.PtrToStructure(slist.next, typeof(wkeSlist));
+                    slist = (wkeSlist)Marshal.PtrToStructure(slist.next, typeof(wkeSlist));
                 }
             }
 

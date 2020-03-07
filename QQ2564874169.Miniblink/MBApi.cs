@@ -1539,10 +1539,6 @@ namespace QQ2564874169.Miniblink
             return wkeNetGetPostBody_x86(job);
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeNetChangeRequestUrl", CallingConvention = CallingConvention.Cdecl,
-        //    CharSet = CharSet.Unicode)]
-        //public static extern void wkeNetChangeRequestUrl(IntPtr job, string url);
-
         [DllImport(DLL_x86, EntryPoint = "wkeNetContinueJob", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeNetContinueJob_x86(IntPtr job);
 
@@ -1625,16 +1621,6 @@ namespace QQ2564874169.Miniblink
             return wkeIsWebRemoteFrame_x86(webView, frameId) != 0;
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeWebFrameGetMainFrame", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern IntPtr wkeWebFrameGetMainFrame(IntPtr webView);
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeWebFrameGetMainWorldScriptContext",
-        //    CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkeWebFrameGetMainWorldScriptContext(IntPtr webFrame, ref IntPtr contextOut);
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeGetWindowHandle", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern IntPtr wkeGetWindowHandle(IntPtr WebView);
-
         [DllImport(DLL_x86, EntryPoint = "wkeJsBindFunction", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Ansi)]
         private static extern void wkeJsBindFunction_x86(string name, wkeJsNativeFunction fn, IntPtr param,
@@ -1657,14 +1643,6 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeJsBindGetter", CallingConvention = CallingConvention.Cdecl,
-        //    CharSet = CharSet.Ansi)]
-        //public static extern void wkeJsBindGetter(string name, wkeJsNativeFunction fn, IntPtr param);
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeJsBindSetter", CallingConvention = CallingConvention.Cdecl,
-        //    CharSet = CharSet.Ansi)]
-        //public static extern void wkeJsBindSetter(string name, wkeJsNativeFunction fn, IntPtr param);
-
         [DllImport(DLL_x86, EntryPoint = "jsArgCount", CallingConvention = CallingConvention.Cdecl)]
         private static extern int jsArgCount_x86(IntPtr es);
 
@@ -1680,20 +1658,6 @@ namespace QQ2564874169.Miniblink
 
             return jsArgCount_x86(es);
         }
-
-        //[DllImport(DLL_x86, EntryPoint = "jsArgCount", CallingConvention = CallingConvention.Cdecl)]
-        //private static extern jsType jsArgType_x86(IntPtr es, int argIdx);
-        //[DllImport(DLL_x64, EntryPoint = "jsArgCount", CallingConvention = CallingConvention.Cdecl)]
-        //private static extern jsType jsArgType_x64(IntPtr es, int argIdx);
-
-        //public static jsType jsArgType(IntPtr es, int argIdx)
-        //{
-        //    if (is64())
-        //    {
-        //        return jsArgType_x64(es, argIdx);
-        //    }
-        //    return jsArgType_x86(es, argIdx);
-        //}
 
         [DllImport(DLL_x86, EntryPoint = "jsArg", CallingConvention = CallingConvention.Cdecl)]
         private static extern long jsArg_x86(IntPtr es, int argIdx);
@@ -2042,9 +2006,6 @@ namespace QQ2564874169.Miniblink
             return is64() ? jsGetWebView_x64(es) : jsGetWebView_x86(es);
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "jsEvalW", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        //public static extern long jsEvalW(IntPtr es, string str);
-
         [DllImport(DLL_x86, EntryPoint = "jsEvalExW", CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Unicode)]
         private static extern long jsEvalExW_x86(IntPtr es, string str, [MarshalAs(UnmanagedType.I1)] bool isInClosure);
@@ -2287,6 +2248,42 @@ namespace QQ2564874169.Miniblink
             }
 
             return wkeNetGetRawResponseHead_x86(job);
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeEnableHighDPISupport", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeEnableHighDPISupport_x86();
+
+        [DllImport(DLL_x64, EntryPoint = "wkeEnableHighDPISupport", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeEnableHighDPISupport_x64();
+
+        public static void wkeEnableHighDPISupport()
+        {
+            if (is64())
+            {
+                wkeEnableHighDPISupport_x64();
+            }
+            else
+            {
+                wkeEnableHighDPISupport_x86();
+            }
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeSetProxy", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetProxy_x86(ref WKEProxy proxy);
+
+        [DllImport(DLL_x64, EntryPoint = "wkeSetProxy", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeSetProxy_x64(ref WKEProxy proxy);
+
+        public static void wkeSetProxy(WKEProxy proxy)
+        {
+            if (is64())
+            {
+                wkeSetProxy_x64(ref proxy);
+            }
+            else
+            {
+                wkeSetProxy_x86(ref proxy);
+            }
         }
     }
 }

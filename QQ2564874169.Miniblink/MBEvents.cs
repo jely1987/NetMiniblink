@@ -273,7 +273,7 @@ namespace QQ2564874169.Miniblink
 
         internal ResponseEventArgs(RequestEventArgs request, byte[] data)
         {
-            Data = data;
+            _data = data;
             _request = request;
         }
 
