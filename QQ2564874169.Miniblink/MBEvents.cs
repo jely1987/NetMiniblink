@@ -301,19 +301,6 @@ namespace QQ2564874169.Miniblink
         public bool Cancel { get; set; }
         public byte[] Data { get; set; }
 
-        public MBPostBody PostBody
-        {
-            get
-            {
-                if ("post".SW(Method) && _body == null)
-                {
-                    _body = new MBPostBody(NetJob);
-                }
-
-                return _body;
-            }
-        }
-
         /// <summary>
         /// 接收到网络数据时
         /// </summary>
@@ -322,7 +309,13 @@ namespace QQ2564874169.Miniblink
         /// 加载失败时
         /// </summary>
         public event EventHandler<EventArgs> LoadFail; 
+        /// <summary>
+        /// 请求内容最终呈现之前
+        /// </summary>
         public event EventHandler<ResponseEventArgs> Response;
+        /// <summary>
+        /// 请求结束
+        /// </summary>
         public event EventHandler<EventArgs> Finish; 
 
         internal IMiniblink Miniblink { get; }
@@ -404,6 +397,16 @@ namespace QQ2564874169.Miniblink
             }, new[] {this, state});
         }
 
+        public MBPostBody GetPostBody()
+        {
+            if ("post".SW(Method) && _body == null)
+            {
+                _body = new MBPostBody(NetJob);
+            }
+
+            return _body;
+        }
+
         public void SetHeader(string name, string value)
         {
             MBApi.wkeNetSetHTTPHeaderField(NetJob, name, value);
@@ -443,7 +446,15 @@ namespace QQ2564874169.Miniblink
             if (Cancel)
             {
                 MBApi.wkeNetCancelRequest(NetJob);
-                Finish?.Invoke(this, new EventArgs());
+
+                if (Data != null)
+                {
+                    OnResponse(Data);
+                }
+                else
+                {
+                    Finish?.Invoke(this, new EventArgs());
+                }
             }
             else
             {

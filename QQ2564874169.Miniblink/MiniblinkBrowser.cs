@@ -881,6 +881,7 @@ namespace QQ2564874169.Miniblink
         private IList<NetFunc> _netFuncBindToSubFrame = new List<NetFunc>();
         private ConcurrentQueue<MouseEventArgs> _mouseMoveEvents = new ConcurrentQueue<MouseEventArgs>();
         private AutoResetEvent _mouseMoveAre = new AutoResetEvent(false);
+        private bool _fiexdCursor;
         private ConcurrentDictionary<long, RequestEventArgs> _requestMap =
             new ConcurrentDictionary<long, RequestEventArgs>();
 
@@ -904,7 +905,6 @@ namespace QQ2564874169.Miniblink
                     throw new WKECreateException();
                 }
 
-                Task.Factory.StartNew(FireMouseMove);
                 _browserPaintUpdated += BrowserPaintUpdated;
                 _paintBitUpdated = OnWkeOnPaintBitUpdated;
                 _createView = OnCreateView;
@@ -923,6 +923,7 @@ namespace QQ2564874169.Miniblink
                 DeviceParameter = new DeviceParameter(this);
                 Cookies = new CookieCollection(this, "cookies.dat");
                 RegisterJsFunc();
+                Task.Factory.StartNew(FireMouseMove);
             }
         }
 
@@ -1561,6 +1562,11 @@ namespace QQ2564874169.Miniblink
             {
                 OnWkeMouseEvent(msg, e);
             }
+
+            if (MouseMoveOptimize)
+            {
+                _fiexdCursor = true;
+            }
             base.OnMouseDown(e);
         }
 
@@ -1584,6 +1590,9 @@ namespace QQ2564874169.Miniblink
             {
                 OnWkeMouseEvent(msg, e);
             }
+
+            _fiexdCursor = false;
+
             base.OnMouseUp(e);
         }
 
@@ -1612,10 +1621,11 @@ namespace QQ2564874169.Miniblink
 
         private void FireMouseMove()
         {
-            MouseEventArgs e;
             while (_mouseMoveAre != null)
             {
                 _mouseMoveAre.WaitOne();
+
+                MouseEventArgs e;
                 while (_mouseMoveEvents != null && _mouseMoveEvents.TryDequeue(out e))
                 {
                     SafeInvoke(s =>
@@ -1773,8 +1783,12 @@ namespace QQ2564874169.Miniblink
 
                 case WinConst.WM_SETCURSOR:
                 {
-                    SetWkeCursor();
-                    base.WndProc(ref m);
+                    if (_fiexdCursor == false)
+                    {
+                        SetWkeCursor();
+                        base.WndProc(ref m);
+                    }
+
                     break;
                 }
 
