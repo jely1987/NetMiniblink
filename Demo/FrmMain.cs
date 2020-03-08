@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
+using QQ2564874169.Miniblink;
 
 namespace Demo
 {
@@ -9,6 +10,7 @@ namespace Demo
         public FrmMain()
 		{
 			InitializeComponent();
+            MiniblinkSetting.EnableHighDPISupport();
         }
 
         private void button6_Click(object sender, EventArgs e)

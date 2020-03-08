@@ -326,22 +326,22 @@ namespace QQ2564874169.Miniblink
 
         internal RequestEventArgs(IMiniblink miniblink, string url, IntPtr job)
         {
-            //var type = MBApi.wkeNetGetRequestMethod(NetJob);
-            //switch (type)
-            //{
-            //    case wkeRequestType.Get:
-            //        Method = "GET";
-            //        break;
-            //    case wkeRequestType.Post:
-            //        Method = "POST";
-            //        break;
-            //    case wkeRequestType.Put:
-            //        Method = "PUT";
-            //        break;
-            //    default:
-            //        Method = "UNKNOW";
-            //        break;
-            //}
+            var type = MBApi.wkeNetGetRequestMethod(job);
+            switch (type)
+            {
+                case wkeRequestType.Get:
+                    Method = "GET";
+                    break;
+                case wkeRequestType.Post:
+                    Method = "POST";
+                    break;
+                case wkeRequestType.Put:
+                    Method = "PUT";
+                    break;
+                default:
+                    Method = "UNKNOW";
+                    break;
+            }
 
             Url = url;
             Miniblink = miniblink;

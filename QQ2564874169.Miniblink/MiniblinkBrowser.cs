@@ -893,11 +893,6 @@ namespace QQ2564874169.Miniblink
 
             if (!IsDesignMode() && !DesignMode)
             {
-                if (MBApi.wkeIsInitialize() == false)
-                {
-                    MBApi.wkeInitialize();
-                }
-
                 MiniblinkHandle = MBApi.wkeCreateWebView();
 
                 if (MiniblinkHandle == IntPtr.Zero)
@@ -1157,8 +1152,8 @@ namespace QQ2564874169.Miniblink
         {
             if (ResourceLoader.Count < 1)
                 return;
-            //if ("get".SW(e.Method) == false)
-            //    return;
+            if ("get".SW(e.Method) == false)
+                return;
             if (e.Url.SW("http:") == false && e.Url.SW("https:") == false)
                 return;
 

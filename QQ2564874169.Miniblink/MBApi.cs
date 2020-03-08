@@ -9,6 +9,11 @@ namespace QQ2564874169.Miniblink
         private const string DLL_x86 = "miniblink_x86.dll";
         private const string DLL_x64 = "miniblink_x64.dll";
 
+        static MBApi()
+        {
+            wkeInitialize();
+        }
+
         private static bool is64()
         {
             return IntPtr.Size == 8;
