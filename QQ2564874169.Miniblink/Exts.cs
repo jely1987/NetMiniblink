@@ -161,7 +161,7 @@ namespace QQ2564874169.Miniblink
                 Marshal.StructureToPtr(funcdata, funcptr, false);
                 return MBApi.jsFunction(es, funcptr);
             }
-
+            //todo 未实现
             if (obj is Delegate)
                 return MBApi.jsUndefined();
 
