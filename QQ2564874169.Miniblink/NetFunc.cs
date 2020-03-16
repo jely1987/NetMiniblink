@@ -19,9 +19,11 @@ namespace QQ2564874169.Miniblink
         private NetFuncDelegate _func { get; }
         private object _state { get; }
         internal wkeJsNativeFunction jsFunc;
+        internal string Id { get; }
 
         public NetFunc(string name, NetFuncDelegate func, object state = null)
         {
+            Id = Guid.NewGuid().ToString().Replace("-", "");
             Name = name;
             _func = func;
             _state = state;

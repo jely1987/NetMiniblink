@@ -1218,8 +1218,11 @@ namespace QQ2564874169.Miniblink
             MBApi.wkeJsBindFunction(func.Name, func.jsFunc, ptr, 0);
         }
 
-        private object OnCallNet(NetFuncContext context)
+        private static object OnCallNet(NetFuncContext context)
         {
+            if (context.Paramters.Length == 0)
+                return null;
+            var id = Convert.ToString(context.Paramters[0]);
 
             return null;
         }
@@ -1261,7 +1264,6 @@ namespace QQ2564874169.Miniblink
 
         private void V8Ready(object sender, DidCreateScriptContextEventArgs e)
         {
-            _v8IsReady = true;
             BindFuncToJs(e);
             HookJs(e);
         }
