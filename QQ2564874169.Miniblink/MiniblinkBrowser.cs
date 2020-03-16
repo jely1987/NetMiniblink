@@ -752,25 +752,9 @@ namespace QQ2564874169.Miniblink
 
         public void BindNetFunc(NetFunc func, bool bindToSubFrame = false)
         {
-            func.jsFunc = new wkeJsNativeFunction((es, state) =>
-            {
-                var handle = GCHandle.FromIntPtr(state);
-                var nfunc = (NetFunc)handle.Target;
-                var arglen = MBApi.jsArgCount(es);
-                var args = new List<object>();
-                for (var i = 0; i < arglen; i++)
-                {
-                    args.Add(MBApi.jsArg(es, i).ToValue(this, es));
-                }
+            
 
-                return nfunc.OnFunc(args.ToArray()).ToJsValue(this, es);
-            });
-            _ref[func.Name] = func;
-
-            var ptr = GCHandle.ToIntPtr(GCHandle.Alloc(func));
-
-            MBApi.wkeJsBindFunction(func.Name, func.jsFunc, ptr, 0);
-
+            _funcs.Add(func);
             if (bindToSubFrame)
             {
                 _netFuncBindToSubFrame.Add(func);
@@ -873,17 +857,21 @@ namespace QQ2564874169.Miniblink
 
         private static string _popHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private static string _openHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
+        private static string _callNet = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private MemoryCache _cache = new MemoryCache(Guid.NewGuid().ToString());
         private EventHandler<PaintUpdatedEventArgs> _browserPaintUpdated;
         private wkePaintBitUpdatedCallback _paintBitUpdated;
         private wkeCreateViewCallback _createView;
-        private Hashtable _ref = new Hashtable();
         private IList<NetFunc> _netFuncBindToSubFrame = new List<NetFunc>();
         private ConcurrentQueue<MouseEventArgs> _mouseMoveEvents = new ConcurrentQueue<MouseEventArgs>();
         private AutoResetEvent _mouseMoveAre = new AutoResetEvent(false);
         private bool _fiexdCursor;
         private ConcurrentDictionary<long, RequestEventArgs> _requestMap =
             new ConcurrentDictionary<long, RequestEventArgs>();
+        private List<NetFunc> _funcs = new List<NetFunc>();
+        private static Hashtable _ref = new Hashtable();
+        private static bool _funcInit;
+        private static Dictionary<long, MiniblinkBrowser> _instances = new Dictionary<long, MiniblinkBrowser>();
 
         public MiniblinkBrowser()
         {
@@ -900,12 +888,13 @@ namespace QQ2564874169.Miniblink
                     throw new WKECreateException();
                 }
 
+                _instances.Add(MiniblinkHandle.ToInt64(), this);
                 _browserPaintUpdated += BrowserPaintUpdated;
                 _paintBitUpdated = OnWkeOnPaintBitUpdated;
                 _createView = OnCreateView;
                 RequestBefore += LoadResource;
                 RequestBefore += LoadCache;
-                DidCreateScriptContext += HookJs;
+                DidCreateScriptContext += V8Ready;
 
                 MBApi.wkeSetContextMenuEnabled(MiniblinkHandle, false);
                 MBApi.wkeSetDragEnable(MiniblinkHandle, false);
@@ -917,8 +906,15 @@ namespace QQ2564874169.Miniblink
 
                 DeviceParameter = new DeviceParameter(this);
                 Cookies = new CookieCollection(this, "cookies.dat");
-                RegisterJsFunc();
                 Task.Factory.StartNew(FireMouseMove);
+
+                if (_funcInit == false)
+                {
+                    BindGlobalNetFunc(new NetFunc(_popHookName, OnHookPop));
+                    BindGlobalNetFunc(new NetFunc(_openHookName, OnHookWindowOpen));
+                    BindGlobalNetFunc(new NetFunc(_callNet, OnCallNet));
+                    _funcInit = true;
+                }
             }
         }
 
@@ -1004,12 +1000,12 @@ namespace QQ2564874169.Miniblink
             PaintUpdated = null;
             ResourceCache = null;
             ResourceLoader.Clear();
-            _ref.Clear();
             _requestMap.Clear();
             _cache.Dispose();
             _netFuncBindToSubFrame.Clear();
             _mouseMoveEvents = null;
             _mouseMoveAre.Dispose();
+            _instances.Remove(MiniblinkHandle.ToInt64());
             base.OnHandleDestroyed(e);
         }
 
@@ -1194,13 +1190,49 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private void RegisterJsFunc()
+        private static void BindGlobalNetFunc(NetFunc func)
         {
-            BindNetFunc(new NetFunc(_popHookName, OnHookPop));
-            BindNetFunc(new NetFunc(_openHookName, OnHookWindowOpen));
+            func.jsFunc = new wkeJsNativeFunction((es, state) =>
+            {
+                var mb = MBApi.jsGetWebView(es);
+                if (_instances.ContainsKey(mb.ToInt64()) == false)
+                {
+                    return 0;
+                }
+                var bro = _instances[mb.ToInt64()];
+                var handle = GCHandle.FromIntPtr(state);
+                var nfunc = (NetFunc)handle.Target;
+                var arglen = MBApi.jsArgCount(es);
+                var args = new List<object>();
+                for (var i = 0; i < arglen; i++)
+                {
+                    args.Add(MBApi.jsArg(es, i).ToValue(bro, es));
+                }
+
+                return nfunc.OnFunc(args.ToArray()).ToJsValue(bro, es);
+            });
+            _ref[func.Name] = func;
+
+            var ptr = GCHandle.ToIntPtr(GCHandle.Alloc(func));
+
+            MBApi.wkeJsBindFunction(func.Name, func.jsFunc, ptr, 0);
         }
 
-        private void HookJs(object sender, DidCreateScriptContextEventArgs e)
+        private object OnCallNet(NetFuncContext context)
+        {
+
+            return null;
+        }
+
+        private void BindFuncToJs(DidCreateScriptContextEventArgs e)
+        {
+            foreach (var func in _funcs)
+            {
+                
+            }
+        }
+
+        private void HookJs(DidCreateScriptContextEventArgs e)
         {
             var map = new Dictionary<string, string>
             {
@@ -1225,6 +1257,13 @@ namespace QQ2564874169.Miniblink
                     e.Frame.RunJs(js);
                 }
             }
+        }
+
+        private void V8Ready(object sender, DidCreateScriptContextEventArgs e)
+        {
+            _v8IsReady = true;
+            BindFuncToJs(e);
+            HookJs(e);
         }
 
         private AlertEventArgs OnAlert(string message, string title)
