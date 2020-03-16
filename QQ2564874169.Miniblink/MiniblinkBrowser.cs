@@ -752,9 +752,12 @@ namespace QQ2564874169.Miniblink
 
         public void BindNetFunc(NetFunc func, bool bindToSubFrame = false)
         {
-            
-
             _funcs.Add(func);
+
+            if (_v8IsReady)
+            {
+                BindFuncToJs(func);
+            }
             if (bindToSubFrame)
             {
                 _netFuncBindToSubFrame.Add(func);
@@ -869,6 +872,7 @@ namespace QQ2564874169.Miniblink
         private ConcurrentDictionary<long, RequestEventArgs> _requestMap =
             new ConcurrentDictionary<long, RequestEventArgs>();
         private List<NetFunc> _funcs = new List<NetFunc>();
+        private bool _v8IsReady;
         private static Hashtable _ref = new Hashtable();
         private static bool _funcInit;
         private static Dictionary<long, MiniblinkBrowser> _instances = new Dictionary<long, MiniblinkBrowser>();
@@ -1005,6 +1009,7 @@ namespace QQ2564874169.Miniblink
             _netFuncBindToSubFrame.Clear();
             _mouseMoveEvents = null;
             _mouseMoveAre.Dispose();
+            _funcs.Clear();
             _instances.Remove(MiniblinkHandle.ToInt64());
             base.OnHandleDestroyed(e);
         }
@@ -1209,7 +1214,7 @@ namespace QQ2564874169.Miniblink
                     args.Add(MBApi.jsArg(es, i).ToValue(bro, es));
                 }
 
-                return nfunc.OnFunc(args.ToArray()).ToJsValue(bro, es);
+                return nfunc.OnFunc(bro, args.ToArray()).ToJsValue(bro, es);
             });
             _ref[func.Name] = func;
 
@@ -1220,19 +1225,24 @@ namespace QQ2564874169.Miniblink
 
         private static object OnCallNet(NetFuncContext context)
         {
-            if (context.Paramters.Length == 0)
-                return null;
-            var id = Convert.ToString(context.Paramters[0]);
-
-            return null;
+            if (context.Paramters.Length == 0) return null;
+            var name = Convert.ToString(context.Paramters[0]);
+            if (string.IsNullOrEmpty(name)) return null;
+            var bro = (MiniblinkBrowser) context.Miniblink;
+            var func = bro._funcs.FirstOrDefault(i => i.Name == name);
+            var ps = context.Paramters.Skip(1).ToArray();
+            return func?.OnFunc(context.Miniblink, ps);
         }
 
-        private void BindFuncToJs(DidCreateScriptContextEventArgs e)
+        private void BindFuncToJs(NetFunc func)
         {
-            foreach (var func in _funcs)
-            {
-                
-            }
+            var script = $@"
+                window.{func.Name}=function(){{
+                    var arr = Array.prototype.slice.call(arguments);
+                    var args = ['{func.Name}'].concat(arr);
+                    return {_callNet}.apply(null,args);
+                }};";
+            RunJs(script);
         }
 
         private void HookJs(DidCreateScriptContextEventArgs e)
@@ -1264,7 +1274,16 @@ namespace QQ2564874169.Miniblink
 
         private void V8Ready(object sender, DidCreateScriptContextEventArgs e)
         {
-            BindFuncToJs(e);
+            _v8IsReady = true;
+
+            if (e.Frame.IsMain)
+            {
+                foreach (var func in _funcs)
+                {
+                    BindFuncToJs(func);
+                }
+            }
+
             HookJs(e);
         }
 
