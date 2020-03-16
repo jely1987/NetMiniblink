@@ -136,20 +136,34 @@ namespace QQ2564874169.Miniblink
                 return array;
             }
 
-            if (obj is TempNetFunc)
+            if (obj is Delegate)
             {
-                var func = (TempNetFunc) obj;
+                var func = (Delegate)obj;
                 var funcptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(jsData)));
                 var jsfunc = new jsCallAsFunctionCallback(
                     (fes, fobj, fargs, fcount) =>
                     {
-                        var fps = new List<object>();
-                        for (var i = 0; i < fcount; i++)
+                        if (func is TempNetFunc)
                         {
-                            fps.Add(MBApi.jsArg(fes, i).ToValue(miniblink, fes));
-                        }
+                            var fps = new List<object>();
+                            for (var i = 0; i < fcount; i++)
+                            {
+                                fps.Add(MBApi.jsArg(fes, i).ToValue(miniblink, fes));
+                            }
 
-                        return func(fps.ToArray()).ToJsValue(miniblink, fes);
+                            return ((TempNetFunc) func)(fps.ToArray()).ToJsValue(miniblink, fes);
+                        }
+                        else
+                        {
+                            var fps = new object[func.Method.GetParameters().Length];
+                            for (var i = 0; i < fcount && i < fps.Length; i++)
+                            {
+                                fps[i] = MBApi.jsArg(fes, i).ToValue(miniblink, fes);
+                            }
+
+                            var rs = func.Method.Invoke(func.Target, fps);
+                            return rs.ToJsValue(miniblink, fes);
+                        }
                     });
                 _keepref.Add(funcptr.ToInt64(), jsfunc);
                 var funcdata = new jsData
@@ -161,9 +175,6 @@ namespace QQ2564874169.Miniblink
                 Marshal.StructureToPtr(funcdata, funcptr, false);
                 return MBApi.jsFunction(es, funcptr);
             }
-            //todo 未实现
-            if (obj is Delegate)
-                return MBApi.jsUndefined();
 
             var jsobj = MBApi.jsEmptyObject(es);
             var ps = obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
