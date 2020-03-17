@@ -24,39 +24,19 @@ namespace Demo
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            View.RequestBefore += View_RequestBefore;
-            View.LoadUri("https://www.baidu.com");
+            View.ConsoleMessage += View_ConsoleMessage;
+            View.DidCreateScriptContext += View_DidCreateScriptContext;
+            View.LoadUri("http://loc.res/iframeMain.html");
         }
 
-        private void View_RequestBefore(object sender, RequestEventArgs e)
+        private void View_DidCreateScriptContext(object sender, DidCreateScriptContextEventArgs e)
         {
-            e.Response += e_response;
+
         }
 
-        private void e_response(object sender, ResponseEventArgs e)
+        private void View_ConsoleMessage(object sender, ConsoleMessageEventArgs e)
         {
-            Console.WriteLine(e.Url);
-            var head = e.GetHeaders();
-            foreach (var name in head.Keys)
-            {
-                Console.WriteLine($"\t{name} = {head[name]}");
-            }
-        }
-
-        private void url_net_data(object sender, NetDataEventArgs e)
-        {
-            Console.WriteLine(e.Url);
-            var head = e.GetHeaders();
-            foreach (var name in head.Keys)
-            {
-                Console.WriteLine($"\t{name} = {head[name]}");
-            }
-        }
-
-        private void url_load_fail(object sender, EventArgs e)
-        {
-            var req = (RequestEventArgs) sender;
-            Console.WriteLine($"{req.Method} = {req.Url}");
+            Console.WriteLine(e.Message);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -73,13 +53,13 @@ namespace Demo
             View.Reload();
         }
 
-        [NetFunc]
+        [NetFunc(BindToSubFrame = true)]
         private void cunzai()
         {
-            MessageBox.Show("66666");
+            Console.WriteLine("666");
         }
 
-        [NetFunc(BindToSubFrame = false)]
+        [NetFunc]
         private void bucunzai()
         {
 

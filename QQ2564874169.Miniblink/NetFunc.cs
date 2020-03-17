@@ -19,6 +19,7 @@ namespace QQ2564874169.Miniblink
         public string Name { get; }
 
         internal wkeJsNativeFunction jsFunc;
+        internal bool BindToSub;
 
         private NetFuncDelegate _func { get; }
         private object _state { get; }
@@ -51,7 +52,6 @@ namespace QQ2564874169.Miniblink
         public NetFuncAttribute(string functionName = null)
         {
             Name = functionName;
-            BindToSubFrame = true;
         }
     }
 }

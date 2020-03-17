@@ -71,5 +71,17 @@ namespace QQ2564874169.Miniblink
 
 	    [DllImport("dwmapi.dll")]
 	    public static extern int DwmIsCompositionEnabled(ref int pfEnabled);
-	}
+
+        [DllImport("user32.dll", EntryPoint = "SetCapture")]
+        public static extern int SetCapture(IntPtr hwnd);
+
+        [DllImport("user32.dll", EntryPoint = "ReleaseCapture")]
+        public static extern int ReleaseCapture();
+
+        [DllImport("user32.dll", EntryPoint = "SetFocus")]
+        public static extern IntPtr SetFocus(IntPtr hwnd);
+
+        [DllImport("user32.dll ", EntryPoint = "SendMessage")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+    }
 }

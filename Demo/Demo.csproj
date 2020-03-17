@@ -284,6 +284,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Res\css\test-css\test.css" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Res\iframeMain.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Res\iframeSub.html" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(ProjectDir)Webres" "$(TargetDir)Webres\" /s /y

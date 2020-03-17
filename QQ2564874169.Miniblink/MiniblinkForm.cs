@@ -88,15 +88,7 @@ namespace QQ2564874169.Miniblink
         public MiniblinkBrowser View { get; }
 
         private ResizeDirect _direct;
-        private bool _resizeing;
-        private Point _resizeStart;
-        private Point _resizePos;
-        private Size _resizeSize;
         private bool _isdrop;
-        private Point _dropPos;
-        private Point _dropLoc;
-        private bool _bakMouseEn;
-        private bool _bakTouchEn;
         private string _dragfunc;
         private string _maxfunc;
         private string _minfunc;
@@ -110,6 +102,7 @@ namespace QQ2564874169.Miniblink
         public MiniblinkForm(bool isTransparent)
         {
             Application.AddMessageFilter(this);
+            ShadowWidth = new FormShadowWidth();
             InitializeComponent();
             Controls.Add(View = new MiniblinkBrowser
             {
@@ -151,7 +144,7 @@ namespace QQ2564874169.Miniblink
             MBApi.wkeSetTransparent(View.MiniblinkHandle, true);
         }
 
-        private void SetTransparentStartPos(object sender, EventArgs e)
+        private void SetFormStartPos()
         {
             switch (StartPosition)
             {
@@ -169,50 +162,6 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private void DropEvent(bool isRemove)
-        {
-            if (isRemove)
-            {
-                View.MouseEnabled = _bakMouseEn;
-                View.TouchEnabled = _bakTouchEn;
-                View.MouseMove -= DropMove;
-                View.MouseUp -= DropUp;
-                View.MouseLeave -= DropLeave;
-            }
-            else
-            {
-                _bakMouseEn = View.MouseEnabled;
-                _bakTouchEn = View.TouchEnabled;
-                View.MouseEnabled = false;
-                View.TouchEnabled = false;
-                View.MouseMove += DropMove;
-                View.MouseUp += DropUp;
-                View.MouseLeave += DropLeave;
-            }
-        }
-
-        private void DropLeave(object sender, EventArgs e)
-        {
-            DropUp(sender, null);
-        }
-
-        private void DropUp(object sender, MouseEventArgs e)
-        {
-            _isdrop = false;
-            DropEvent(true);
-            Cursor = Cursors.Default;
-        }
-
-        private void DropMove(object sender, MouseEventArgs e)
-        {
-            var nx = MousePosition.X - _dropPos.X;
-            var ny = MousePosition.Y - _dropPos.Y;
-            nx = _dropLoc.X + nx;
-            ny = _dropLoc.Y + ny;
-            Location = new Point(nx, ny);
-            Cursor = Cursors.SizeAll;
-        }
-
         private object DropStart(NetFuncContext context)
         {
             if (DropByClass && _isdrop == false &&
@@ -220,10 +169,31 @@ namespace QQ2564874169.Miniblink
                 MouseButtons == MouseButtons.Left)
             {
                 _isdrop = true;
-                _dropPos = MousePosition;
-                _dropLoc = Location;
+                var dropPos = MousePosition;
+                var dropLoc = Location;
+                var me = View.MouseEnabled;
+                View.MouseEnabled = false;
+                WatchMouse(p =>
+                {
+                    var nx = p.X - dropPos.X;
+                    var ny = p.Y - dropPos.Y;
+                    nx = dropLoc.X + nx;
+                    ny = dropLoc.Y + ny;
+                    Invoke(new Action(() =>
+                    {
+                        Location = new Point(nx, ny);
+                        Cursor = Cursors.SizeAll;
+                    }));
+                }, () =>
+                {
+                    Invoke(new Action(() =>
+                    {
+                        ResetCursor();
+                        View.MouseEnabled = me;
+                    }));
+                    _isdrop = false;
+                });
                 Cursor = Cursors.SizeAll;
-                DropEvent(false);
             }
 
             return null;
@@ -231,9 +201,14 @@ namespace QQ2564874169.Miniblink
 
         private void MiniblinkForm_Load(object sender, EventArgs e)
         {
+            Shown += (ls, le) =>
+            {
+                SetFormStartPos();
+                DrawShadow();
+            };
+
             if (!IsDesignMode() && IsTransparent)
             {
-                Shown += SetTransparentStartPos;
                 SetTransparent();
                 using (var image = View.DrawToBitmap())
                 {
@@ -246,14 +221,18 @@ namespace QQ2564874169.Miniblink
         {
             base.WndProc(ref m);
 
-            if (IsTransparent && m.Msg == (int)WinConst.WM_SYSCOMMAND)
+            if (m.Msg == (int)WinConst.WM_SYSCOMMAND)
             {
                 //窗口还原消息
                 if (Utils.Dword(m.WParam).ToInt32() == 61728)
                 {
-                    using (var image = View.DrawToBitmap())
+                    WindowState = FormWindowState.Normal;
+                    if (IsTransparent)
                     {
-                        TransparentPaint(image, image.Width, image.Height);
+                        using (var image = View.DrawToBitmap())
+                        {
+                            TransparentPaint(image, image.Width, image.Height);
+                        }
                     }
                 }
             }
@@ -271,7 +250,7 @@ namespace QQ2564874169.Miniblink
                 return;
             }
 
-            if (ShadowWidth.Bottom + ShadowWidth.Left + ShadowWidth.Right + ShadowWidth.Top < 1)
+            if (ShadowWidth.Bottom + ShadowWidth.Left + ShadowWidth.Right + ShadowWidth.Top == 0)
             {
                 return;
             }
@@ -290,7 +269,7 @@ namespace QQ2564874169.Miniblink
 
         private void Miniblink_Paint(object sender, PaintUpdatedEventArgs e)
         {
-            if (!IsDisposed && !IsDesignMode() && IsTransparent)
+            if (!IsDisposed && !IsDesignMode())
             {
                 TransparentPaint(e.Image, e.Image.Width, e.Image.Height);
 
@@ -343,10 +322,6 @@ namespace QQ2564874169.Miniblink
                 {
                     cp.ClassStyle |= (int)WinConst.CS_DROPSHADOW;
                 }
-                else if (ShadowWidth == null)
-                {
-                    ShadowWidth = new FormShadowWidth();
-                }
 
                 return cp;
             }
@@ -363,78 +338,58 @@ namespace QQ2564874169.Miniblink
             return false;
         }
 
-        private void ResizeTask()
+        private void ResizeMsg()
         {
-            var last = _resizeStart;
-            var waiter = new SpinWait();
+            const int WMSZ_LEFT = 0xF001;
+            const int WMSZ_RIGHT = 0xF002;
+            const int WMSZ_TOP = 0xF003;
+            const int WMSZ_TOPLEFT = 0xF004;
+            const int WMSZ_TOPRIGHT = 0xF005;
+            const int WMSZ_BOTTOM = 0xF006;
+            const int WMSZ_BOTTOMLEFT = 0xF007;
+            const int WMSZ_BOTTOMRIGHT = 0xF008;
 
-            Task.Factory.StartNew(() =>
+            var param = 0;
+            switch (_direct)
             {
-                while (_resizeing)
-                {
-                    if (MouseButtons != MouseButtons.Left)
-                    {
-                        _resizeing = false;
-                        Invoke(new Action(() => { Cursor = DefaultCursor; }));
-                        break;
-                    }
+                case ResizeDirect.Top:
+                    Cursor = Cursors.SizeNS;
+                    param = WMSZ_TOP;
+                    break;
+                case ResizeDirect.Bottom:
+                    Cursor = Cursors.SizeNS;
+                    param = WMSZ_BOTTOM;
+                    break;
+                case ResizeDirect.Left:
+                    Cursor = Cursors.SizeWE;
+                    param = WMSZ_LEFT;
+                    break;
+                case ResizeDirect.Right:
+                    Cursor = Cursors.SizeWE;
+                    param = WMSZ_RIGHT;
+                    break;
+                case ResizeDirect.LeftTop:
+                    Cursor = Cursors.SizeNWSE;
+                    param = WMSZ_TOPLEFT;
+                    break;
+                case ResizeDirect.LeftBottom:
+                    Cursor = Cursors.SizeNESW;
+                    param = WMSZ_BOTTOMLEFT;
+                    break;
+                case ResizeDirect.RightTop:
+                    Cursor = Cursors.SizeNESW;
+                    param = WMSZ_TOPRIGHT;
+                    break;
+                case ResizeDirect.RightBottom:
+                    Cursor = Cursors.SizeNWSE;
+                    param = WMSZ_BOTTOMRIGHT;
+                    break;
+            }
 
-                    var curr = MousePosition;
-                    if (curr.X != last.X || curr.Y != last.Y)
-                    {
-                        var xx = curr.X - _resizeStart.X;
-                        var xy = curr.Y - _resizeStart.Y;
-                        int nx = Left, ny = Top, nw = Width, nh = Height;
-
-                        switch (_direct)
-                        {
-                            case ResizeDirect.Left:
-                                nw = _resizeSize.Width - xx;
-                                nx = _resizePos.X + xx;
-                                break;
-                            case ResizeDirect.Right:
-                                nw = _resizeSize.Width + xx;
-                                break;
-                            case ResizeDirect.Top:
-                                nh = _resizeSize.Height - xy;
-                                ny = _resizePos.Y + xy;
-                                break;
-                            case ResizeDirect.Bottom:
-                                nh = _resizeSize.Height + xy;
-                                break;
-                            case ResizeDirect.LeftTop:
-                                nw = _resizeSize.Width - xx;
-                                nx = _resizePos.X + xx;
-                                nh = _resizeSize.Height - xy;
-                                ny = _resizePos.Y + xy;
-                                break;
-                            case ResizeDirect.LeftBottom:
-                                nw = _resizeSize.Width - xx;
-                                nx = _resizePos.X + xx;
-                                nh = _resizeSize.Height + xy;
-                                break;
-                            case ResizeDirect.RightTop:
-                                nw = _resizeSize.Width + xx;
-                                nh = _resizeSize.Height - xy;
-                                ny = _resizePos.Y + xy;
-                                break;
-                            case ResizeDirect.RightBottom:
-                                nw = _resizeSize.Width + xx;
-                                nh = _resizeSize.Height + xy;
-                                break;
-                        }
-
-                        Invoke(new Action(() =>
-                        {
-                            Size = new Size(nw, nh);
-                            Location = new Point(nx, ny);
-                        }));
-                    }
-
-                    last = curr;
-                    waiter.SpinOnce();
-                }
-            });
+            if (param != 0)
+            {
+                WinApi.SendMessage(Handle, (uint)WinConst.WM_SYSCOMMAND, new IntPtr(0xF000 | param), IntPtr.Zero);
+            }
         }
 
         private ResizeDirect ShowResizeCursor(Point point)
@@ -529,7 +484,6 @@ namespace QQ2564874169.Miniblink
                     Cursor = Cursors.SizeNESW;
                     break;
             }
-
             return direct;
         }
 
@@ -602,7 +556,6 @@ namespace QQ2564874169.Miniblink
                 Application.RemoveMessageFilter(this);
                 return false;
             }
-
             var ctrl = FromChildHandle(m.HWnd);
 
             if (ctrl == null || ctrl.FindForm() != this)
@@ -613,40 +566,13 @@ namespace QQ2564874169.Miniblink
             //鼠标单击
             if (m.Msg == (int)WinConst.WM_LBUTTONDOWN && _direct != ResizeDirect.None)
             {
-                _resizeing = true;
-                _resizeStart = MousePosition;
-                _resizePos = Location;
-                _resizeSize = Size;
-                ResizeTask();
+                ResizeMsg();
                 return true;
             }
 
             //鼠标移动
             if (m.Msg == (int)WinConst.WM_MOUSEMOVE)
             {
-                if (_resizeing)
-                {
-                    switch (_direct)
-                    {
-                        case ResizeDirect.Bottom:
-                        case ResizeDirect.Top:
-                            Cursor = Cursors.SizeNS;
-                            break;
-                        case ResizeDirect.Left:
-                        case ResizeDirect.Right:
-                            Cursor = Cursors.SizeWE;
-                            break;
-                        case ResizeDirect.LeftTop:
-                        case ResizeDirect.RightBottom:
-                            Cursor = Cursors.SizeNWSE;
-                            break;
-                        case ResizeDirect.RightTop:
-                        case ResizeDirect.LeftBottom:
-                            Cursor = Cursors.SizeNESW;
-                            break;
-                    }
-                    return true;
-                }
                 if (NoneBorderResize && FormBorderStyle == FormBorderStyle.None &&
                     WindowState == FormWindowState.Normal)
                 {
@@ -656,6 +582,31 @@ namespace QQ2564874169.Miniblink
             }
 
             return false;
+        }
+
+        private static void WatchMouse(Action<Point> onMove, Action onFinish = null)
+        {
+            var last = MousePosition;
+
+            Task.Factory.StartNew(() =>
+            {
+                var waiter = new SpinWait();
+
+                while (MouseButtons.HasFlag(MouseButtons.Left))
+                {
+                    var curr = MousePosition;
+
+                    if (curr.Equals(last) == false)
+                    {
+                        onMove(curr);
+                        last = curr;
+                    }
+
+                    waiter.SpinOnce();
+                }
+
+                onFinish?.Invoke();
+            });
         }
     }
 }

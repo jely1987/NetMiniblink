@@ -25,6 +25,9 @@ namespace QQ2564874169.Miniblink
         static MiniblinkBrowser()
         {
             AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
+            MiniblinkSetting.BindNetFunc(new NetFunc(_popHookName, OnHookPop));
+            MiniblinkSetting.BindNetFunc(new NetFunc(_openHookName, OnHookWindowOpen));
+            MiniblinkSetting.BindNetFunc(new NetFunc(_callNet, OnCallNet));
         }
 
         private static Assembly AssemblyResolve(object sender, ResolveEventArgs args)
@@ -53,21 +56,7 @@ namespace QQ2564874169.Miniblink
         public IList<ILoadResource> ResourceLoader { get; }
         public CookieCollection Cookies { get; }
         public bool MouseMoveOptimize { get; set; } = true;
-
-        private IResourceCache _resourceCache;
-        public IResourceCache ResourceCache
-        {
-            get { return _resourceCache; }
-            set
-            {
-                _resourceCache = value;
-
-                if (_resourceCache == null)
-                {
-                    _cache.Trim(100);
-                }
-            }
-        }
+        public IResourceCache ResourceCache { get; set; }
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -651,7 +640,7 @@ namespace QQ2564874169.Miniblink
         protected virtual bool OnLoadUrlBegin(IntPtr mb, IntPtr param, IntPtr url, IntPtr job)
         {
             var e = new RequestEventArgs(this, url.ToUTF8String(), job);
-            
+
             if (_requestBefore != null)
             {
                 _requestBefore?.Invoke(this, e);
@@ -659,8 +648,8 @@ namespace QQ2564874169.Miniblink
                 e.State = job.ToInt64();
                 e.Finish += (fs, fe) =>
                 {
-                    var req = (RequestEventArgs) fs;
-                    _requestMap.TryRemove((long) req.State, out req);
+                    var req = (RequestEventArgs)fs;
+                    _requestMap.TryRemove((long)req.State, out req);
                 };
             }
             return e.OnBegin();
@@ -752,15 +741,16 @@ namespace QQ2564874169.Miniblink
 
         public void BindNetFunc(NetFunc func, bool bindToSubFrame = false)
         {
+            func.BindToSub = bindToSubFrame;
             _funcs.Add(func);
 
             if (_v8IsReady)
             {
-                BindFuncToJs(func);
-            }
-            if (bindToSubFrame)
-            {
-                _netFuncBindToSubFrame.Add(func);
+                foreach (var f in _iframes)
+                {
+                    f.RunJs(BindFuncJs(false));
+                }
+                RunJs(BindFuncJs(true));
             }
         }
 
@@ -861,21 +851,18 @@ namespace QQ2564874169.Miniblink
         private static string _popHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private static string _openHookName = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private static string _callNet = "func" + Guid.NewGuid().ToString().Replace("-", "");
-        private MemoryCache _cache = new MemoryCache(Guid.NewGuid().ToString());
         private EventHandler<PaintUpdatedEventArgs> _browserPaintUpdated;
         private wkePaintBitUpdatedCallback _paintBitUpdated;
         private wkeCreateViewCallback _createView;
-        private IList<NetFunc> _netFuncBindToSubFrame = new List<NetFunc>();
         private ConcurrentQueue<MouseEventArgs> _mouseMoveEvents = new ConcurrentQueue<MouseEventArgs>();
         private AutoResetEvent _mouseMoveAre = new AutoResetEvent(false);
         private bool _fiexdCursor;
+        private bool _lockPaint;
         private ConcurrentDictionary<long, RequestEventArgs> _requestMap =
             new ConcurrentDictionary<long, RequestEventArgs>();
         private List<NetFunc> _funcs = new List<NetFunc>();
         private bool _v8IsReady;
-        private static Hashtable _ref = new Hashtable();
-        private static bool _funcInit;
-        private static Dictionary<long, MiniblinkBrowser> _instances = new Dictionary<long, MiniblinkBrowser>();
+        private List<FrameContext> _iframes = new List<FrameContext>();
 
         public MiniblinkBrowser()
         {
@@ -885,14 +872,13 @@ namespace QQ2564874169.Miniblink
 
             if (!IsDesignMode() && !DesignMode)
             {
-                MiniblinkHandle = MBApi.wkeCreateWebView();
+                MiniblinkHandle = MiniblinkSetting.CreateWebView(this);
 
                 if (MiniblinkHandle == IntPtr.Zero)
                 {
                     throw new WKECreateException();
                 }
 
-                _instances.Add(MiniblinkHandle.ToInt64(), this);
                 _browserPaintUpdated += BrowserPaintUpdated;
                 _paintBitUpdated = OnWkeOnPaintBitUpdated;
                 _createView = OnCreateView;
@@ -911,48 +897,27 @@ namespace QQ2564874169.Miniblink
                 DeviceParameter = new DeviceParameter(this);
                 Cookies = new CookieCollection(this, "cookies.dat");
                 Task.Factory.StartNew(FireMouseMove);
-
-                if (_funcInit == false)
-                {
-                    BindGlobalNetFunc(new NetFunc(_popHookName, OnHookPop));
-                    BindGlobalNetFunc(new NetFunc(_openHookName, OnHookWindowOpen));
-                    BindGlobalNetFunc(new NetFunc(_callNet, OnCallNet));
-                    _funcInit = true;
-                }
             }
         }
 
         private void LoadCache(object sender, RequestEventArgs e)
         {
-            if (ResourceCache == null || "get".SW(e.Method) == false)
+            if (ResourceCache == null || "get".SW(e.Method) == false || ResourceCache.Matchs(e.Url) == false)
                 return;
 
             var data = ResourceCache.Get(e.Url);
+
             if (data != null)
             {
                 e.Data = data;
-                return;
             }
-
-            var key = e.Url.GetHashCode() + "_cache";
-            var pass = _cache.Get(key);
-            if (pass != null) return;
-
-            e.Response += (rs, re) =>
+            else
             {
-                if (ResourceCache.Matchs(re.ContentType, re.Url) &&
-                    re.Data != null && re.Data.Length > 0)
+                e.Response += (rs, re) =>
                 {
                     ResourceCache.Save(re.Url, re.Data);
-                }
-                else
-                {
-                    _cache.Add(new CacheItem(key, true), new CacheItemPolicy
-                    {
-                        SlidingExpiration = TimeSpan.FromHours(1)
-                    });
-                }
-            };
+                };
+            }
         }
 
         private IntPtr OnCreateView(IntPtr mb, IntPtr param, wkeNavigationType type, IntPtr url, IntPtr windowFeatures)
@@ -1005,12 +970,11 @@ namespace QQ2564874169.Miniblink
             ResourceCache = null;
             ResourceLoader.Clear();
             _requestMap.Clear();
-            _cache.Dispose();
-            _netFuncBindToSubFrame.Clear();
             _mouseMoveEvents = null;
             _mouseMoveAre.Dispose();
             _funcs.Clear();
-            _instances.Remove(MiniblinkHandle.ToInt64());
+            _iframes.Clear();
+            MiniblinkSetting.DestroyWebView(MiniblinkHandle);
             base.OnHandleDestroyed(e);
         }
 
@@ -1021,23 +985,29 @@ namespace QQ2564874169.Miniblink
 
         protected override void OnPaint(PaintEventArgs e)
         {
+            if (_lockPaint) return;
+
             if (!IsDesignMode() && !IsDisposed)
             {
+                _lockPaint = true;
                 using (var bitmap = DrawToBitmap())
                 {
                     var rect = new RectangleF(e.ClipRectangle.X, e.ClipRectangle.Y,
                         e.ClipRectangle.Width, e.ClipRectangle.Height);
                     e.Graphics.DrawImage(bitmap, rect, rect, GraphicsUnit.Pixel);
                 }
+
+                _lockPaint = false;
             }
         }
 
         private void OnWkeOnPaintBitUpdated(IntPtr webView, IntPtr param, IntPtr buf, IntPtr rectPtr,
             int width, int height)
         {
-            if (buf == IntPtr.Zero) return;
+            if (buf == IntPtr.Zero || _lockPaint) return;
+            _lockPaint = true;
             var stride = width * 4 + width * 4 % 4;
-            var rect = (wkeRect) Marshal.PtrToStructure(rectPtr, typeof(wkeRect));
+            var rect = (wkeRect)Marshal.PtrToStructure(rectPtr, typeof(wkeRect));
             using (var view = new Bitmap(width, height, stride, PixelFormat.Format32bppPArgb, buf))
             {
                 var e = new PaintUpdatedEventArgs
@@ -1056,6 +1026,8 @@ namespace QQ2564874169.Miniblink
                     _browserPaintUpdated(this, e);
                 }
             }
+
+            _lockPaint = false;
         }
 
         private void BrowserPaintUpdated(object sender, PaintUpdatedEventArgs e)
@@ -1195,54 +1167,39 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        private static void BindGlobalNetFunc(NetFunc func)
-        {
-            func.jsFunc = new wkeJsNativeFunction((es, state) =>
-            {
-                var mb = MBApi.jsGetWebView(es);
-                if (_instances.ContainsKey(mb.ToInt64()) == false)
-                {
-                    return 0;
-                }
-                var bro = _instances[mb.ToInt64()];
-                var handle = GCHandle.FromIntPtr(state);
-                var nfunc = (NetFunc)handle.Target;
-                var arglen = MBApi.jsArgCount(es);
-                var args = new List<object>();
-                for (var i = 0; i < arglen; i++)
-                {
-                    args.Add(MBApi.jsArg(es, i).ToValue(bro, es));
-                }
-
-                return nfunc.OnFunc(bro, args.ToArray()).ToJsValue(bro, es);
-            });
-            _ref[func.Name] = func;
-
-            var ptr = GCHandle.ToIntPtr(GCHandle.Alloc(func));
-
-            MBApi.wkeJsBindFunction(func.Name, func.jsFunc, ptr, 0);
-        }
-
         private static object OnCallNet(NetFuncContext context)
         {
             if (context.Paramters.Length == 0) return null;
             var name = Convert.ToString(context.Paramters[0]);
             if (string.IsNullOrEmpty(name)) return null;
-            var bro = (MiniblinkBrowser) context.Miniblink;
+            var bro = (MiniblinkBrowser)context.Miniblink;
             var func = bro._funcs.FirstOrDefault(i => i.Name == name);
             var ps = context.Paramters.Skip(1).ToArray();
             return func?.OnFunc(context.Miniblink, ps);
         }
 
-        private void BindFuncToJs(NetFunc func)
+        private string BindFuncJs(bool isMain)
         {
-            var script = $@"
+            var js = "";
+            foreach (var func in _funcs)
+            {
+                if (isMain == false && func.BindToSub == false)
+                    continue;
+
+                var call = _callNet;
+                if (isMain == false)
+                {
+                    call = $"window.top['{call}']";
+                }
+                js += $@"
                 window.{func.Name}=function(){{
                     var arr = Array.prototype.slice.call(arguments);
                     var args = ['{func.Name}'].concat(arr);
-                    return {_callNet}.apply(null,args);
+                    return {call}.apply(null,args);
                 }};";
-            RunJs(script);
+            }
+
+            return js;
         }
 
         private void HookJs(DidCreateScriptContextEventArgs e)
@@ -1252,10 +1209,6 @@ namespace QQ2564874169.Miniblink
                 {"popHookName", $"'{_popHookName}'"},
                 {"openHookName", $"'{_openHookName}'"}
             };
-            if (e.Frame.IsMain == false)
-            {
-                map.Add("netFuncList", "[" + string.Join(",", _netFuncBindToSubFrame.Select(i => "'" + i.Name + "'")) + "]");
-            }
             var vars = string.Join(";", map.Keys.Select(k => $"var {k}={map[k]};")) + ";";
             var js = string.Join(".", typeof(MiniblinkBrowser).Namespace, "Files", "browser.js");
 
@@ -1265,7 +1218,7 @@ namespace QQ2564874169.Miniblink
                 {
                     using (var reader = new StreamReader(sm, Encoding.UTF8))
                     {
-                        js = vars + reader.ReadToEnd();
+                        js = vars + reader.ReadToEnd()+ ";" + BindFuncJs(e.Frame.IsMain);
                     }
                     e.Frame.RunJs(js);
                 }
@@ -1276,12 +1229,9 @@ namespace QQ2564874169.Miniblink
         {
             _v8IsReady = true;
 
-            if (e.Frame.IsMain)
+            if (e.Frame.IsMain == false)
             {
-                foreach (var func in _funcs)
-                {
-                    BindFuncToJs(func);
-                }
+                _iframes.Add(e.Frame);
             }
 
             HookJs(e);
@@ -1343,18 +1293,20 @@ namespace QQ2564874169.Miniblink
             return args;
         }
 
-        private object OnHookPop(NetFuncContext context)
+        private static object OnHookPop(NetFuncContext context)
         {
             if (context.Paramters.Length < 1)
             {
                 return null;
             }
+
+            var bro = (MiniblinkBrowser)context.Miniblink;
             var type = context.Paramters[0].ToString().ToLower();
 
             if ("alert" == type)
             {
                 var msg = "";
-                var title = new Uri(Url).Host;
+                var title = new Uri(bro.Url).Host;
                 if (context.Paramters.Length > 1 && context.Paramters[1] != null)
                 {
                     msg = context.Paramters[1].ToString();
@@ -1369,14 +1321,14 @@ namespace QQ2564874169.Miniblink
                     }
                 }
 
-                OnAlert(msg, title);
+                bro.OnAlert(msg, title);
                 return null;
             }
 
             if ("confirm" == type)
             {
                 var msg = "";
-                var title = new Uri(Url).Host;
+                var title = new Uri(bro.Url).Host;
                 if (context.Paramters.Length > 1 && context.Paramters[1] != null)
                 {
                     msg = context.Paramters[1].ToString();
@@ -1391,7 +1343,7 @@ namespace QQ2564874169.Miniblink
                     }
                 }
 
-                var e = OnConfirm(msg, title);
+                var e = bro.OnConfirm(msg, title);
                 return e.Result.GetValueOrDefault();
             }
 
@@ -1399,7 +1351,7 @@ namespace QQ2564874169.Miniblink
             {
                 var msg = "";
                 var input = "";
-                var title = new Uri(Url).Host;
+                var title = new Uri(bro.Url).Host;
                 if (context.Paramters.Length > 1 && context.Paramters[1] != null)
                 {
                     msg = context.Paramters[1].ToString();
@@ -1419,14 +1371,14 @@ namespace QQ2564874169.Miniblink
                     }
                 }
 
-                var e = OnPrompt(msg, input, title);
+                var e = bro.OnPrompt(msg, input, title);
                 return e.Result;
             }
 
             return null;
         }
 
-        private object OnHookWindowOpen(NetFuncContext context)
+        private static object OnHookWindowOpen(NetFuncContext context)
         {
             string url = null;
             string name = null;
@@ -1471,17 +1423,18 @@ namespace QQ2564874169.Miniblink
                 }
             }
 
+            var bro = (MiniblinkBrowser)context.Miniblink;
             var navArgs = new NavigateEventArgs
             {
                 Url = url,
                 Type = NavigateType.WindowOpen
             };
-            OnNavigateBefore(navArgs);
+            bro.OnNavigateBefore(navArgs);
             if (navArgs.Cancel)
             {
                 return null;
             }
-            var e = OnWindowOpen(url, name, map, "true" == replace);
+            var e = bro.OnWindowOpen(url, name, map, "true" == replace);
             return e.ReturnValue;
         }
 
@@ -1506,7 +1459,7 @@ namespace QQ2564874169.Miniblink
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 e.Effect = DragDropEffects.All;
-                var items = (Array) e.Data.GetData(DataFormats.FileDrop);
+                var items = (Array)e.Data.GetData(DataFormats.FileDrop);
                 var files = items.Cast<string>().ToArray();
                 var p = PointToClient(new Point(e.X, e.Y));
                 OnDropFiles(false, p.X, p.Y, files);
@@ -1515,7 +1468,7 @@ namespace QQ2564874169.Miniblink
 
         private void DragFileDrop(object sender, DragEventArgs e)
         {
-            var items = (Array) e.Data.GetData(DataFormats.FileDrop);
+            var items = (Array)e.Data.GetData(DataFormats.FileDrop);
             var files = items.Cast<string>().ToArray();
             var p = PointToClient(new Point(e.X, e.Y));
             OnDropFiles(true, p.X, p.Y, files);
@@ -1685,8 +1638,8 @@ namespace QQ2564874169.Miniblink
                 {
                     SafeInvoke(s =>
                     {
-                        OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, (MouseEventArgs) s);
-                        base.OnMouseMove((MouseEventArgs) s);
+                        OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, (MouseEventArgs)s);
+                        base.OnMouseMove((MouseEventArgs)s);
                     }, e);
                 }
 
@@ -1758,7 +1711,6 @@ namespace QQ2564874169.Miniblink
                     if (Cursor != Cursors.Hand)
                     {
                         Cursor = Cursors.Hand;
-
                     }
 
                     break;
@@ -1816,42 +1768,42 @@ namespace QQ2564874169.Miniblink
 
         protected override void WndProc(ref Message m)
         {
-            switch ((WinConst) m.Msg)
+            switch ((WinConst)m.Msg)
             {
                 case WinConst.WM_INPUTLANGCHANGE:
-                {
-                    DefWndProc(ref m);
-                    break;
-                }
-
-                case WinConst.WM_IME_STARTCOMPOSITION:
-                {
-                    SetImeStartPos();
-                    break;
-                }
-
-                case WinConst.WM_SETFOCUS:
-                {
-                    MBApi.wkeSetFocus(MiniblinkHandle);
-                    break;
-                }
-
-                case WinConst.WM_SETCURSOR:
-                {
-                    if (_fiexdCursor == false)
                     {
-                        SetWkeCursor();
-                        base.WndProc(ref m);
+                        DefWndProc(ref m);
+                        break;
                     }
 
-                    break;
-                }
+                case WinConst.WM_IME_STARTCOMPOSITION:
+                    {
+                        SetImeStartPos();
+                        break;
+                    }
+
+                case WinConst.WM_SETFOCUS:
+                    {
+                        MBApi.wkeSetFocus(MiniblinkHandle);
+                        break;
+                    }
+
+                case WinConst.WM_SETCURSOR:
+                    {
+                        if (_fiexdCursor == false)
+                        {
+                            SetWkeCursor();
+                            base.WndProc(ref m);
+                        }
+
+                        break;
+                    }
 
                 default:
-                {
-                    base.WndProc(ref m);
-                    break;
-                }
+                    {
+                        base.WndProc(ref m);
+                        break;
+                    }
             }
         }
 

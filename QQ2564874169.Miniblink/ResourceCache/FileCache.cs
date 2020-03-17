@@ -7,51 +7,28 @@ namespace QQ2564874169.Miniblink.ResourceCache
     public class FileCache : IResourceCache
     {
         public List<string> UrlRegex { get; }
-        public List<string> MimeRegex { get; }
         public int SlidingMinute { get; set; }
 
         public FileCache()
         {
             SlidingMinute = 30;
             UrlRegex = new List<string>();
-            MimeRegex = new List<string>
-            {
-                "image/*",
-                "application/javascript",
-                "text/css"
-            };;
         }
 
-        public bool Matchs(string mime, string url)
+        public bool Matchs(string url)
         {
-            var success = false;
-
-            if (MimeRegex.Count > 0)
+            if (UrlRegex.Count > 0)
             {
-                foreach (var item in MimeRegex)
-                {
-                    if (Regex.IsMatch(mime, item, RegexOptions.IgnoreCase))
-                    {
-                        success = true;
-                        break;
-                    }
-                }
-            }
-
-            if (UrlRegex.Count > 0 && success)
-            {
-                success = false;
                 foreach (var item in UrlRegex)
                 {
                     if (Regex.IsMatch(url, item, RegexOptions.IgnoreCase))
                     {
-                        success = true;
-                        break;
+                        return true;
                     }
                 }
             }
 
-            return success;
+            return false;
         }
 
         public byte[] Get(string url)

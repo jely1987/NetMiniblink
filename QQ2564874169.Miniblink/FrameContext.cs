@@ -8,9 +8,9 @@ namespace QQ2564874169.Miniblink
         public bool IsMain { get; }
         public string Url { get; }
         public bool IsRemote { get; }
-        private MiniblinkBrowser _mb;
+        private IMiniblink _mb;
 
-        internal FrameContext(MiniblinkBrowser miniblink, IntPtr frameId)
+        internal FrameContext(IMiniblink miniblink, IntPtr frameId)
         {
             _mb = miniblink;
             Id = frameId;

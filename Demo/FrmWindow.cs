@@ -17,11 +17,14 @@ namespace Demo
         public FrmWindow()
         {
             InitializeComponent();
+            FormBorderStyle = FormBorderStyle.None;
             View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmFormMode_Load(object sender, EventArgs e)
         {
+            ShadowWidth.SetAll(10);
+            NoneBorderResize = true;
             DropByClass = true;
             View.LoadUri("http://loc.res/window.html");
         }
