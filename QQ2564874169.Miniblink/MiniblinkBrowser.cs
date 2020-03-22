@@ -975,6 +975,7 @@ namespace QQ2564874169.Miniblink
             _funcs.Clear();
             _iframes.Clear();
             MiniblinkSetting.DestroyWebView(MiniblinkHandle);
+            MBApi.wkeDestroyWebView(MiniblinkHandle);
             base.OnHandleDestroyed(e);
         }
 
