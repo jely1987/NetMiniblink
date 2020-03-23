@@ -1744,6 +1744,13 @@ namespace QQ2564874169.Miniblink
                     }
 
                     break;
+                case wkeCursorInfo.Cross:
+                    if (Cursor != Cursors.Cross)
+                    {
+                        Cursor = Cursors.Cross;
+                    }
+
+                    break;
                 default:
                     Console.WriteLine("未实现的指针类型：" + type);
                     break;
