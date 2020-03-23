@@ -53,12 +53,23 @@ namespace QQ2564874169.Miniblink
             }
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeConfigure", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkeConfigure(WKESettings settings);
+        [DllImport(DLL_x86, EntryPoint = "wkeDestroyWebView", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeDestroyWebView_x86(IntPtr webView);
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeSetDebugConfig", CallingConvention = CallingConvention.Cdecl,
-        //    CharSet = CharSet.Unicode)]
-        //public static extern void wkeSetDebugConfig(IntPtr webView, string debugString, string param);
+        [DllImport(DLL_x64, EntryPoint = "wkeDestroyWebView", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void wkeDestroyWebView_x64(IntPtr webView);
+
+        public static void wkeDestroyWebView(IntPtr webView)
+        {
+            if (is64())
+            {
+                wkeDestroyWebView_x64(webView);
+            }
+            else
+            {
+                wkeDestroyWebView_x86(webView);
+            }
+        }
 
         [DllImport(DLL_x86, EntryPoint = "wkeSetTouchEnabled", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeSetTouchEnabled_x86(IntPtr webView, [MarshalAs(UnmanagedType.I1)] bool enable);
