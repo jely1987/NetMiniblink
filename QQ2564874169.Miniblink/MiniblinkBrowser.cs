@@ -972,6 +972,7 @@ namespace QQ2564874169.Miniblink
             _requestMap.Clear();
             _mouseMoveEvents = null;
             _mouseMoveAre.Dispose();
+            _mouseMoveAre = null;
             _funcs.Clear();
             _iframes.Clear();
             MiniblinkSetting.DestroyWebView(MiniblinkHandle);
