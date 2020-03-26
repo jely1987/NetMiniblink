@@ -639,6 +639,9 @@ namespace QQ2564874169.Miniblink
 
         protected virtual bool OnLoadUrlBegin(IntPtr mb, IntPtr param, IntPtr url, IntPtr job)
         {
+            if (_wkeLoadUrlBegin == null)
+                return false;
+
             var e = new RequestEventArgs(this, url.ToUTF8String(), job);
 
             if (_requestBefore != null)
@@ -657,6 +660,9 @@ namespace QQ2564874169.Miniblink
 
         protected virtual bool OnNetResponse(IntPtr mb, IntPtr param, string url, IntPtr job)
         {
+            if (_wkeNetResponse == null)
+                return false;
+
             RequestEventArgs req;
             if (_requestMap.TryGetValue(job.ToInt64(), out req))
             {
@@ -668,6 +674,9 @@ namespace QQ2564874169.Miniblink
 
         protected virtual void OnLoadFail(IntPtr mb, IntPtr param, IntPtr url, IntPtr job)
         {
+            if (_wkeLoadUrlFail == null)
+                return;
+
             RequestEventArgs req;
             if (_requestMap.TryGetValue(job.ToInt64(), out req))
             {
@@ -677,6 +686,9 @@ namespace QQ2564874169.Miniblink
 
         private void OnLoadUrlEnd(IntPtr mb, IntPtr param, IntPtr url, IntPtr job, IntPtr buf, int length)
         {
+            if (_wkeLoadUrlEnd == null)
+                return;
+
             RequestEventArgs req;
             if (_requestMap.TryGetValue(job.ToInt64(), out req))
             {
@@ -922,6 +934,10 @@ namespace QQ2564874169.Miniblink
 
         private IntPtr OnCreateView(IntPtr mb, IntPtr param, wkeNavigationType type, IntPtr url, IntPtr windowFeatures)
         {
+            if (_createView == null)
+            {
+                return IntPtr.Zero;
+            }
             if (type == wkeNavigationType.LinkClick)
             {
                 var e = new NavigateEventArgs
@@ -941,13 +957,19 @@ namespace QQ2564874169.Miniblink
                 OnNavigateBefore(mb, param, type, url);
             }
 
-            return new IntPtr(1);
+            return IntPtr.Zero;
         }
 
         private void DestroyCallback()
         {
             if (!IsDesignMode())
             {
+                _paintBitUpdated = null;
+                _createView = null;
+                _wkeLoadUrlBegin = null;
+                _wkeLoadUrlEnd = null;
+                _wkeLoadUrlFail = null;
+                _wkeNetResponse = null;
                 MBApi.wkeOnPaintBitUpdated(MiniblinkHandle, null, IntPtr.Zero);
                 MBApi.wkeOnPaintUpdated(MiniblinkHandle, null, IntPtr.Zero);
                 MBApi.wkeOnURLChanged2(MiniblinkHandle, null, IntPtr.Zero);
@@ -966,7 +988,6 @@ namespace QQ2564874169.Miniblink
         protected override void OnHandleDestroyed(EventArgs e)
         {
             DestroyCallback();
-            PaintUpdated = null;
             ResourceCache = null;
             ResourceLoader.Clear();
             _requestMap.Clear();
@@ -1006,7 +1027,7 @@ namespace QQ2564874169.Miniblink
         private void OnWkeOnPaintBitUpdated(IntPtr webView, IntPtr param, IntPtr buf, IntPtr rectPtr,
             int width, int height)
         {
-            if (buf == IntPtr.Zero || _lockPaint) return;
+            if (buf == IntPtr.Zero || _lockPaint || _paintBitUpdated == null) return;
             _lockPaint = true;
             var stride = width * 4 + width * 4 % 4;
             var rect = (wkeRect)Marshal.PtrToStructure(rectPtr, typeof(wkeRect));

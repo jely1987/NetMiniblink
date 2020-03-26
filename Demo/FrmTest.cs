@@ -26,7 +26,7 @@ namespace Demo
         {
             View.ConsoleMessage += View_ConsoleMessage;
             View.DidCreateScriptContext += View_DidCreateScriptContext;
-            View.LoadUri("http://loc.res/iframeMain.html");
+            View.LoadUri("https://www.taobao.com");
         }
 
         private void View_DidCreateScriptContext(object sender, DidCreateScriptContextEventArgs e)
@@ -53,16 +53,15 @@ namespace Demo
             View.Reload();
         }
 
-        [NetFunc(BindToSubFrame = true)]
-        private void cunzai()
-        {
-            Console.WriteLine("666");
-        }
-
         [NetFunc]
-        private void bucunzai()
+        private void showForm()
         {
-
+            var form = new MiniblinkForm();
+            form.Load += (s, e) =>
+            {
+                //form.View.LoadUri("https://www.baidu.com");
+            };
+            form.ShowDialog();
         }
     }
 }
