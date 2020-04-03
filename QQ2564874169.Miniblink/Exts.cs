@@ -99,7 +99,7 @@ namespace QQ2564874169.Miniblink
                         map.Add(k, MBApi.jsGet(es, value, k).ToValue(miniblink, es));
                     }
 
-                    return exp;
+                    return map;
                 default:
                     throw new NotSupportedException();
             }
