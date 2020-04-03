@@ -80,6 +80,15 @@
     <Compile Include="IMiniblink.cs" />
     <Compile Include="IResourceCache.cs" />
     <Compile Include="JsFunc.cs" />
+    <Compile Include="MiniblinkBrowserEvents.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MiniblinkBrowserMethod.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MiniblinkBrowserProperty.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="MiniblinkSetting.cs" />
     <Compile Include="ResourceLoader\EmbedLoader.cs" />
     <Compile Include="ResourceLoader\FileLoader.cs" />
