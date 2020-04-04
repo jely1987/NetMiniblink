@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
 {
-    public partial class MiniblinkForm : Form, IMessageFilter
+    public partial class MiniblinkForm : Form
     {
         /// <summary>
         /// 是否透明模式
@@ -101,7 +101,6 @@ namespace QQ2564874169.Miniblink
 
         public MiniblinkForm(bool isTransparent)
         {
-            Application.AddMessageFilter(this);
             ShadowWidth = new FormShadowWidth();
             InitializeComponent();
             Controls.Add(View = new MiniblinkBrowser
@@ -131,6 +130,28 @@ namespace QQ2564874169.Miniblink
 
                 View.DocumentReady += RegisterJsEvent;
                 View.RegisterNetFunc(this);
+                View.MouseMove += ViewMouseMove;
+                View.MouseDown += ViewMouseDown;
+            }
+        }
+
+        private void ViewMouseDown(object sender, MouseEventArgs e)
+        {
+            if (_direct != ResizeDirect.None)
+            {
+                View.Enabled = false;
+                ResizeMsg();
+                View.Enabled = true;
+            }
+        }
+
+        private void ViewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (NoneBorderResize && 
+                FormBorderStyle == FormBorderStyle.None &&
+                WindowState == FormWindowState.Normal)
+            {
+                _direct = ShowResizeCursor(PointToClient(MousePosition));
             }
         }
 
@@ -547,41 +568,6 @@ namespace QQ2564874169.Miniblink
             LeftBottom,
             RightTop,
             RightBottom
-        }
-
-        public bool PreFilterMessage(ref Message m)
-        {
-            if (IsDisposed)
-            {
-                Application.RemoveMessageFilter(this);
-                return false;
-            }
-            var ctrl = FromChildHandle(m.HWnd);
-
-            if (ctrl == null || ctrl.FindForm() != this)
-            {
-                return false;
-            }
-
-            //鼠标单击
-            if (m.Msg == (int)WinConst.WM_LBUTTONDOWN && _direct != ResizeDirect.None)
-            {
-                ResizeMsg();
-                return true;
-            }
-
-            //鼠标移动
-            if (m.Msg == (int)WinConst.WM_MOUSEMOVE)
-            {
-                if (NoneBorderResize && FormBorderStyle == FormBorderStyle.None &&
-                    WindowState == FormWindowState.Normal)
-                {
-                    _direct = ShowResizeCursor(PointToClient(MousePosition));
-                    return _direct != ResizeDirect.None;
-                }
-            }
-
-            return false;
         }
 
         private static void WatchMouse(Action<Point> onMove, Action onFinish = null)
