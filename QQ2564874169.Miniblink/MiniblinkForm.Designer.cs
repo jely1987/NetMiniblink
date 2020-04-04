@@ -40,7 +40,7 @@ namespace QQ2564874169.Miniblink
             this.KeyPreview = true;
             this.Name = "MiniblinkForm";
             this.Text = "MiniblinkForm";
-            this.Load += new System.EventHandler(this.MiniblinkForm_Load);
+            this.Load += new System.EventHandler(this.FormLoad);
             this.ResumeLayout(false);
 
 		}
