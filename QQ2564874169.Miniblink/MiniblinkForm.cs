@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
 {
-    public partial class MiniblinkForm : Form, IMessageFilter
+    public partial class MiniblinkForm : Form
     {
         /// <summary>
         /// 是否透明模式
@@ -101,7 +101,6 @@ namespace QQ2564874169.Miniblink
 
         public MiniblinkForm(bool isTransparent)
         {
-            Application.AddMessageFilter(this);
             ShadowWidth = new FormShadowWidth();
             InitializeComponent();
             Controls.Add(View = new MiniblinkBrowser
@@ -119,7 +118,7 @@ namespace QQ2564874169.Miniblink
                 {
                     NoneBorderResize = true;
                     FormBorderStyle = FormBorderStyle.None;
-                    View.PaintUpdated += Miniblink_Paint;
+                    View.PaintUpdated += FormPaint;
                 }
 
                 DropByClass = FormBorderStyle == FormBorderStyle.None;
@@ -131,6 +130,28 @@ namespace QQ2564874169.Miniblink
 
                 View.DocumentReady += RegisterJsEvent;
                 View.RegisterNetFunc(this);
+                View.MouseMove += ViewMouseMove;
+                View.MouseDown += ViewMouseDown;
+            }
+        }
+
+        private void ViewMouseDown(object sender, MouseEventArgs e)
+        {
+            if (_direct != ResizeDirect.None)
+            {
+                View.Enabled = false;
+                ResizeMsg();
+                View.Enabled = true;
+            }
+        }
+
+        private void ViewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (NoneBorderResize && 
+                FormBorderStyle == FormBorderStyle.None &&
+                WindowState == FormWindowState.Normal)
+            {
+                _direct = ShowResizeCursor(PointToClient(MousePosition));
             }
         }
 
@@ -199,7 +220,7 @@ namespace QQ2564874169.Miniblink
             return null;
         }
 
-        private void MiniblinkForm_Load(object sender, EventArgs e)
+        private void FormLoad(object sender, EventArgs e)
         {
             Shown += (ls, le) =>
             {
@@ -267,7 +288,7 @@ namespace QQ2564874169.Miniblink
             WinApi.DwmExtendFrameIntoClientArea(Handle, ref margins);
         }
 
-        private void Miniblink_Paint(object sender, PaintUpdatedEventArgs e)
+        private void FormPaint(object sender, PaintUpdatedEventArgs e)
         {
             if (!IsDisposed && !IsDesignMode())
             {
@@ -340,49 +361,49 @@ namespace QQ2564874169.Miniblink
 
         private void ResizeMsg()
         {
-            const int WMSZ_LEFT = 0xF001;
-            const int WMSZ_RIGHT = 0xF002;
-            const int WMSZ_TOP = 0xF003;
-            const int WMSZ_TOPLEFT = 0xF004;
-            const int WMSZ_TOPRIGHT = 0xF005;
-            const int WMSZ_BOTTOM = 0xF006;
-            const int WMSZ_BOTTOMLEFT = 0xF007;
-            const int WMSZ_BOTTOMRIGHT = 0xF008;
+            const int wmszLeft = 0xF001;
+            const int wmszRight = 0xF002;
+            const int wmszTop = 0xF003;
+            const int wmszTopleft = 0xF004;
+            const int wmszTopright = 0xF005;
+            const int wmszBottom = 0xF006;
+            const int wmszBottomleft = 0xF007;
+            const int wmszBottomright = 0xF008;
 
             var param = 0;
             switch (_direct)
             {
                 case ResizeDirect.Top:
                     Cursor = Cursors.SizeNS;
-                    param = WMSZ_TOP;
+                    param = wmszTop;
                     break;
                 case ResizeDirect.Bottom:
                     Cursor = Cursors.SizeNS;
-                    param = WMSZ_BOTTOM;
+                    param = wmszBottom;
                     break;
                 case ResizeDirect.Left:
                     Cursor = Cursors.SizeWE;
-                    param = WMSZ_LEFT;
+                    param = wmszLeft;
                     break;
                 case ResizeDirect.Right:
                     Cursor = Cursors.SizeWE;
-                    param = WMSZ_RIGHT;
+                    param = wmszRight;
                     break;
                 case ResizeDirect.LeftTop:
                     Cursor = Cursors.SizeNWSE;
-                    param = WMSZ_TOPLEFT;
+                    param = wmszTopleft;
                     break;
                 case ResizeDirect.LeftBottom:
                     Cursor = Cursors.SizeNESW;
-                    param = WMSZ_BOTTOMLEFT;
+                    param = wmszBottomleft;
                     break;
                 case ResizeDirect.RightTop:
                     Cursor = Cursors.SizeNESW;
-                    param = WMSZ_TOPRIGHT;
+                    param = wmszTopright;
                     break;
                 case ResizeDirect.RightBottom:
                     Cursor = Cursors.SizeNWSE;
-                    param = WMSZ_BOTTOMRIGHT;
+                    param = wmszBottomright;
                     break;
             }
 
@@ -547,41 +568,6 @@ namespace QQ2564874169.Miniblink
             LeftBottom,
             RightTop,
             RightBottom
-        }
-
-        public bool PreFilterMessage(ref Message m)
-        {
-            if (IsDisposed)
-            {
-                Application.RemoveMessageFilter(this);
-                return false;
-            }
-            var ctrl = FromChildHandle(m.HWnd);
-
-            if (ctrl == null || ctrl.FindForm() != this)
-            {
-                return false;
-            }
-
-            //鼠标单击
-            if (m.Msg == (int)WinConst.WM_LBUTTONDOWN && _direct != ResizeDirect.None)
-            {
-                ResizeMsg();
-                return true;
-            }
-
-            //鼠标移动
-            if (m.Msg == (int)WinConst.WM_MOUSEMOVE)
-            {
-                if (NoneBorderResize && FormBorderStyle == FormBorderStyle.None &&
-                    WindowState == FormWindowState.Normal)
-                {
-                    _direct = ShowResizeCursor(PointToClient(MousePosition));
-                    return _direct != ResizeDirect.None;
-                }
-            }
-
-            return false;
         }
 
         private static void WatchMouse(Action<Point> onMove, Action onFinish = null)

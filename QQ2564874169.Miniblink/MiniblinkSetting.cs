@@ -35,7 +35,7 @@ namespace QQ2564874169.Miniblink
 
         public static void BindNetFunc(NetFunc func)
         {
-            func.jsFunc = new wkeJsNativeFunction((es, state) =>
+            func.JsFunc = new wkeJsNativeFunction((es, state) =>
             {
                 var mb = MBApi.jsGetWebView(es);
                 if (_miniblinks.ContainsKey(mb.ToInt64()) == false)
@@ -58,7 +58,7 @@ namespace QQ2564874169.Miniblink
 
             var ptr = GCHandle.ToIntPtr(GCHandle.Alloc(func));
 
-            MBApi.wkeJsBindFunction(func.Name, func.jsFunc, ptr, 0);
+            MBApi.wkeJsBindFunction(func.Name, func.JsFunc, ptr, 0);
         }
     }
 }

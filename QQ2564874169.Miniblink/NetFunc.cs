@@ -10,7 +10,7 @@ namespace QQ2564874169.Miniblink
     {
         public string Name { get; internal set; }
         public object State { get; internal set; }
-        public IMiniblink Miniblink;
+        public IMiniblink Miniblink { get; internal set; }
         public object[] Paramters { get; internal set; }
     }
 
@@ -18,11 +18,11 @@ namespace QQ2564874169.Miniblink
     {
         public string Name { get; }
 
-        internal wkeJsNativeFunction jsFunc;
+        internal wkeJsNativeFunction JsFunc;
         internal bool BindToSub;
 
-        private NetFuncDelegate _func { get; }
-        private object _state { get; }
+        private NetFuncDelegate _func;
+        private object _state;
 
         public NetFunc(string name, NetFuncDelegate func, object state = null)
         {
