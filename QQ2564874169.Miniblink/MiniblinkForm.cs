@@ -552,9 +552,9 @@ namespace QQ2564874169.Miniblink
             e.Frame.RunJs(js);
         }
 
-        internal bool IsDesignMode()
+        private static bool IsDesignMode()
         {
-            return View.IsDesignMode();
+            return MiniblinkBrowser.IsDesignMode();
         }
 
         private enum ResizeDirect

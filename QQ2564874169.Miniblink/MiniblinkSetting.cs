@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace QQ2564874169.Miniblink
 {
@@ -31,6 +29,7 @@ namespace QQ2564874169.Miniblink
         internal static void DestroyWebView(IntPtr handle)
         {
             _miniblinks.Remove(handle.ToInt64());
+            MBApi.wkeDestroyWebView(handle);
         }
 
         public static void BindNetFunc(NetFunc func)

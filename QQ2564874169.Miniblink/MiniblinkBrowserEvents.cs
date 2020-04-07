@@ -19,7 +19,7 @@ namespace QQ2564874169.Miniblink
             {
                 if (_wkeDidCreateScriptContextCallback == null)
                 {
-                    _wkeDidCreateScriptContextCallback = new wkeDidCreateScriptContextCallback(onWkeDidCreateScriptContextCallback);
+                    _wkeDidCreateScriptContextCallback = new wkeDidCreateScriptContextCallback(OnWkeDidCreateScriptContextCallback);
                     MBApi.wkeOnDidCreateScriptContext(MiniblinkHandle, _wkeDidCreateScriptContextCallback, IntPtr.Zero);
                 }
 
@@ -58,7 +58,7 @@ namespace QQ2564874169.Miniblink
             return args;
         }
 
-        protected virtual void onWkeDidCreateScriptContextCallback(IntPtr webView, IntPtr param, IntPtr frame,
+        protected virtual void OnWkeDidCreateScriptContextCallback(IntPtr webView, IntPtr param, IntPtr frame,
             IntPtr context, int extensionGroup, int worldId)
         {
             var e = new DidCreateScriptContextEventArgs

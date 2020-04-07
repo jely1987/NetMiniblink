@@ -20,10 +20,13 @@ namespace QQ2564874169.Miniblink
     {
         static MiniblinkBrowser()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
-            MiniblinkSetting.BindNetFunc(new NetFunc(_popHookName, OnHookPop));
-            MiniblinkSetting.BindNetFunc(new NetFunc(_openHookName, OnHookWindowOpen));
-            MiniblinkSetting.BindNetFunc(new NetFunc(_callNet, OnCallNet));
+            if (IsDesignMode() == false)
+            {
+                AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
+                MiniblinkSetting.BindNetFunc(new NetFunc(_popHookName, OnHookPop));
+                MiniblinkSetting.BindNetFunc(new NetFunc(_openHookName, OnHookWindowOpen));
+                MiniblinkSetting.BindNetFunc(new NetFunc(_callNet, OnCallNet));
+            }
         }
 
         private static Assembly AssemblyResolve(object sender, ResolveEventArgs args)
@@ -149,32 +152,33 @@ namespace QQ2564874169.Miniblink
 
         private void DestroyCallback()
         {
-            if (!IsDesignMode())
-            {
-                _paintBitUpdated = null;
-                _createView = null;
-                _wkeLoadUrlBegin = null;
-                _wkeLoadUrlEnd = null;
-                _wkeLoadUrlFail = null;
-                _wkeNetResponse = null;
-                MBApi.wkeOnPaintBitUpdated(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnPaintUpdated(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnURLChanged2(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnNavigation(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnDocumentReady2(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnConsole(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeNetOnResponse(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnLoadUrlBegin(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnDownload(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnCreateView(MiniblinkHandle, null, IntPtr.Zero);
-                Destroy?.Invoke(this, new EventArgs());
-            }
+            _paintBitUpdated = null;
+            _createView = null;
+            _wkeLoadUrlBegin = null;
+            _wkeLoadUrlEnd = null;
+            _wkeLoadUrlFail = null;
+            _wkeNetResponse = null;
+            MBApi.wkeOnPaintBitUpdated(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnPaintUpdated(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnURLChanged2(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnNavigation(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnDocumentReady2(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnConsole(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeNetOnResponse(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnLoadUrlBegin(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnDownload(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnCreateView(MiniblinkHandle, null, IntPtr.Zero);
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
         {
-            DestroyCallback();
+            Destroy?.Invoke(this, new EventArgs());
+            if (IsDesignMode() == false)
+            {
+                DestroyCallback();
+                MiniblinkSetting.DestroyWebView(MiniblinkHandle);
+            }
             ResourceCache = null;
             ResourceLoader.Clear();
             _requestMap.Clear();
@@ -183,8 +187,7 @@ namespace QQ2564874169.Miniblink
             _mouseMoveAre = null;
             _funcs.Clear();
             _iframes.Clear();
-            MiniblinkSetting.DestroyWebView(MiniblinkHandle);
-            MBApi.wkeDestroyWebView(MiniblinkHandle);
+
             base.OnHandleDestroyed(e);
         }
 
@@ -583,7 +586,7 @@ namespace QQ2564874169.Miniblink
             OnDropFiles(true, p.X, p.Y, files);
         }
 
-        internal bool IsDesignMode()
+        internal static bool IsDesignMode()
         {
             var returnFlag = false;
 
@@ -598,7 +601,7 @@ namespace QQ2564874169.Miniblink
             }
 #endif
 
-            return returnFlag || DesignMode;
+            return returnFlag;
         }
 
         #region 消息处理
