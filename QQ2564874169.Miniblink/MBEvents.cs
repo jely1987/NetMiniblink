@@ -296,7 +296,7 @@ namespace QQ2564874169.Miniblink
             Valid
         }
 
-        public string Url { get; }
+        public string Url { get; private set; }
         public string Method { get; }
         public bool Cancel { get; set; }
         public byte[] Data { get; set; }
@@ -410,6 +410,12 @@ namespace QQ2564874169.Miniblink
         public void SetHeader(string name, string value)
         {
             MBApi.wkeNetSetHTTPHeaderField(NetJob, name, value);
+        }
+
+        public void ResetUrl(string url)
+        {
+            MBApi.wkeNetChangeRequestUrl(NetJob, url);
+            Url = url;
         }
 
         private void SetData(byte[] data)

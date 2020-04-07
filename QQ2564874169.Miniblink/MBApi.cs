@@ -638,10 +638,6 @@ namespace QQ2564874169.Miniblink
             return wkeGetContentHeight_x86(webView);
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkePaint2", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkePaint2(IntPtr webView, IntPtr bits, int bufWid, int bufHei, int xDst, int yDst,
-        //    int w, int h, int xSrc, int ySrc, [MarshalAs(UnmanagedType.I1)] bool bCopyAlpha);
-
         [DllImport(DLL_x86, EntryPoint = "wkePaint", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkePaint_x86(IntPtr webView, IntPtr bits, byte pitch);
         [DllImport(DLL_x64, EntryPoint = "wkePaint", CallingConvention = CallingConvention.Cdecl)]
@@ -950,20 +946,6 @@ namespace QQ2564874169.Miniblink
             return wkeIsCookieEnabled_x86(webView) != 0;
         }
 
-        //[DllImport(DLL_x86, EntryPoint = "wkeSetCookieJarPath", CallingConvention = CallingConvention.Cdecl,
-        //    CharSet = CharSet.Unicode)]
-        //public static extern void wkeSetCookieJarPath(IntPtr webView, string path);
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeSetCookieJarFullPath", CallingConvention = CallingConvention.Cdecl,
-        //    CharSet = CharSet.Unicode)]
-        //public static extern void wkeSetCookieJarFullPath(IntPtr webView, string path);
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeSetMediaVolume", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkeSetMediaVolume(IntPtr webView, float volume);
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeGetMediaVolume", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern float wkeGetMediaVolume(IntPtr webView);
-
         [DllImport(DLL_x86, EntryPoint = "wkeFireMouseEvent", CallingConvention = CallingConvention.Cdecl)]
         private static extern byte wkeFireMouseEvent_x86(IntPtr webView, int message, int x, int y, int flags);
 
@@ -1204,13 +1186,6 @@ namespace QQ2564874169.Miniblink
 
             return wkeGetString_x86(wkeString);
         }
-        //[DllImport(DLL_x86, EntryPoint = "wkeSetUserKeyValue", CallingConvention = CallingConvention.Cdecl,
-        //    CharSet = CharSet.Ansi)]
-        //public static extern void wkeSetUserKeyValue(IntPtr webView, string key, IntPtr value);
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeGetUserKeyValue", CallingConvention = CallingConvention.Cdecl,
-        //    CharSet = CharSet.Ansi)]
-        //public static extern IntPtr wkeGetUserKeyValue(IntPtr webView, string key);
 
         [DllImport(DLL_x86, EntryPoint = "wkeGetCursorInfoType", CallingConvention = CallingConvention.Cdecl)]
         private static extern wkeCursorInfo wkeGetCursorInfoType_x86(IntPtr webView);
@@ -1222,16 +1197,6 @@ namespace QQ2564874169.Miniblink
         {
             return is64() ? wkeGetCursorInfoType_x64(webView) : wkeGetCursorInfoType_x86(webView);
         }
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeSetDragFiles", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkeSetDragFiles(IntPtr webView, IntPtr clintPos, IntPtr screenPos,
-        //    [MarshalAs(UnmanagedType.LPArray)] IntPtr[] files, int filesCount);
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeOnTitleChanged", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkeOnTitleChanged(IntPtr webView, wkeTitleChangedCallback callback, IntPtr param);
-
-        //[DllImport(DLL_x86, EntryPoint = "wkeOnURLChanged", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void wkeOnURLChanged(IntPtr webView, wkeURLChangedCallback callback, IntPtr param);
 
         [DllImport(DLL_x86, EntryPoint = "wkeOnURLChanged2", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeOnURLChanged2_x86(IntPtr webView, wkeURLChangedCallback2 callback, IntPtr param);
@@ -2299,6 +2264,26 @@ namespace QQ2564874169.Miniblink
             else
             {
                 wkeSetProxy_x86(ref proxy);
+            }
+        }
+
+        [DllImport(DLL_x86, EntryPoint = "wkeNetChangeRequestUrl", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Ansi)]
+        private static extern void wkeNetChangeRequestUrl_x86(IntPtr job, string url);
+
+        [DllImport(DLL_x64, EntryPoint = "wkeNetChangeRequestUrl", CallingConvention = CallingConvention.Cdecl,
+            CharSet = CharSet.Ansi)]
+        private static extern void wkeNetChangeRequestUrl_x64(IntPtr job, string url);
+
+        public static void wkeNetChangeRequestUrl(IntPtr job, string url)
+        {
+            if (is64())
+            {
+                wkeNetChangeRequestUrl_x64(job, url);
+            }
+            else
+            {
+                wkeNetChangeRequestUrl_x86(job, url);
             }
         }
     }
