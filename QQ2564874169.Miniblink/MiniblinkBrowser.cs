@@ -80,7 +80,7 @@ namespace QQ2564874169.Miniblink
                 {
                     throw new WKECreateException();
                 }
-                
+
                 _browserPaintUpdated += BrowserPaintUpdated;
                 _paintBitUpdated = OnWkeOnPaintBitUpdated;
                 _createView = OnCreateView;
@@ -548,11 +548,6 @@ namespace QQ2564874169.Miniblink
             }
             var e = bro.OnWindowOpen(url, name, map, "true" == replace);
             return e.ReturnValue;
-        }
-
-        public void Print(Action<PrintPreviewDialog> callback)
-        {
-            new PrintUtil(this).Start(callback);
         }
 
         private void OnDropFiles(bool isDone, int x, int y, string[] files)

@@ -266,5 +266,9 @@ namespace QQ2564874169.Miniblink
             MBApi.wkeReload(MiniblinkHandle);
         }
 
+        public void Print(Action<PrintPreviewDialog> callback)
+        {
+            new PrintUtil(this).Start(callback);
+        }
     }
 }
