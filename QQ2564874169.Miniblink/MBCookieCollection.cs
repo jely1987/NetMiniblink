@@ -30,10 +30,12 @@ namespace QQ2564874169.Miniblink
                     }
                     else
                     {
-                        _container = new CookieContainer();
+                        MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ClearAllCookies);
+                        MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ClearSessionCookies);
+                        MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.FlushCookiesToFile);
+                        MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ReloadCookiesFromFile);
                         _miniblink.RequestBefore += ClearCookie;
-                        MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, 
-                            wkeCookieCommand.FlushCookiesToFile);
+                        _container = new CookieContainer();
                     }
                 }
 
@@ -47,21 +49,16 @@ namespace QQ2564874169.Miniblink
 
         internal CookieCollection(IMiniblink miniblink, string path)
         {
-            if (File.Exists(path) == false)
-            {
-                File.Create(path).Close();
-            }
             _file = path;
             _miniblink = miniblink;
             _miniblink.NavigateBefore += NavigateBefore;
-            Enable = true;
+            _enable = true;
         }
 
         private void ClearCookie(object sender, RequestEventArgs e)
         {
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ClearAllCookies);
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ClearSessionCookies);
-            MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.ReloadCookiesFromFile);
         }
 
         private void NavigateBefore(object sender, NavigateEventArgs e)
@@ -75,6 +72,10 @@ namespace QQ2564874169.Miniblink
 
         private void Reload(string host)
         {
+            if (File.Exists(_file) == false)
+            {
+                return;
+            }
             MBApi.wkePerformCookieCommand(_miniblink.MiniblinkHandle, wkeCookieCommand.FlushCookiesToFile);
             _container = new CookieContainer();
             var rows = File.ReadAllLines(_file, Encoding.UTF8);
