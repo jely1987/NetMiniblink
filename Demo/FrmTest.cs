@@ -26,7 +26,7 @@ namespace Demo
         {
             //View.ConsoleMessage += View_ConsoleMessage;
             //View.DidCreateScriptContext += View_DidCreateScriptContext;
-            //View.RequestBefore += View_RequestBefore;
+            View.RequestBefore += View_RequestBefore;
             View.LoadUri("https://www.baidu.com");
         }
 
@@ -47,11 +47,12 @@ namespace Demo
 
         private void button1_Click(object sender, EventArgs e)
         {
+            View.LoadUri("http://www.easteat.com");
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            View.ShowDevTools();
+            View.LoadUri("https://www.baidu.com");
         }
 
         private void button3_Click(object sender, EventArgs e)
