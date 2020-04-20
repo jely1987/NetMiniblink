@@ -173,6 +173,7 @@ namespace QQ2564874169.Miniblink
 
         protected override void OnHandleDestroyed(EventArgs e)
         {
+            Enabled = false;
             Destroy?.Invoke(this, new EventArgs());
             if (IsDesignMode() == false)
             {
