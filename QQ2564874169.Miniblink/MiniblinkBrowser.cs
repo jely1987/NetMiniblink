@@ -331,7 +331,7 @@ namespace QQ2564874169.Miniblink
                 {
                     using (var reader = new StreamReader(sm, Encoding.UTF8))
                     {
-                        js = vars + reader.ReadToEnd()+ ";" + BindFuncJs(e.Frame.IsMain);
+                        js = vars + reader.ReadToEnd() + ";" + BindFuncJs(e.Frame.IsMain);
                     }
                     e.Frame.RunJs(js);
                 }
@@ -746,8 +746,8 @@ namespace QQ2564874169.Miniblink
                 {
                     SafeInvoke(s =>
                     {
-                        OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, (MouseEventArgs)s);
-                        base.OnMouseMove((MouseEventArgs)s);
+                        OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, (MouseEventArgs) s);
+                        base.OnMouseMove((MouseEventArgs) s);
                     }, e);
                 }
 
@@ -765,6 +765,7 @@ namespace QQ2564874169.Miniblink
             else
             {
                 OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, e);
+                base.OnMouseMove(e);
             }
         }
 
@@ -883,51 +884,51 @@ namespace QQ2564874169.Miniblink
 
         protected override void WndProc(ref Message m)
         {
-            switch ((WinConst) m.Msg)
+            switch ((WinConst)m.Msg)
             {
                 case WinConst.WM_INPUTLANGCHANGE:
-                {
-                    DefWndProc(ref m);
-                    break;
-                }
+                    {
+                        DefWndProc(ref m);
+                        break;
+                    }
 
                 case WinConst.WM_IME_STARTCOMPOSITION:
-                {
-                    SetImeStartPos();
-                    break;
-                }
+                    {
+                        SetImeStartPos();
+                        break;
+                    }
 
                 case WinConst.WM_SETFOCUS:
-                {
-                    MBApi.wkeSetFocus(MiniblinkHandle);
-                    break;
-                }
+                    {
+                        MBApi.wkeSetFocus(MiniblinkHandle);
+                        break;
+                    }
                 case WinConst.WM_KILLFOCUS:
-                {
-                    MBApi.wkeKillFocus(MiniblinkHandle);
-                    break;
-                }
+                    {
+                        MBApi.wkeKillFocus(MiniblinkHandle);
+                        break;
+                    }
 
                 case WinConst.WM_SETCURSOR:
-                {
-                    if (MouseButtons == MouseButtons.None)
                     {
-                        _fiexdCursor = false;
-                    }
-                    if (_fiexdCursor == false)
-                    {
-                        SetWkeCursor();
-                        base.WndProc(ref m);
-                    }
+                        if (MouseButtons == MouseButtons.None)
+                        {
+                            _fiexdCursor = false;
+                        }
+                        if (_fiexdCursor == false)
+                        {
+                            SetWkeCursor();
+                            base.WndProc(ref m);
+                        }
 
-                    break;
-                }
+                        break;
+                    }
 
                 default:
-                {
-                    base.WndProc(ref m);
-                    break;
-                }
+                    {
+                        base.WndProc(ref m);
+                        break;
+                    }
             }
         }
 

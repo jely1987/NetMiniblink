@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
 {
-    public partial class MiniblinkForm : Form
+    public partial class MiniblinkForm : Form, IMessageFilter
     {
         /// <summary>
         /// 是否透明模式
@@ -101,6 +101,7 @@ namespace QQ2564874169.Miniblink
 
         public MiniblinkForm(bool isTransparent)
         {
+            Application.AddMessageFilter(this);
             ShadowWidth = new FormShadowWidth();
             InitializeComponent();
             Controls.Add(View = new MiniblinkBrowser
@@ -130,29 +131,13 @@ namespace QQ2564874169.Miniblink
 
                 View.DocumentReady += RegisterJsEvent;
                 View.RegisterNetFunc(this);
-                View.MouseMove += ViewMouseMove;
-                View.MouseDown += ViewMouseDown;
             }
         }
 
-        private void ViewMouseDown(object sender, MouseEventArgs e)
+        protected override void OnClosed(EventArgs e)
         {
-            if (_direct != ResizeDirect.None)
-            {
-                View.Enabled = false;
-                ResizeMsg();
-                View.Enabled = true;
-            }
-        }
-
-        private void ViewMouseMove(object sender, MouseEventArgs e)
-        {
-            if (NoneBorderResize && 
-                FormBorderStyle == FormBorderStyle.None &&
-                WindowState == FormWindowState.Normal)
-            {
-                _direct = ShowResizeCursor(PointToClient(MousePosition));
-            }
+            Application.RemoveMessageFilter(this);
+            base.OnClosed(e);
         }
 
         private void SetTransparent()
@@ -593,6 +578,53 @@ namespace QQ2564874169.Miniblink
 
                 onFinish?.Invoke();
             });
+        }
+
+        public bool PreFilterMessage(ref Message m)
+        {
+            if (IsDisposed)
+            {
+                return false;
+            }
+
+            if (NoneBorderResize == false)
+            {
+                return false;
+            }
+
+            if (FormBorderStyle != FormBorderStyle.None)
+            {
+                return false;
+            }
+
+            if (WindowState == FormWindowState.Normal)
+            {
+                return false;
+            }
+
+            var ctrl = FromChildHandle(m.HWnd);
+            if (ctrl == null || ctrl.FindForm() != this)
+            {
+                return false;
+            }
+
+            var wMsg = (WinConst)m.Msg;
+
+            switch (wMsg)
+            {
+                case WinConst.WM_MOUSEMOVE:
+                    _direct = ShowResizeCursor(PointToClient(MousePosition));
+                    break;
+                case WinConst.WM_LBUTTONDOWN:
+                    if (_direct != ResizeDirect.None)
+                    {
+                        ResizeMsg();
+                        return true;
+                    }
+                    break;
+            }
+
+            return false;
         }
     }
 }
