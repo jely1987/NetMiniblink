@@ -19,22 +19,6 @@ namespace QQ2564874169.Miniblink
             return IntPtr.Size == 8;
         }
 
-        [DllImport(DLL_x86, EntryPoint = "wkeIsInitialize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern byte wkeIsInitialize_x86();
-
-        [DllImport(DLL_x64, EntryPoint = "wkeIsInitialize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern byte wkeIsInitialize_x64();
-
-        public static bool wkeIsInitialize()
-        {
-            if (is64())
-            {
-                return wkeIsInitialize_x64() != 0;
-            }
-
-            return wkeIsInitialize_x86() != 0;
-        }
-
         [DllImport(DLL_x86, EntryPoint = "wkeInitialize", CallingConvention = CallingConvention.Cdecl)]
         private static extern void wkeInitialize_x86();
 
