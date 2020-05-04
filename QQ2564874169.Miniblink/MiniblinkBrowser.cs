@@ -884,37 +884,45 @@ namespace QQ2564874169.Miniblink
 
         protected override void WndProc(ref Message m)
         {
-            switch ((WinConst)m.Msg)
+            if (IsDesignMode())
             {
-                case WinConst.WM_INPUTLANGCHANGE:
+                base.WndProc(ref m);
+            }
+            else
+            {
+                switch ((WinConst) m.Msg)
+                {
+                    case WinConst.WM_INPUTLANGCHANGE:
                     {
                         DefWndProc(ref m);
                         break;
                     }
 
-                case WinConst.WM_IME_STARTCOMPOSITION:
+                    case WinConst.WM_IME_STARTCOMPOSITION:
                     {
                         SetImeStartPos();
                         break;
                     }
 
-                case WinConst.WM_SETFOCUS:
+                    case WinConst.WM_SETFOCUS:
                     {
                         MBApi.wkeSetFocus(MiniblinkHandle);
                         break;
                     }
-                case WinConst.WM_KILLFOCUS:
+
+                    case WinConst.WM_KILLFOCUS:
                     {
                         MBApi.wkeKillFocus(MiniblinkHandle);
                         break;
                     }
 
-                case WinConst.WM_SETCURSOR:
+                    case WinConst.WM_SETCURSOR:
                     {
                         if (MouseButtons == MouseButtons.None)
                         {
                             _fiexdCursor = false;
                         }
+
                         if (_fiexdCursor == false)
                         {
                             SetWkeCursor();
@@ -924,11 +932,12 @@ namespace QQ2564874169.Miniblink
                         break;
                     }
 
-                default:
+                    default:
                     {
                         base.WndProc(ref m);
                         break;
                     }
+                }
             }
         }
 
