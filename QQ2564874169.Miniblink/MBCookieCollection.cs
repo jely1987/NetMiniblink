@@ -110,7 +110,7 @@ namespace QQ2564874169.Miniblink
                     Path = items[2],
                     Secure = "true".Equals(items[3], StringComparison.OrdinalIgnoreCase),
                     Expires = new DateTime(1970, 1, 1).AddSeconds(long.Parse(items[4])),
-                    Name = items[5],
+                    Name = items[5].Split('=')[0],
                     Value = Utils.UrlEncode(items[6])
                 };
                 _container.Add(cookie);
