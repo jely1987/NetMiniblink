@@ -597,7 +597,7 @@ namespace QQ2564874169.Miniblink
                 return false;
             }
 
-            if (WindowState == FormWindowState.Normal)
+            if (WindowState != FormWindowState.Normal)
             {
                 return false;
             }

@@ -113,8 +113,22 @@ namespace QQ2564874169.Miniblink
                 return MBApi.jsInt((int) obj);
             if (obj is bool)
                 return MBApi.jsBoolean((bool) obj);
-            if (obj is double || obj is decimal)
-                return MBApi.jsDouble((double) obj);
+            if (obj is double)
+                return MBApi.jsDouble((double)obj);
+            if (obj is decimal)
+            {
+                var dec = (decimal)obj;
+                if (dec.ToString().Contains("."))
+                {
+                    return ToJsValue(Convert.ToDouble(dec.ToString()), miniblink, es);
+                }
+                else
+                {
+                    return ToJsValue(Convert.ToInt32(dec.ToString()), miniblink, es);
+                }
+            }
+            if (obj is long)
+                return ToJsValue(obj.ToString(), miniblink, es);
             if (obj is float)
                 return MBApi.jsFloat((float) obj);
             if (obj is DateTime)
