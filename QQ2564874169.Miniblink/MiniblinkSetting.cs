@@ -31,6 +31,7 @@ namespace QQ2564874169.Miniblink
         internal static void DestroyWebView(IntPtr handle)
         {
             _miniblinks.Remove(handle.ToInt64());
+            MBApi.wkeDestroyWebView(handle);
         }
 
         public static void BindNetFunc(NetFunc func)
