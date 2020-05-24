@@ -115,6 +115,10 @@ namespace QQ2564874169.Miniblink
 
         public void SafeInvoke(Action<object> callback, object state = null)
         {
+            if (IsDisposed)
+            {
+                return;
+            }
             if (InvokeRequired)
             {
                 Invoke(callback, state);
@@ -266,5 +270,9 @@ namespace QQ2564874169.Miniblink
             MBApi.wkeReload(MiniblinkHandle);
         }
 
+        public void Print(Action<PrintPreviewDialog> callback)
+        {
+            new PrintUtil(this).Start(callback);
+        }
     }
 }

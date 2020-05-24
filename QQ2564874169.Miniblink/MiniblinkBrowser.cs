@@ -20,10 +20,13 @@ namespace QQ2564874169.Miniblink
     {
         static MiniblinkBrowser()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
-            MiniblinkSetting.BindNetFunc(new NetFunc(_popHookName, OnHookPop));
-            MiniblinkSetting.BindNetFunc(new NetFunc(_openHookName, OnHookWindowOpen));
-            MiniblinkSetting.BindNetFunc(new NetFunc(_callNet, OnCallNet));
+            if (IsDesignMode() == false)
+            {
+                AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
+                MiniblinkSetting.BindNetFunc(new NetFunc(_popHookName, OnHookPop));
+                MiniblinkSetting.BindNetFunc(new NetFunc(_openHookName, OnHookWindowOpen));
+                MiniblinkSetting.BindNetFunc(new NetFunc(_callNet, OnCallNet));
+            }
         }
 
         private static Assembly AssemblyResolve(object sender, ResolveEventArgs args)
@@ -77,7 +80,7 @@ namespace QQ2564874169.Miniblink
                 {
                     throw new WKECreateException();
                 }
-                
+
                 _browserPaintUpdated += BrowserPaintUpdated;
                 _paintBitUpdated = OnWkeOnPaintBitUpdated;
                 _createView = OnCreateView;
@@ -149,32 +152,34 @@ namespace QQ2564874169.Miniblink
 
         private void DestroyCallback()
         {
-            if (!IsDesignMode())
-            {
-                _paintBitUpdated = null;
-                _createView = null;
-                _wkeLoadUrlBegin = null;
-                _wkeLoadUrlEnd = null;
-                _wkeLoadUrlFail = null;
-                _wkeNetResponse = null;
-                MBApi.wkeOnPaintBitUpdated(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnPaintUpdated(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnURLChanged2(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnNavigation(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnDocumentReady2(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnConsole(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeNetOnResponse(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnLoadUrlBegin(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnDownload(MiniblinkHandle, null, IntPtr.Zero);
-                MBApi.wkeOnCreateView(MiniblinkHandle, null, IntPtr.Zero);
-                Destroy?.Invoke(this, new EventArgs());
-            }
+            _paintBitUpdated = null;
+            _createView = null;
+            _wkeLoadUrlBegin = null;
+            _wkeLoadUrlEnd = null;
+            _wkeLoadUrlFail = null;
+            _wkeNetResponse = null;
+            MBApi.wkeOnPaintBitUpdated(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnPaintUpdated(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnURLChanged2(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnNavigation(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnDocumentReady2(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnConsole(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeNetOnResponse(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnLoadUrlBegin(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnDownload(MiniblinkHandle, null, IntPtr.Zero);
+            MBApi.wkeOnCreateView(MiniblinkHandle, null, IntPtr.Zero);
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
         {
-            DestroyCallback();
+            Enabled = false;
+            Destroy?.Invoke(this, new EventArgs());
+            if (IsDesignMode() == false)
+            {
+                DestroyCallback();
+                MiniblinkSetting.DestroyWebView(MiniblinkHandle);
+            }
             ResourceCache = null;
             ResourceLoader.Clear();
             _requestMap.Clear();
@@ -183,7 +188,7 @@ namespace QQ2564874169.Miniblink
             _mouseMoveAre = null;
             _funcs.Clear();
             _iframes.Clear();
-            MiniblinkSetting.DestroyWebView(MiniblinkHandle);
+
             base.OnHandleDestroyed(e);
         }
 
@@ -326,7 +331,7 @@ namespace QQ2564874169.Miniblink
                 {
                     using (var reader = new StreamReader(sm, Encoding.UTF8))
                     {
-                        js = vars + reader.ReadToEnd()+ ";" + BindFuncJs(e.Frame.IsMain);
+                        js = vars + reader.ReadToEnd() + ";" + BindFuncJs(e.Frame.IsMain);
                     }
                     e.Frame.RunJs(js);
                 }
@@ -546,11 +551,6 @@ namespace QQ2564874169.Miniblink
             return e.ReturnValue;
         }
 
-        public void Print(Action<PrintPreviewDialog> callback)
-        {
-            new PrintUtil(this).Start(callback);
-        }
-
         private void OnDropFiles(bool isDone, int x, int y, string[] files)
         {
             if (FireDropFile)
@@ -582,7 +582,7 @@ namespace QQ2564874169.Miniblink
             OnDropFiles(true, p.X, p.Y, files);
         }
 
-        internal bool IsDesignMode()
+        internal static bool IsDesignMode()
         {
             var returnFlag = false;
 
@@ -597,7 +597,7 @@ namespace QQ2564874169.Miniblink
             }
 #endif
 
-            return returnFlag || DesignMode;
+            return returnFlag;
         }
 
         #region 消息处理
@@ -746,8 +746,8 @@ namespace QQ2564874169.Miniblink
                 {
                     SafeInvoke(s =>
                     {
-                        OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, (MouseEventArgs)s);
-                        base.OnMouseMove((MouseEventArgs)s);
+                        OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, (MouseEventArgs) s);
+                        base.OnMouseMove((MouseEventArgs) s);
                     }, e);
                 }
 
@@ -765,6 +765,7 @@ namespace QQ2564874169.Miniblink
             else
             {
                 OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, e);
+                base.OnMouseMove(e);
             }
         }
 
@@ -883,50 +884,59 @@ namespace QQ2564874169.Miniblink
 
         protected override void WndProc(ref Message m)
         {
-            switch ((WinConst) m.Msg)
+            if (IsDesignMode())
             {
-                case WinConst.WM_INPUTLANGCHANGE:
+                base.WndProc(ref m);
+            }
+            else
+            {
+                switch ((WinConst) m.Msg)
                 {
-                    DefWndProc(ref m);
-                    break;
-                }
-
-                case WinConst.WM_IME_STARTCOMPOSITION:
-                {
-                    SetImeStartPos();
-                    break;
-                }
-
-                case WinConst.WM_SETFOCUS:
-                {
-                    MBApi.wkeSetFocus(MiniblinkHandle);
-                    break;
-                }
-                case WinConst.WM_KILLFOCUS:
-                {
-                    MBApi.wkeKillFocus(MiniblinkHandle);
-                    break;
-                }
-
-                case WinConst.WM_SETCURSOR:
-                {
-                    if (MouseButtons == MouseButtons.None)
+                    case WinConst.WM_INPUTLANGCHANGE:
                     {
-                        _fiexdCursor = false;
+                        DefWndProc(ref m);
+                        break;
                     }
-                    if (_fiexdCursor == false)
+
+                    case WinConst.WM_IME_STARTCOMPOSITION:
                     {
-                        SetWkeCursor();
+                        SetImeStartPos();
+                        break;
+                    }
+
+                    case WinConst.WM_SETFOCUS:
+                    {
+                        MBApi.wkeSetFocus(MiniblinkHandle);
+                        break;
+                    }
+
+                    case WinConst.WM_KILLFOCUS:
+                    {
+                        MBApi.wkeKillFocus(MiniblinkHandle);
+                        break;
+                    }
+
+                    case WinConst.WM_SETCURSOR:
+                    {
+                        if (MouseButtons == MouseButtons.None)
+                        {
+                            _fiexdCursor = false;
+                        }
+
+                        if (_fiexdCursor == false)
+                        {
+                            SetWkeCursor();
+                            base.WndProc(ref m);
+                        }
+
+                        break;
+                    }
+
+                    default:
+                    {
                         base.WndProc(ref m);
+                        break;
                     }
-
-                    break;
-                }
-
-                default:
-                {
-                    base.WndProc(ref m);
-                    break;
                 }
             }
         }

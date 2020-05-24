@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace QQ2564874169.Miniblink
 {
@@ -19,7 +17,7 @@ namespace QQ2564874169.Miniblink
             {
                 if (_wkeDidCreateScriptContextCallback == null)
                 {
-                    _wkeDidCreateScriptContextCallback = new wkeDidCreateScriptContextCallback(onWkeDidCreateScriptContextCallback);
+                    _wkeDidCreateScriptContextCallback = new wkeDidCreateScriptContextCallback(OnWkeDidCreateScriptContextCallback);
                     MBApi.wkeOnDidCreateScriptContext(MiniblinkHandle, _wkeDidCreateScriptContextCallback, IntPtr.Zero);
                 }
 
@@ -58,7 +56,7 @@ namespace QQ2564874169.Miniblink
             return args;
         }
 
-        protected virtual void onWkeDidCreateScriptContextCallback(IntPtr webView, IntPtr param, IntPtr frame,
+        protected virtual void OnWkeDidCreateScriptContextCallback(IntPtr webView, IntPtr param, IntPtr frame,
             IntPtr context, int extensionGroup, int worldId)
         {
             var e = new DidCreateScriptContextEventArgs
@@ -114,11 +112,6 @@ namespace QQ2564874169.Miniblink
             remove
             {
                 _navigateBefore -= value;
-
-                if (_navigateBefore == null)
-                {
-                    MBApi.wkeOnNavigation(MiniblinkHandle, null, IntPtr.Zero);
-                }
             }
         }
 
@@ -200,7 +193,8 @@ namespace QQ2564874169.Miniblink
             {
                 if (_wkeConsoleMessage == null)
                 {
-                    MBApi.wkeOnConsole(MiniblinkHandle, _wkeConsoleMessage = new wkeConsoleCallback(OnConsoleMessage),
+                    MBApi.wkeOnConsole(MiniblinkHandle, 
+                        _wkeConsoleMessage = new wkeConsoleCallback(OnConsoleMessage),
                         IntPtr.Zero);
                 }
 
@@ -240,7 +234,8 @@ namespace QQ2564874169.Miniblink
             {
                 if (_wkeDownload == null)
                 {
-                    MBApi.wkeOnDownload(MiniblinkHandle, _wkeDownload = new wkeDownloadCallback(OnDownload),
+                    MBApi.wkeOnDownload(MiniblinkHandle, 
+                        _wkeDownload = new wkeDownloadCallback(OnDownload),
                         IntPtr.Zero);
                 }
 
@@ -289,16 +284,19 @@ namespace QQ2564874169.Miniblink
         {
             add
             {
-                if (_requestBefore == null)
+                if (_wkeLoadUrlBegin == null)
                 {
                     MBApi.wkeOnLoadUrlBegin(MiniblinkHandle,
                         _wkeLoadUrlBegin = new wkeLoadUrlBeginCallback(OnLoadUrlBegin),
                         IntPtr.Zero);
-                    MBApi.wkeNetOnResponse(MiniblinkHandle, _wkeNetResponse = new wkeNetResponseCallback(OnNetResponse),
+                    MBApi.wkeNetOnResponse(MiniblinkHandle, 
+                        _wkeNetResponse = new wkeNetResponseCallback(OnNetResponse),
                         IntPtr.Zero);
-                    MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, _wkeLoadUrlEnd = new wkeLoadUrlEndCallback(OnLoadUrlEnd),
+                    MBApi.wkeOnLoadUrlEnd(MiniblinkHandle, 
+                        _wkeLoadUrlEnd = new wkeLoadUrlEndCallback(OnLoadUrlEnd),
                         IntPtr.Zero);
-                    MBApi.wkeOnLoadUrlFail(MiniblinkHandle, _wkeLoadUrlFail = new wkeLoadUrlFailCallback(OnLoadFail),
+                    MBApi.wkeOnLoadUrlFail(MiniblinkHandle, 
+                        _wkeLoadUrlFail = new wkeLoadUrlFailCallback(OnLoadFail),
                         IntPtr.Zero);
                 }
 
