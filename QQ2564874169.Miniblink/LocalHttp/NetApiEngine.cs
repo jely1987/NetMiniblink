@@ -151,7 +151,8 @@ namespace QQ2564874169.Miniblink.LocalHttp
             {
                 var name = i.GetName().Name;
                 if (name.SW("QQ2564874169") ||
-                    name.SW("system"))
+                    name.SW("system") ||
+                    name.SW("microsoft"))
                     return false;
 
                 return LoadingAssembly == null || LoadingAssembly(i);
