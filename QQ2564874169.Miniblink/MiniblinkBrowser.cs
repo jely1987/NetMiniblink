@@ -740,18 +740,22 @@ namespace QQ2564874169.Miniblink
             while (_mouseMoveAre != null)
             {
                 _mouseMoveAre.WaitOne();
-
-                MouseEventArgs e;
-                while (_mouseMoveEvents != null && _mouseMoveEvents.TryDequeue(out e))
-                {
-                    SafeInvoke(s =>
-                    {
-                        OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, (MouseEventArgs) s);
-                        base.OnMouseMove((MouseEventArgs) s);
-                    }, e);
-                }
-
+                MouseMoveInvoke();
                 _mouseMoveAre?.Reset();
+            }
+        }
+
+        private void MouseMoveInvoke()
+        {
+            MouseEventArgs e;
+            if (_mouseMoveEvents != null && _mouseMoveEvents.TryDequeue(out e))
+            {
+                BeginInvoke(new Action<MouseEventArgs>(s =>
+                {
+                    OnWkeMouseEvent(WinConst.WM_MOUSEMOVE, s);
+                    base.OnMouseMove(s);
+                    MouseMoveInvoke();
+                }), e);
             }
         }
 
