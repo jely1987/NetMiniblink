@@ -184,7 +184,7 @@ namespace QQ2564874169.Miniblink
             ResourceLoader.Clear();
             _requestMap.Clear();
             _mouseMoveEvents = null;
-            _mouseMoveAre.Dispose();
+            _mouseMoveAre.Close();
             _mouseMoveAre = null;
             _funcs.Clear();
             _iframes.Clear();
@@ -323,7 +323,7 @@ namespace QQ2564874169.Miniblink
                 {"openHookName", $"'{_openHookName}'"}
             };
             var vars = string.Join(";", map.Keys.Select(k => $"var {k}={map[k]};")) + ";";
-            var js = string.Join(".", typeof(MiniblinkBrowser).Namespace, "Files", "browser.js");
+            var js = string.Join(".", new[] { typeof(MiniblinkBrowser).Namespace, "Files", "browser.js" });
 
             using (var sm = typeof(MiniblinkBrowser).Assembly.GetManifestResourceStream(js))
             {

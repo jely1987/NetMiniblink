@@ -179,13 +179,13 @@ namespace QQ2564874169.Miniblink
                             return rs.ToJsValue(miniblink, fes);
                         }
                     });
-                _keepref.Add(funcptr.ToInt64(), jsfunc);
                 var funcdata = new jsData
                 {
                     typeName = "function",
                     callAsFunction = jsfunc,
                     finalize = FunctionFinalize
                 };
+                _keepref.Add(funcptr.ToInt64(), funcdata);
                 Marshal.StructureToPtr(funcdata, funcptr, false);
                 return MBApi.jsFunction(es, funcptr);
             }
