@@ -57,7 +57,6 @@ namespace QQ2564874169.Miniblink
         private wkePaintBitUpdatedCallback _paintBitUpdated;
         private wkeCreateViewCallback _createView;
         private ConcurrentQueue<MouseEventArgs> _mouseMoveEvents = new ConcurrentQueue<MouseEventArgs>();
-        private AutoResetEvent _mouseMoveAre = new AutoResetEvent(false);
         private bool _fiexdCursor;
         private bool _lockPaint;
         private ConcurrentDictionary<long, RequestEventArgs> _requestMap =
@@ -65,6 +64,7 @@ namespace QQ2564874169.Miniblink
         private List<NetFunc> _funcs = new List<NetFunc>();
         private bool _v8IsReady;
         private List<FrameContext> _iframes = new List<FrameContext>();
+        private bool _lockMouseMove;
 
         public MiniblinkBrowser()
         {
@@ -98,7 +98,6 @@ namespace QQ2564874169.Miniblink
 
                 DeviceParameter = new DeviceParameter(this);
                 Cookies = new CookieCollection(this, "cookies.dat");
-                Task.Factory.StartNew(FireMouseMove);
             }
         }
 
@@ -184,8 +183,6 @@ namespace QQ2564874169.Miniblink
             ResourceLoader.Clear();
             _requestMap.Clear();
             _mouseMoveEvents = null;
-            _mouseMoveAre.Close();
-            _mouseMoveAre = null;
             _funcs.Clear();
             _iframes.Clear();
 
@@ -735,20 +732,13 @@ namespace QQ2564874169.Miniblink
             base.OnMouseDoubleClick(e);
         }
 
-        private void FireMouseMove()
-        {
-            while (_mouseMoveAre != null)
-            {
-                _mouseMoveAre.WaitOne();
-                MouseMoveInvoke();
-                _mouseMoveAre?.Reset();
-            }
-        }
-
         private void MouseMoveInvoke()
         {
+            if (_mouseMoveEvents == null)
+                return;
+
             MouseEventArgs e;
-            if (_mouseMoveEvents != null && _mouseMoveEvents.TryDequeue(out e))
+            if (_mouseMoveEvents.TryDequeue(out e))
             {
                 BeginInvoke(new Action<MouseEventArgs>(s =>
                 {
@@ -757,6 +747,10 @@ namespace QQ2564874169.Miniblink
                     MouseMoveInvoke();
                 }), e);
             }
+            else
+            {
+                _lockMouseMove = false;
+            }
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -764,7 +758,11 @@ namespace QQ2564874169.Miniblink
             if (MouseMoveOptimize)
             {
                 _mouseMoveEvents.Enqueue(e);
-                _mouseMoveAre.Set();
+                if (_lockMouseMove == false)
+                {
+                    _lockMouseMove = true;
+                    MouseMoveInvoke();
+                }
             }
             else
             {
