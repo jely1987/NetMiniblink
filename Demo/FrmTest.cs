@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using QQ2564874169.Miniblink;
@@ -19,15 +20,16 @@ namespace Demo
         public FrmTest()
         {
             InitializeComponent();
-            //View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
             //View.ConsoleMessage += View_ConsoleMessage;
             //View.DidCreateScriptContext += View_DidCreateScriptContext;
-            View.RequestBefore += View_RequestBefore;
-            View.LoadUri("https://www.baidu.com");
+            //View.RequestBefore += View_RequestBefore;
+            //View.LoadUri("https://www.baidu.com");
+            View.LoadUri("http://loc.res/test.html");
         }
 
         private void View_RequestBefore(object sender, RequestEventArgs e)
@@ -61,14 +63,18 @@ namespace Demo
         }
 
         [NetFunc]
-        private void showForm()
+        private async Task<string> showForm()
         {
-            var form = new MiniblinkForm();
-            form.Load += (s, e) =>
+            var t = Task.Factory.StartNew(() =>
             {
-                //form.View.LoadUri("https://www.baidu.com");
-            };
-            form.ShowDialog();
+                Console.WriteLine("sleep begin");
+                Thread.Sleep(3000);
+                Console.WriteLine("sleep end");
+            });
+            Console.WriteLine("first");
+            await t;
+            Console.WriteLine("running");
+            return "666";
         }
     }
 }

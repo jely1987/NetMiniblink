@@ -5,7 +5,9 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Threading;
 using Ionic.Zip;
 
 namespace QQ2564874169.Miniblink
@@ -98,6 +100,22 @@ namespace QQ2564874169.Miniblink
                         }
 
                         ret = m.Invoke(tg, mpvs);
+                    }
+
+                    if (ret is Task t)
+                    {
+                        if (ret.GetType().IsGenericType)
+                        {
+                            var frame = new DispatcherFrame();
+                            t.ContinueWith(ct => frame.Continue = false);
+                            Dispatcher.PushFrame(frame);
+                            var p = ret.GetType().GetProperty("Result");
+                            ret = p.GetValue(ret, null);
+                        }
+                        else
+                        {
+                            t.Wait();
+                        }
                     }
 
                     return ret;
