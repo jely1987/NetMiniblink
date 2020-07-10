@@ -72,10 +72,10 @@ namespace QQ2564874169.Miniblink
                                 }
                                 if (pt == typeof(DateTime) && !(v is DateTime))
                                 {
-                                    long l_date;
-                                    if (long.TryParse(v.ToString(), out l_date))
+                                    long date;
+                                    if (long.TryParse(v.ToString(), out date))
                                     {
-                                        v = l_date.ToDate();
+                                        v = date.ToDate();
                                     }
                                 }
                                 if (v is JsFunc || pt == typeof(object) || pt == typeof(ExpandoObject))
