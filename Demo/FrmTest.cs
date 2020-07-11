@@ -27,14 +27,21 @@ namespace Demo
         {
             //View.ConsoleMessage += View_ConsoleMessage;
             //View.DidCreateScriptContext += View_DidCreateScriptContext;
-            //View.RequestBefore += View_RequestBefore;
-            //View.LoadUri("https://www.baidu.com");
-            View.LoadUri("http://loc.res/test.html");
+            View.RequestBefore += View_RequestBefore;
+            View.LoadUri("https://www.baidu.com");
+            //View.LoadUri("http://loc.res/test.html");
         }
 
         private void View_RequestBefore(object sender, RequestEventArgs e)
         {
-            Console.WriteLine(e.Url);
+            if (e.Url.EndsWith(".png"))
+            {
+                e.Async(req =>
+                {
+                    Thread.Sleep(3000);
+                    Console.WriteLine(req.State);
+                }, e.Url);
+            }
         }
 
         private void View_DidCreateScriptContext(object sender, DidCreateScriptContextEventArgs e)
