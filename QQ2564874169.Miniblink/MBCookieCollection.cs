@@ -103,6 +103,11 @@ namespace QQ2564874169.Miniblink
                     continue;
                 }
 
+                if ("0" == items[4])
+                {
+                    items[4] = "1200";
+                }
+
                 var cookie = new Cookie
                 {
                     HttpOnly = httpOnly,
@@ -113,6 +118,7 @@ namespace QQ2564874169.Miniblink
                     Name = items[5].Split('=')[0],
                     Value = Utils.UrlEncode(items[6])
                 };
+                
                 _container.Add(cookie);
             }
         }
