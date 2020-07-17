@@ -369,8 +369,6 @@ namespace QQ2564874169.Miniblink
                 {
                     req.Miniblink.SafeInvoke(_ =>
                     {
-                        MBApi.wkeNetContinueJob(req.NetJob);
-
                         if (e.ContentType != null)
                         {
                             MBApi.wkeNetSetMIMEType(req.NetJob, e.ContentType);
@@ -380,19 +378,22 @@ namespace QQ2564874169.Miniblink
                         {
                             req.SetData(e.Data);
                         }
+
+                        MBApi.wkeNetContinueJob(req.NetJob);
+
+                        var t = req.NetData?.GetInvocationList().Length;
+                        t += req.LoadFail?.GetInvocationList().Length;
+                        t += req.Response?.GetInvocationList().Length;
+                        if (t == 0)
+                        {
+                            req._status = Status.Valid;
+                            Finish?.Invoke(req, new EventArgs());
+                        }
+                        else
+                        {
+                            req._status = Status.Post;
+                        }
                     });
-                    var t = req.NetData?.GetInvocationList().Length;
-                    t += req.LoadFail?.GetInvocationList().Length;
-                    t += req.Response?.GetInvocationList().Length;
-                    if (t == 0)
-                    {
-                        req._status = Status.Valid;
-                        Finish?.Invoke(req, new EventArgs());
-                    }
-                    else
-                    {
-                        req._status = Status.Post;
-                    }
                 }
             }, new[] {this, state});
         }
