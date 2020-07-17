@@ -102,7 +102,8 @@ namespace QQ2564874169.Miniblink
                         ret = m.Invoke(tg, mpvs);
                     }
 
-                    if (ret is Task t)
+                    var t = ret as Task;
+                    if (t != null)
                     {
                         if (ret.GetType().IsGenericType)
                         {

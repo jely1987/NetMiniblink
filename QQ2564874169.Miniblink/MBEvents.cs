@@ -175,13 +175,15 @@ namespace QQ2564874169.Miniblink
 
     public class RequestAsync
     {
+        public RequestEventArgs Request { get; }
         public object State { get; }
 
         internal string ContentType { get; private set; }
         internal byte[] Data { get; private set; }
 
-        internal RequestAsync(object state)
+        internal RequestAsync(RequestEventArgs request, object state)
         {
+            Request = request;
             State = state;
         }
 
@@ -358,29 +360,27 @@ namespace QQ2564874169.Miniblink
                 var ps = (object[]) s;
                 var req = (RequestEventArgs) ps[0];
                 var pm = ps[1];
-                var e = new RequestAsync(pm);
+                var e = new RequestAsync(req, pm);
                 try
                 {
                     callback(e);
                 }
                 finally
                 {
-                    if (e.ContentType != null || e.Data != null)
+                    req.Miniblink.SafeInvoke(_ =>
                     {
-                        req.Miniblink.SafeInvoke(_ =>
-                        {
-                            if (e.ContentType != null)
-                            {
-                                MBApi.wkeNetSetMIMEType(req.NetJob, e.ContentType);
-                            }
+                        MBApi.wkeNetContinueJob(req.NetJob);
 
-                            if (e.Data != null)
-                            {
-                                req.SetData(e.Data);
-                            }
-                        });
-                    }
-                    MBApi.wkeNetContinueJob(req.NetJob);
+                        if (e.ContentType != null)
+                        {
+                            MBApi.wkeNetSetMIMEType(req.NetJob, e.ContentType);
+                        }
+
+                        if (e.Data != null)
+                        {
+                            req.SetData(e.Data);
+                        }
+                    });
                     var t = req.NetData?.GetInvocationList().Length;
                     t += req.LoadFail?.GetInvocationList().Length;
                     t += req.Response?.GetInvocationList().Length;
