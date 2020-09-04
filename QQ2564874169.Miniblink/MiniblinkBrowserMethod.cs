@@ -23,10 +23,10 @@ namespace QQ2564874169.Miniblink
 
             using (var image = new Bitmap(ViewWidth, ViewHeight))
             {
-                var bitmap = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
+                var data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
                     ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                MBApi.wkePaint(MiniblinkHandle, bitmap.Scan0, 0);
-                image.UnlockBits(bitmap);
+                MBApi.wkePaint(MiniblinkHandle, data.Scan0, 0);
+                image.UnlockBits(data);
                 return image.Clone(rect.Value, PixelFormat.Format32bppArgb);
             }
         }
