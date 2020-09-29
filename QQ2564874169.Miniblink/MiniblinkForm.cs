@@ -188,7 +188,6 @@ namespace QQ2564874169.Miniblink
                     Invoke(new Action(() =>
                     {
                         Location = new Point(nx, ny);
-                        Cursor = Cursors.SizeAll;
                     }));
                 }, () =>
                 {

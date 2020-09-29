@@ -44,12 +44,12 @@ namespace QQ2564874169.Miniblink
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class NetFuncAttribute : Attribute
+    public class JsFuncAttribute : Attribute
     {
         public string Name { get; }
         public bool BindToSubFrame { get; set; }
 
-        public NetFuncAttribute(string functionName = null)
+        public JsFuncAttribute(string functionName = null)
         {
             Name = functionName;
         }

@@ -43,7 +43,7 @@ namespace QQ2564874169.Miniblink
 
             foreach (var method in methods)
             {
-                var attr = method.GetCustomAttribute<NetFuncAttribute>();
+                var attr = method.GetCustomAttribute<JsFuncAttribute>();
                 if (attr == null) continue;
                 BindNetFunc(new NetFunc(attr.Name ?? method.Name, ctx =>
                 {
