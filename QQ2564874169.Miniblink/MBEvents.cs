@@ -121,7 +121,6 @@ namespace QQ2564874169.Miniblink
 
         internal AlertEventArgs()
         {
-
         }
     }
 
@@ -132,7 +131,6 @@ namespace QQ2564874169.Miniblink
 
         internal ConfirmEventArgs()
         {
-
         }
     }
 
@@ -143,7 +141,6 @@ namespace QQ2564874169.Miniblink
 
         internal PromptEventArgs()
         {
-
         }
     }
 
@@ -153,7 +150,6 @@ namespace QQ2564874169.Miniblink
 
         internal DidCreateScriptContextEventArgs()
         {
-
         }
     }
 
@@ -282,7 +278,7 @@ namespace QQ2564874169.Miniblink
         public IDictionary<string, string> GetHeaders()
         {
             var ptr = MBApi.wkeNetGetRawResponseHead(_request.NetJob);
-            var slist = (wkeSlist)Marshal.PtrToStructure(ptr, typeof(wkeSlist));
+            var slist = (wkeSlist) Marshal.PtrToStructure(ptr, typeof(wkeSlist));
             return slist.ToDict();
         }
     }
@@ -307,18 +303,21 @@ namespace QQ2564874169.Miniblink
         /// 接收到网络数据时
         /// </summary>
         public event EventHandler<NetDataEventArgs> NetData;
+
         /// <summary>
         /// 加载失败时
         /// </summary>
-        public event EventHandler<EventArgs> LoadFail; 
+        public event EventHandler<EventArgs> LoadFail;
+
         /// <summary>
         /// 请求内容最终呈现之前
         /// </summary>
         public event EventHandler<ResponseEventArgs> Response;
+
         /// <summary>
         /// 请求结束
         /// </summary>
-        public event EventHandler<EventArgs> Finish; 
+        public event EventHandler<EventArgs> Finish;
 
         internal IMiniblink Miniblink { get; }
         internal object State { get; set; }
@@ -349,6 +348,11 @@ namespace QQ2564874169.Miniblink
             Miniblink = miniblink;
             NetJob = job;
             _status = Status.Before;
+            var idx = url.IndexOf("#", StringComparison.Ordinal);
+            if (idx > 0)
+            {
+                ResetUrl(url.Substring(0, idx));
+            }
         }
 
         public void Async(Action<RequestAsync> callback, object state = null)
@@ -438,6 +442,7 @@ namespace QQ2564874169.Miniblink
                 Cancel = false;
                 return Cancel;
             }
+
             if (_status == Status.Before && Data != null)
             {
                 SetData(Data);
@@ -522,7 +527,7 @@ namespace QQ2564874169.Miniblink
                     SetData(e.Data);
                 }
             }
-            
+
             Finish?.Invoke(this, new EventArgs());
         }
     }
