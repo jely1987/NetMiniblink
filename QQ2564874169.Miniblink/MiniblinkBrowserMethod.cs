@@ -36,7 +36,7 @@ namespace QQ2564874169.Miniblink
             new DrawToBitmapUtil(this).ToImage(callback);
         }
 
-        public void RegisterNetFunc(object target)
+        public void RegisterJsFunc(object target)
         {
             var tg = target;
             var methods = tg.GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
