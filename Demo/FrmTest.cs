@@ -25,11 +25,11 @@ namespace Demo
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            //View.ConsoleMessage += View_ConsoleMessage;
+            View.ConsoleMessage += View_ConsoleMessage;
             //View.DidCreateScriptContext += View_DidCreateScriptContext;
             View.RequestBefore += View_RequestBefore;
-            View.LoadUri("https://www.baidu.com");
-            //View.LoadUri("http://loc.res/test.html");
+            //View.LoadUri("https://www.baidu.com");
+            View.LoadUri("http://loc.res/test.html");
         }
 
         private void View_RequestBefore(object sender, RequestEventArgs e)
@@ -69,7 +69,13 @@ namespace Demo
             View.Reload();
         }
 
-        [NetFunc]
+        [JsFunc]
+        private int add(int n1, int n2)
+        {
+            return n1 * n2;
+        }
+
+        [JsFunc]
         private async Task<string> showForm()
         {
             var t = Task.Factory.StartNew(() =>

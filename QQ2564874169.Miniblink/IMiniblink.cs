@@ -80,7 +80,7 @@ namespace QQ2564874169.Miniblink
         event EventHandler<EventArgs> Destroy;
 
         void ScrollTo(int x, int y);
-		void RegisterNetFunc(object target);
+		void RegisterJsFunc(object target);
 		void ShowDevTools();
 		object RunJs(string script);
 		object CallJsFunc(string funcName, params object[] param);

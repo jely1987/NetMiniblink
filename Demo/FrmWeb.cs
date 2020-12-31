@@ -26,7 +26,7 @@ namespace Demo
             View.LoadUri("http://loc.res/web.html");
         }
 
-        [NetFunc("webapi")]
+        [JsFunc("webapi")]
         private object GetUrl(string path)
         {
             if (path.StartsWith("/"))

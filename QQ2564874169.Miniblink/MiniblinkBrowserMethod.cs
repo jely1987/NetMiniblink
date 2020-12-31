@@ -23,10 +23,10 @@ namespace QQ2564874169.Miniblink
 
             using (var image = new Bitmap(ViewWidth, ViewHeight))
             {
-                var bitmap = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
+                var data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
                     ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                MBApi.wkePaint(MiniblinkHandle, bitmap.Scan0, 0);
-                image.UnlockBits(bitmap);
+                MBApi.wkePaint(MiniblinkHandle, data.Scan0, 0);
+                image.UnlockBits(data);
                 return image.Clone(rect.Value, PixelFormat.Format32bppArgb);
             }
         }
@@ -36,14 +36,14 @@ namespace QQ2564874169.Miniblink
             new DrawToBitmapUtil(this).ToImage(callback);
         }
 
-        public void RegisterNetFunc(object target)
+        public void RegisterJsFunc(object target)
         {
             var tg = target;
             var methods = tg.GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
             foreach (var method in methods)
             {
-                var attr = method.GetCustomAttribute<NetFuncAttribute>();
+                var attr = method.GetCustomAttribute<JsFuncAttribute>();
                 if (attr == null) continue;
                 BindNetFunc(new NetFunc(attr.Name ?? method.Name, ctx =>
                 {

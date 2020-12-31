@@ -25,31 +25,31 @@ namespace Demo
             View.LoadUri("http://loc.res/js_call_net.html");
         }
 
-        [NetFunc]
+        [JsFunc]
         private object Func1(int n1, int n2)
         {
             return "结果是：" + (n1 * n2);
         }
 
-        [NetFunc]
+        [JsFunc]
         private void Func2(JsFunc func)
         {
             func(5, 6);
         }
 
-        [NetFunc]
+        [JsFunc]
         private object Func3(dynamic data)
         {
             return data.n1 * data.n2;
         }
 
-        [NetFunc]
+        [JsFunc]
         private object Func4(string name, int age, int? year)
         {
             return $"name={name}, age={age}, year={year}";
         }
 
-        [NetFunc]
+        [JsFunc]
         private object Func5()
         {
             return new TempNetFunc(param => "姓名：" + param[0]);

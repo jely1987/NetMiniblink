@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -58,7 +59,6 @@ namespace QQ2564874169.Miniblink
         private wkeCreateViewCallback _createView;
         private ConcurrentQueue<MouseEventArgs> _mouseMoveEvents = new ConcurrentQueue<MouseEventArgs>();
         private bool _fiexdCursor;
-        private bool _lockPaint;
         private ConcurrentDictionary<long, RequestEventArgs> _requestMap =
             new ConcurrentDictionary<long, RequestEventArgs>();
         private List<NetFunc> _funcs = new List<NetFunc>();
@@ -196,27 +196,20 @@ namespace QQ2564874169.Miniblink
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (_lockPaint) return;
-
             if (!IsDesignMode() && !IsDisposed)
             {
-                _lockPaint = true;
-                using (var bitmap = DrawToBitmap())
+                using (var bitmap = DrawToBitmap(e.ClipRectangle))
                 {
-                    var rect = new RectangleF(e.ClipRectangle.X, e.ClipRectangle.Y,
-                        e.ClipRectangle.Width, e.ClipRectangle.Height);
-                    e.Graphics.DrawImage(bitmap, rect, rect, GraphicsUnit.Pixel);
+                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    e.Graphics.DrawImage(bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
                 }
-
-                _lockPaint = false;
             }
         }
 
         private void OnWkeOnPaintBitUpdated(IntPtr webView, IntPtr param, IntPtr buf, IntPtr rectPtr,
             int width, int height)
         {
-            if (buf == IntPtr.Zero || _lockPaint || _paintBitUpdated == null) return;
-            _lockPaint = true;
+            if (buf == IntPtr.Zero || _paintBitUpdated == null) return;
             var stride = width * 4 + width * 4 % 4;
             var rect = (wkeRect)Marshal.PtrToStructure(rectPtr, typeof(wkeRect));
             using (var view = new Bitmap(width, height, stride, PixelFormat.Format32bppPArgb, buf))
@@ -237,8 +230,6 @@ namespace QQ2564874169.Miniblink
                     _browserPaintUpdated(this, e);
                 }
             }
-
-            _lockPaint = false;
         }
 
         private void BrowserPaintUpdated(object sender, PaintUpdatedEventArgs e)
@@ -248,6 +239,7 @@ namespace QQ2564874169.Miniblink
                 using (var g = CreateGraphics())
                 {
                     var rect = new RectangleF(e.Rect.X, e.Rect.Y, e.Rect.Width, e.Rect.Height);
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.DrawImage(e.Image, rect, rect, GraphicsUnit.Pixel);
                 }
             }
@@ -892,53 +884,53 @@ namespace QQ2564874169.Miniblink
             }
             else
             {
-                switch ((WinConst) m.Msg)
+                switch ((WinConst)m.Msg)
                 {
                     case WinConst.WM_INPUTLANGCHANGE:
-                    {
-                        DefWndProc(ref m);
-                        break;
-                    }
+                        {
+                            DefWndProc(ref m);
+                            break;
+                        }
 
                     case WinConst.WM_IME_STARTCOMPOSITION:
-                    {
-                        SetImeStartPos();
-                        break;
-                    }
+                        {
+                            SetImeStartPos();
+                            break;
+                        }
 
                     case WinConst.WM_SETFOCUS:
-                    {
-                        MBApi.wkeSetFocus(MiniblinkHandle);
-                        break;
-                    }
+                        {
+                            MBApi.wkeSetFocus(MiniblinkHandle);
+                            break;
+                        }
 
                     case WinConst.WM_KILLFOCUS:
-                    {
-                        MBApi.wkeKillFocus(MiniblinkHandle);
-                        break;
-                    }
+                        {
+                            MBApi.wkeKillFocus(MiniblinkHandle);
+                            break;
+                        }
 
                     case WinConst.WM_SETCURSOR:
-                    {
-                        if (MouseButtons == MouseButtons.None)
                         {
-                            _fiexdCursor = false;
-                        }
+                            if (MouseButtons == MouseButtons.None)
+                            {
+                                _fiexdCursor = false;
+                            }
 
-                        if (_fiexdCursor == false)
-                        {
-                            SetWkeCursor();
-                            base.WndProc(ref m);
-                        }
+                            if (_fiexdCursor == false)
+                            {
+                                SetWkeCursor();
+                                base.WndProc(ref m);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
 
                     default:
-                    {
-                        base.WndProc(ref m);
-                        break;
-                    }
+                        {
+                            base.WndProc(ref m);
+                            break;
+                        }
                 }
             }
         }

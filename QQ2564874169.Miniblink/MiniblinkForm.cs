@@ -130,7 +130,7 @@ namespace QQ2564874169.Miniblink
                 View.BindNetFunc(new NetFunc(_closefunc = "close" + tmp, CloseFunc));
 
                 View.DocumentReady += RegisterJsEvent;
-                View.RegisterNetFunc(this);
+                View.RegisterJsFunc(this);
             }
         }
 
@@ -188,7 +188,6 @@ namespace QQ2564874169.Miniblink
                     Invoke(new Action(() =>
                     {
                         Location = new Point(nx, ny);
-                        Cursor = Cursors.SizeAll;
                     }));
                 }, () =>
                 {
