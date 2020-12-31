@@ -9,6 +9,6 @@
 -  **最好是clone代码使用，因为发行版里的内容只在有心情的时候才更新。** 
 - 欢迎提交PR。
 
-![view](https://gitee.com/aochulai/NetMiniblink/attach_files/572609/download/20201231162211.png "view")
+![view](https://images.gitee.com/uploads/images/2020/1231/163704_6c4304b3_307669.png "view")
 
 发布日志和下载：(https://gitee.com/aochulai/NetMiniblink/releases)
