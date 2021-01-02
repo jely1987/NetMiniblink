@@ -150,6 +150,12 @@
     <Compile Include="FrmHook.Designer.cs">
       <DependentUpon>FrmHook.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmMultProc.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmMultProc.Designer.cs">
+      <DependentUpon>FrmMultProc.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmTransparent.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -242,6 +248,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FrmHook.resx">
       <DependentUpon>FrmHook.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmMultProc.resx">
+      <DependentUpon>FrmMultProc.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmTransparent.resx">
       <DependentUpon>FrmTransparent.cs</DependentUpon>
