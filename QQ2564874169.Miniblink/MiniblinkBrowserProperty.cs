@@ -286,5 +286,17 @@ namespace QQ2564874169.Miniblink
                 }
             }
         }
+
+        /// <summary>
+        /// 是否使用位图绘屏模式
+        /// 位图绘屏性能更差但是兼容性更高
+        /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool BmpPaintMode
+        {
+            get;
+            set;
+        }
     }
 }

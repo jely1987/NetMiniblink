@@ -11,8 +11,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace QQ2564874169.Miniblink
@@ -42,6 +40,7 @@ namespace QQ2564874169.Miniblink
                     {
                         throw new Exception("没有找到DotNetZip.dll");
                     }
+
                     var data = new byte[sm.Length];
                     sm.Read(data, 0, data.Length);
                     return Assembly.Load(data);
@@ -56,11 +55,14 @@ namespace QQ2564874169.Miniblink
         private static string _callNet = "func" + Guid.NewGuid().ToString().Replace("-", "");
         private EventHandler<PaintUpdatedEventArgs> _browserPaintUpdated;
         private wkePaintBitUpdatedCallback _paintBitUpdated;
+        private wkePaintUpdatedCallback _paintUpdated;
         private wkeCreateViewCallback _createView;
         private ConcurrentQueue<MouseEventArgs> _mouseMoveEvents = new ConcurrentQueue<MouseEventArgs>();
         private bool _fiexdCursor;
+
         private ConcurrentDictionary<long, RequestEventArgs> _requestMap =
             new ConcurrentDictionary<long, RequestEventArgs>();
+
         private List<NetFunc> _funcs = new List<NetFunc>();
         private bool _v8IsReady;
         private List<FrameContext> _iframes = new List<FrameContext>();
@@ -83,6 +85,7 @@ namespace QQ2564874169.Miniblink
 
                 _browserPaintUpdated += BrowserPaintUpdated;
                 _paintBitUpdated = OnWkeOnPaintBitUpdated;
+                _paintUpdated = OnWkeOnPaintUpdated;
                 _createView = OnCreateView;
                 RequestBefore += LoadResource;
                 RequestBefore += LoadCache;
@@ -95,9 +98,11 @@ namespace QQ2564874169.Miniblink
                 MBApi.wkeOnCreateView(MiniblinkHandle, _createView, IntPtr.Zero);
                 MBApi.wkeSetHandle(MiniblinkHandle, Handle);
                 MBApi.wkeOnPaintBitUpdated(MiniblinkHandle, _paintBitUpdated, IntPtr.Zero);
+                MBApi.wkeOnPaintUpdated(MiniblinkHandle, _paintUpdated, IntPtr.Zero);
 
                 DeviceParameter = new DeviceParameter(this);
                 Cookies = new CookieCollection(this, "cookies.dat");
+                BmpPaintMode = true;
             }
         }
 
@@ -114,10 +119,7 @@ namespace QQ2564874169.Miniblink
             }
             else
             {
-                e.Response += (rs, re) =>
-                {
-                    ResourceCache.Save(re.Url, re.Data);
-                };
+                e.Response += (rs, re) => { ResourceCache.Save(re.Url, re.Data); };
             }
         }
 
@@ -127,6 +129,7 @@ namespace QQ2564874169.Miniblink
             {
                 return IntPtr.Zero;
             }
+
             if (type == wkeNavigationType.LinkClick)
             {
                 var e = new NavigateEventArgs
@@ -179,6 +182,7 @@ namespace QQ2564874169.Miniblink
                 DestroyCallback();
                 MiniblinkSetting.DestroyWebView(MiniblinkHandle);
             }
+
             ResourceCache = null;
             ResourceLoader.Clear();
             _requestMap.Clear();
@@ -194,9 +198,32 @@ namespace QQ2564874169.Miniblink
             e.IsInputKey = true;
         }
 
+        private void OnWkeOnPaintUpdated(IntPtr webView, IntPtr param, IntPtr hdc,
+            int x, int y, int w, int h)
+        {
+            if (!BmpPaintMode)
+            {
+                Invalidate(new Rectangle(x, y, w, h));
+            }
+        }
+
+        private void OnPaint(IntPtr hWnd)
+        {
+            var ps = new WinPaint();
+            var wHdc = WinApi.BeginPaint(hWnd, ref ps);
+            var mbHdc = MBApi.wkeGetViewDC(MiniblinkHandle);
+            var x = ps.rcPaint.left;
+            var y = ps.rcPaint.top;
+            var w = ps.rcPaint.right - ps.rcPaint.left;
+            var h = ps.rcPaint.bottom - ps.rcPaint.top;
+            WinApi.BitBlt(wHdc, x, y, w, h, mbHdc, x, y, (int) WinConst.SRCCOPY);
+            WinApi.EndPaint(wHdc, ref ps);
+            Console.WriteLine($"{x}-{y},{w}-{h}");
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (!IsDesignMode() && !IsDisposed)
+            if (!IsDesignMode() && !IsDisposed && BmpPaintMode)
             {
                 using (var bitmap = DrawToBitmap(e.ClipRectangle))
                 {
@@ -209,9 +236,9 @@ namespace QQ2564874169.Miniblink
         private void OnWkeOnPaintBitUpdated(IntPtr webView, IntPtr param, IntPtr buf, IntPtr rectPtr,
             int width, int height)
         {
-            if (buf == IntPtr.Zero || _paintBitUpdated == null) return;
+            if (buf == IntPtr.Zero || _paintBitUpdated == null || BmpPaintMode == false) return;
             var stride = width * 4 + width * 4 % 4;
-            var rect = (wkeRect)Marshal.PtrToStructure(rectPtr, typeof(wkeRect));
+            var rect = (wkeRect) Marshal.PtrToStructure(rectPtr, typeof(wkeRect));
             using (var view = new Bitmap(width, height, stride, PixelFormat.Format32bppPArgb, buf))
             {
                 var e = new PaintUpdatedEventArgs
@@ -274,7 +301,7 @@ namespace QQ2564874169.Miniblink
             if (context.Paramters.Length == 0) return null;
             var name = Convert.ToString(context.Paramters[0]);
             if (string.IsNullOrEmpty(name)) return null;
-            var bro = (MiniblinkBrowser)context.Miniblink;
+            var bro = (MiniblinkBrowser) context.Miniblink;
             var func = bro._funcs.FirstOrDefault(i => i.Name == name);
             var ps = context.Paramters.Skip(1).ToArray();
             return func?.OnFunc(context.Miniblink, ps);
@@ -293,6 +320,7 @@ namespace QQ2564874169.Miniblink
                 {
                     call = $"window.top['{call}']";
                 }
+
                 js += $@"
                 window.{func.Name}=function(){{
                     var arr = Array.prototype.slice.call(arguments);
@@ -312,7 +340,7 @@ namespace QQ2564874169.Miniblink
                 {"openHookName", $"'{_openHookName}'"}
             };
             var vars = string.Join(";", map.Keys.Select(k => $"var {k}={map[k]};")) + ";";
-            var js = string.Join(".", new[] { typeof(MiniblinkBrowser).Namespace, "Files", "browser.js" });
+            var js = string.Join(".", new[] {typeof(MiniblinkBrowser).Namespace, "Files", "browser.js"});
 
             using (var sm = typeof(MiniblinkBrowser).Assembly.GetManifestResourceStream(js))
             {
@@ -322,6 +350,7 @@ namespace QQ2564874169.Miniblink
                     {
                         js = vars + reader.ReadToEnd() + ";" + BindFuncJs(e.Frame.IsMain);
                     }
+
                     e.Frame.RunJs(js);
                 }
             }
@@ -402,7 +431,7 @@ namespace QQ2564874169.Miniblink
                 return null;
             }
 
-            var bro = (MiniblinkBrowser)context.Miniblink;
+            var bro = (MiniblinkBrowser) context.Miniblink;
             var type = context.Paramters[0].ToString().ToLower();
 
             if ("alert" == type)
@@ -525,7 +554,7 @@ namespace QQ2564874169.Miniblink
                 }
             }
 
-            var bro = (MiniblinkBrowser)context.Miniblink;
+            var bro = (MiniblinkBrowser) context.Miniblink;
             var navArgs = new NavigateEventArgs
             {
                 Url = url,
@@ -536,6 +565,7 @@ namespace QQ2564874169.Miniblink
             {
                 return null;
             }
+
             var e = bro.OnWindowOpen(url, name, map, "true" == replace);
             return e.ReturnValue;
         }
@@ -556,7 +586,7 @@ namespace QQ2564874169.Miniblink
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 e.Effect = DragDropEffects.All;
-                var items = (Array)e.Data.GetData(DataFormats.FileDrop);
+                var items = (Array) e.Data.GetData(DataFormats.FileDrop);
                 var files = items.Cast<string>().ToArray();
                 var p = PointToClient(new Point(e.X, e.Y));
                 OnDropFiles(false, p.X, p.Y, files);
@@ -565,7 +595,7 @@ namespace QQ2564874169.Miniblink
 
         private void DragFileDrop(object sender, DragEventArgs e)
         {
-            var items = (Array)e.Data.GetData(DataFormats.FileDrop);
+            var items = (Array) e.Data.GetData(DataFormats.FileDrop);
             var files = items.Cast<string>().ToArray();
             var p = PointToClient(new Point(e.X, e.Y));
             OnDropFiles(true, p.X, p.Y, files);
@@ -604,46 +634,49 @@ namespace QQ2564874169.Miniblink
         protected override void OnKeyUp(KeyEventArgs e)
         {
             var code = e.KeyValue;
-            var flags = (uint)wkeKeyFlags.WKE_REPEAT;
+            var flags = (uint) wkeKeyFlags.WKE_REPEAT;
 
             if (Utils.IsExtendedKey(e.KeyCode))
             {
-                flags |= (uint)wkeKeyFlags.WKE_EXTENDED;
+                flags |= (uint) wkeKeyFlags.WKE_EXTENDED;
             }
 
             if (MBApi.wkeFireKeyUpEvent(MiniblinkHandle, code, flags, false))
             {
                 e.Handled = true;
             }
+
             base.OnKeyUp(e);
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
             var code = e.KeyValue;
-            var flags = (uint)wkeKeyFlags.WKE_REPEAT;
+            var flags = (uint) wkeKeyFlags.WKE_REPEAT;
 
             if (Utils.IsExtendedKey(e.KeyCode))
             {
-                flags |= (uint)wkeKeyFlags.WKE_EXTENDED;
+                flags |= (uint) wkeKeyFlags.WKE_EXTENDED;
             }
 
             if (MBApi.wkeFireKeyDownEvent(MiniblinkHandle, code, flags, false))
             {
                 e.Handled = true;
             }
+
             base.OnKeyDown(e);
         }
 
         protected override void OnKeyPress(KeyPressEventArgs e)
         {
             var code = e.KeyChar;
-            var flags = (uint)wkeKeyFlags.WKE_REPEAT;
+            var flags = (uint) wkeKeyFlags.WKE_REPEAT;
 
             if (MBApi.wkeFireKeyPressEvent(MiniblinkHandle, code, flags, false))
             {
                 e.Handled = true;
             }
+
             base.OnKeyPress(e);
         }
 
@@ -672,6 +705,7 @@ namespace QQ2564874169.Miniblink
             {
                 _fiexdCursor = true;
             }
+
             base.OnMouseDown(e);
         }
 
@@ -721,6 +755,7 @@ namespace QQ2564874169.Miniblink
             {
                 OnWkeMouseEvent(msg, e);
             }
+
             base.OnMouseDoubleClick(e);
         }
 
@@ -768,16 +803,16 @@ namespace QQ2564874169.Miniblink
             uint flags = 0;
 
             if (ModifierKeys.HasFlag(Keys.Control))
-                flags |= (uint)wkeMouseFlags.WKE_CONTROL;
+                flags |= (uint) wkeMouseFlags.WKE_CONTROL;
             if (ModifierKeys.HasFlag(Keys.LShiftKey))
-                flags |= (uint)wkeMouseFlags.WKE_SHIFT;
+                flags |= (uint) wkeMouseFlags.WKE_SHIFT;
 
             if (e.Button.HasFlag(MouseButtons.Left))
-                flags |= (uint)wkeMouseFlags.WKE_LBUTTON;
+                flags |= (uint) wkeMouseFlags.WKE_LBUTTON;
             if (e.Button.HasFlag(MouseButtons.Middle))
-                flags |= (uint)wkeMouseFlags.WKE_MBUTTON;
+                flags |= (uint) wkeMouseFlags.WKE_MBUTTON;
             if (e.Button.HasFlag(MouseButtons.Right))
-                flags |= (uint)wkeMouseFlags.WKE_RBUTTON;
+                flags |= (uint) wkeMouseFlags.WKE_RBUTTON;
 
             MBApi.wkeFireMouseWheelEvent(MiniblinkHandle, e.X, e.Y, e.Delta, flags);
             base.OnMouseWheel(e);
@@ -790,18 +825,18 @@ namespace QQ2564874169.Miniblink
                 var flags = 0;
 
                 if (ModifierKeys.HasFlag(Keys.Control))
-                    flags |= (int)wkeMouseFlags.WKE_CONTROL;
+                    flags |= (int) wkeMouseFlags.WKE_CONTROL;
                 if (ModifierKeys.HasFlag(Keys.LShiftKey))
-                    flags |= (int)wkeMouseFlags.WKE_SHIFT;
+                    flags |= (int) wkeMouseFlags.WKE_SHIFT;
 
                 if (e.Button.HasFlag(MouseButtons.Left))
-                    flags |= (int)wkeMouseFlags.WKE_LBUTTON;
+                    flags |= (int) wkeMouseFlags.WKE_LBUTTON;
                 if (e.Button.HasFlag(MouseButtons.Middle))
-                    flags |= (int)wkeMouseFlags.WKE_MBUTTON;
+                    flags |= (int) wkeMouseFlags.WKE_MBUTTON;
                 if (e.Button.HasFlag(MouseButtons.Right))
-                    flags |= (int)wkeMouseFlags.WKE_RBUTTON;
+                    flags |= (int) wkeMouseFlags.WKE_RBUTTON;
 
-                MBApi.wkeFireMouseEvent(MiniblinkHandle, (int)msg, e.X, e.Y, flags);
+                MBApi.wkeFireMouseEvent(MiniblinkHandle, (int) msg, e.X, e.Y, flags);
             }
         }
 
@@ -855,7 +890,6 @@ namespace QQ2564874169.Miniblink
                 default:
                     Console.WriteLine("未实现的指针类型：" + type);
                     break;
-
             }
         }
 
@@ -864,7 +898,7 @@ namespace QQ2564874169.Miniblink
             var caret = MBApi.wkeGetCaretRect(MiniblinkHandle);
             var comp = new CompositionForm
             {
-                dwStyle = (int)WinConst.CFS_POINT | (int)WinConst.CFS_FORCE_POSITION,
+                dwStyle = (int) WinConst.CFS_POINT | (int) WinConst.CFS_FORCE_POSITION,
                 ptCurrentPos =
                 {
                     x = caret.x,
@@ -884,53 +918,69 @@ namespace QQ2564874169.Miniblink
             }
             else
             {
-                switch ((WinConst)m.Msg)
+                switch ((WinConst) m.Msg)
                 {
                     case WinConst.WM_INPUTLANGCHANGE:
-                        {
-                            DefWndProc(ref m);
-                            break;
-                        }
+                    {
+                        DefWndProc(ref m);
+                        break;
+                    }
 
                     case WinConst.WM_IME_STARTCOMPOSITION:
-                        {
-                            SetImeStartPos();
-                            break;
-                        }
+                    {
+                        SetImeStartPos();
+                        break;
+                    }
 
                     case WinConst.WM_SETFOCUS:
-                        {
-                            MBApi.wkeSetFocus(MiniblinkHandle);
-                            break;
-                        }
+                    {
+                        MBApi.wkeSetFocus(MiniblinkHandle);
+                        break;
+                    }
 
                     case WinConst.WM_KILLFOCUS:
-                        {
-                            MBApi.wkeKillFocus(MiniblinkHandle);
-                            break;
-                        }
+                    {
+                        MBApi.wkeKillFocus(MiniblinkHandle);
+                        break;
+                    }
 
                     case WinConst.WM_SETCURSOR:
+                    {
+                        if (MouseButtons == MouseButtons.None)
                         {
-                            if (MouseButtons == MouseButtons.None)
-                            {
-                                _fiexdCursor = false;
-                            }
-
-                            if (_fiexdCursor == false)
-                            {
-                                SetWkeCursor();
-                                base.WndProc(ref m);
-                            }
-
-                            break;
+                            _fiexdCursor = false;
                         }
 
-                    default:
+                        if (_fiexdCursor == false)
+                        {
+                            SetWkeCursor();
+                            base.WndProc(ref m);
+                        }
+
+                        break;
+                    }
+                    case WinConst.WM_ERASEBKGND:
+                    {
+                        m.Result = new IntPtr(1);
+                        break;
+                    }
+                    case WinConst.WM_PAINT:
+                        if (BmpPaintMode)
                         {
                             base.WndProc(ref m);
-                            break;
                         }
+                        else
+                        {
+                            OnPaint(m.HWnd);
+                            m.Result = new IntPtr(1);
+                            DefWndProc(ref m);
+                        }
+                        break;
+                    default:
+                    {
+                        base.WndProc(ref m);
+                        break;
+                    }
                 }
             }
         }

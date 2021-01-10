@@ -40,11 +40,11 @@ namespace QQ2564874169.Miniblink
     [StructLayout(LayoutKind.Sequential)]
     internal struct WinPaint
     {
-        public int hdc;
-        public int fErase;
+        public IntPtr hdc;
+        public bool fErase;
         public WinRect rcPaint;
-        public int fRestore;
-        public int fIncUpdate;
+        public bool fRestore;
+        public bool fIncUpdate;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public byte[] rgbReserved;
     }
