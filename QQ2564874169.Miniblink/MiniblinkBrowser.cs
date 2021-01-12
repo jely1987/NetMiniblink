@@ -203,7 +203,19 @@ namespace QQ2564874169.Miniblink
         {
             if (!BmpPaintMode)
             {
-                Invalidate(new Rectangle(x, y, w, h));
+                var e = new PaintUpdatedEventArgs
+                {
+                    WebView = webView,
+                    Param = hdc,
+                    Rect = new Rectangle(x, y, w, h),
+                    Width = Width,
+                    Height = Height
+                };
+                PaintUpdated?.Invoke(this, e);
+                if (e.Cancel == false)
+                {
+                    Invalidate(new Rectangle(x, y, w, h));
+                }
             }
         }
 
@@ -218,7 +230,6 @@ namespace QQ2564874169.Miniblink
             var h = ps.rcPaint.bottom - ps.rcPaint.top;
             WinApi.BitBlt(wHdc, x, y, w, h, mbHdc, x, y, (int) WinConst.SRCCOPY);
             WinApi.EndPaint(wHdc, ref ps);
-            Console.WriteLine($"{x}-{y},{w}-{h}");
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -244,7 +255,6 @@ namespace QQ2564874169.Miniblink
                 var e = new PaintUpdatedEventArgs
                 {
                     WebView = webView,
-                    Param = param,
                     Image = view,
                     Rect = new Rectangle(rect.x, rect.y, rect.w, rect.h),
                     Width = width,

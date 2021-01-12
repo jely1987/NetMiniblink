@@ -215,10 +215,7 @@ namespace QQ2564874169.Miniblink
             if (!IsDesignMode() && IsTransparent)
             {
                 SetTransparent();
-                using (var image = View.DrawToBitmap())
-                {
-                    TransparentPaint(image, image.Width, image.Height);
-                }
+                TransparentPaint(Width, Height, MBApi.wkeGetViewDC(View.MiniblinkHandle));
             }
         }
 
@@ -234,10 +231,7 @@ namespace QQ2564874169.Miniblink
                     WindowState = FormWindowState.Normal;
                     if (IsTransparent)
                     {
-                        using (var image = View.DrawToBitmap())
-                        {
-                            TransparentPaint(image, image.Width, image.Height);
-                        }
+                        TransparentPaint(Width, Height, MBApi.wkeGetViewDC(View.MiniblinkHandle));
                     }
                 }
             }
@@ -276,45 +270,52 @@ namespace QQ2564874169.Miniblink
         {
             if (!IsDisposed && !IsDesignMode())
             {
-                TransparentPaint(e.Image, e.Image.Width, e.Image.Height);
+                if (View.BmpPaintMode)
+                {
+                    var hBmp = IntPtr.Zero;
+                    var bak = IntPtr.Zero;
+                    var mdc = WinApi.CreateCompatibleDC(IntPtr.Zero);
+                    try
+                    {
+                        hBmp = e.Image.GetHbitmap(Color.FromArgb(0));
+                        mdc = WinApi.CreateCompatibleDC(IntPtr.Zero);
+                        bak = WinApi.SelectObject(mdc, hBmp);
+                        TransparentPaint(e.Image.Width, e.Image.Height, mdc);
+                    }
+                    finally
+                    {
+                        if (hBmp != IntPtr.Zero)
+                        {
+                            WinApi.SelectObject(mdc, bak);
+                            WinApi.DeleteObject(hBmp);
+                        }
+
+                        WinApi.DeleteDC(mdc);
+                    }
+                }
+                else
+                {
+                    TransparentPaint(e.Width, e.Height, e.Param);
+                }
 
                 e.Cancel = true;
             }
         }
 
-        private void TransparentPaint(Bitmap bitmap, int width, int height)
+        private void TransparentPaint(int width, int height, IntPtr memDc)
         {
-            var oldBits = IntPtr.Zero;
-            var hBitmap = IntPtr.Zero;
-            var memDc = WinApi.CreateCompatibleDC(IntPtr.Zero);
+            var dst = new WinPoint {x = Left, y = Top};
+            var src = new WinPoint();
+            var size = new WinSize(width, height);
 
-            try
+            var blend = new BlendFunction
             {
-                var dst = new WinPoint { x = Left, y = Top };
-                var src = new WinPoint();
-                var size = new WinSize(width, height);
-
-                hBitmap = bitmap.GetHbitmap(Color.FromArgb(0));
-                oldBits = WinApi.SelectObject(memDc, hBitmap);
-
-                var blend = new BlendFunction
-                {
-                    BlendOp = (byte)WinConst.AC_SRC_OVER,
-                    SourceConstantAlpha = 255,
-                    AlphaFormat = (byte)WinConst.AC_SRC_ALPHA
-                };
-
-                WinApi.UpdateLayeredWindow(Handle, IntPtr.Zero, ref dst, ref size, memDc, ref src, 0, ref blend, (int)WinConst.ULW_ALPHA);
-            }
-            finally
-            {
-                if (hBitmap != IntPtr.Zero)
-                {
-                    WinApi.SelectObject(memDc, oldBits);
-                    WinApi.DeleteObject(hBitmap);
-                }
-                WinApi.DeleteDC(memDc);
-            }
+                BlendOp = (byte) WinConst.AC_SRC_OVER,
+                SourceConstantAlpha = 255,
+                AlphaFormat = (byte) WinConst.AC_SRC_ALPHA
+            };
+            WinApi.UpdateLayeredWindow(Handle, IntPtr.Zero, ref dst, ref size, memDc, ref src, 0, ref blend,
+                (int) WinConst.ULW_ALPHA);
         }
 
         protected override CreateParams CreateParams
