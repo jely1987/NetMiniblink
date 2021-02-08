@@ -270,34 +270,17 @@ namespace QQ2564874169.Miniblink
         {
             if (!IsDisposed && !IsDesignMode())
             {
+                IntPtr dc;
                 if (View.BmpPaintMode)
                 {
-                    var hBmp = IntPtr.Zero;
-                    var bak = IntPtr.Zero;
-                    var mdc = WinApi.CreateCompatibleDC(IntPtr.Zero);
-                    try
-                    {
-                        hBmp = e.Image.GetHbitmap(Color.FromArgb(0));
-                        mdc = WinApi.CreateCompatibleDC(IntPtr.Zero);
-                        bak = WinApi.SelectObject(mdc, hBmp);
-                        TransparentPaint(e.Image.Width, e.Image.Height, mdc);
-                    }
-                    finally
-                    {
-                        if (hBmp != IntPtr.Zero)
-                        {
-                            WinApi.SelectObject(mdc, bak);
-                            WinApi.DeleteObject(hBmp);
-                        }
-
-                        WinApi.DeleteDC(mdc);
-                    }
+                    dc = MBApi.wkeGetViewDC(View.MiniblinkHandle);
                 }
                 else
                 {
-                    TransparentPaint(e.Width, e.Height, e.Param);
+                    dc = e.Param;
                 }
 
+                TransparentPaint(e.Width, e.Height,dc);
                 e.Cancel = true;
             }
         }

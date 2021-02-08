@@ -206,7 +206,7 @@ namespace QQ2564874169.Miniblink
                 var e = new PaintUpdatedEventArgs
                 {
                     WebView = webView,
-                    Param = hdc,
+                    Param = MBApi.wkeGetViewDC(webView),
                     Rect = new Rectangle(x, y, w, h),
                     Width = Width,
                     Height = Height
@@ -276,7 +276,7 @@ namespace QQ2564874169.Miniblink
                 using (var g = CreateGraphics())
                 {
                     var rect = new RectangleF(e.Rect.X, e.Rect.Y, e.Rect.Width, e.Rect.Height);
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.SmoothingMode = SmoothingMode.HighQuality;
                     g.DrawImage(e.Image, rect, rect, GraphicsUnit.Pixel);
                 }
             }
@@ -692,6 +692,7 @@ namespace QQ2564874169.Miniblink
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
+            WinApi.SetCapture(Handle);
             WinConst msg = 0;
             switch (e.Button)
             {
@@ -721,6 +722,7 @@ namespace QQ2564874169.Miniblink
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
+            WinApi.ReleaseCapture();
             WinConst msg = 0;
             switch (e.Button)
             {
@@ -969,11 +971,13 @@ namespace QQ2564874169.Miniblink
 
                         break;
                     }
+
                     case WinConst.WM_ERASEBKGND:
                     {
                         m.Result = new IntPtr(1);
                         break;
                     }
+
                     case WinConst.WM_PAINT:
                         if (BmpPaintMode)
                         {
@@ -985,6 +989,7 @@ namespace QQ2564874169.Miniblink
                             m.Result = new IntPtr(1);
                             DefWndProc(ref m);
                         }
+
                         break;
                     default:
                     {
