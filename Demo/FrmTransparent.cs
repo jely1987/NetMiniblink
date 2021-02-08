@@ -18,6 +18,7 @@ namespace Demo
         {
             InitializeComponent();
             ShowInTaskbar = false;
+            //View.BmpPaintMode = false;
             View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
         }
 

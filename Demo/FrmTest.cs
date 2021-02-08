@@ -20,16 +20,18 @@ namespace Demo
         public FrmTest()
         {
             InitializeComponent();
-            View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            //View.ResourceLoader.Add(new EmbedLoader(typeof(FrmMain).Assembly, "Res", "loc.res"));
+            TopMost = true;
+            //View.BmpPaintMode = false;
         }
 
         private void FrmTest_Load(object sender, EventArgs e)
         {
-            View.ConsoleMessage += View_ConsoleMessage;
+            //View.ConsoleMessage += View_ConsoleMessage;
             //View.DidCreateScriptContext += View_DidCreateScriptContext;
-            View.RequestBefore += View_RequestBefore;
-            //View.LoadUri("https://www.baidu.com");
-            View.LoadUri("http://loc.res/test.html");
+            //View.RequestBefore += View_RequestBefore;
+            View.LoadUri("https://www.taobao.com");
+            //View.LoadUri("http://loc.res/test.html");
         }
 
         private void View_RequestBefore(object sender, RequestEventArgs e)
@@ -46,7 +48,6 @@ namespace Demo
 
         private void View_DidCreateScriptContext(object sender, DidCreateScriptContextEventArgs e)
         {
-
         }
 
         private void View_ConsoleMessage(object sender, ConsoleMessageEventArgs e)
